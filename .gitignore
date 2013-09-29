@@ -1,0 +1,4 @@
+*.o
+*.diff
+*.failed
+lexical_analyzer
