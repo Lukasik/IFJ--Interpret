@@ -57,6 +57,9 @@ void insertChar(int *index, char **content, int c)
 // vraci INVALIDCHAR pokud viceradkovy komentar nema konec 
 int comments_and_whtspc(FILE *f)
 {
+	
+	int isComment=0;
+	
 	// odstrani bile znaky
 	int c=fgetc(f);
 	while (isspace(c)) c=fgetc(f); 
@@ -67,6 +70,7 @@ int comments_and_whtspc(FILE *f)
 	// jestli je komentar jednoradkovy
 	if (c=='/' && hlpc=='/')
 	{
+		isComment=1;
 		while (c!='\n' && c!=EOF) c=fgetc(f);
 		
 		if (c==EOF) ungetc(c,f);
@@ -79,6 +83,8 @@ int comments_and_whtspc(FILE *f)
 	// jestli je komentar viceradkovy
 	if (c=='/' && hlpc=='*')
 	{
+		isComment=1;
+		
 		hlpc=fgetc(f);
 	    c=fgetc(f);
 		
@@ -103,7 +109,7 @@ int comments_and_whtspc(FILE *f)
 		ungetc(hlpc,f);
 		ungetc(c,f);
 	}
-	return 0;
+	return isComment;
 }
 
 // vrati kod konkretni Aritmeticke operace nebo -1 pokud se o aritm. op. nejedna
@@ -271,7 +277,7 @@ int isVariable(FILE *f,int c, char **content)
 		insertChar(&index,content,'\0');
 		
 		// pokud je nazev promenne klicove slovo, vrat chybovy token
-		if ((ec=isKeyWord(*content))==-1) return INVALIDCHAR;
+		if ((ec=isKeyWord(*content))!=-1) return INVALIDCHAR;
 		
 		return VAR;
 	}
@@ -317,7 +323,9 @@ int getToken(FILE *f, char **content )
 
 	
 	// nacte prvni znak v poradi po bilych znacich a mezerach
-	if((ec=comments_and_whtspc(f))==INVALIDCHAR) return INVALIDCHAR;
+	while((ec=comments_and_whtspc(f))==1) 
+		if (ec==INVALIDCHAR) return INVALIDCHAR;
+		
 	c=fgetc(f);
 	
 	// pro EOF
@@ -348,7 +356,7 @@ int getToken(FILE *f, char **content )
 	if ((ec=isString(f,c,content))!=-1) return ec;
 	
 	if ((ec=isVariable(f,c,content))==INVALIDCHAR) return INVALIDCHAR;
-	else if ((ec=isVariable(f,c,content))!=-1) return ec;
+	else if (ec!=-1) return ec;
 	
 	// pro ostatni, zjisti jestli se jedna o znak nebo o symbol vhodny pro ID
 	if (isdigit(c)) flag=NUMBER;
