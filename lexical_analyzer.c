@@ -15,14 +15,14 @@ enum tSymbols
 // vraci TOKEN pokud je klicove slovo, -1 pokud ne
 int isKeyWord(char *str)
 {
-	if (strcmp("while",str)==0) return WHILE;
-    if (strcmp("function",str)==0) return FUNCTION;
+	if (strcmp("while",str)==0) return KEYWORD;
+    if (strcmp("function",str)==0) return KEYWORD;
 	if (strcmp("true",str)==0) return BOOL;
 	if (strcmp("false",str)==0) return BOOL;
-	if (strcmp("if",str)==0) return IF;
+	if (strcmp("if",str)==0) return KEYWORD;
 	if (strcmp("null",str)==0) return NULLV;
-	if (strcmp("return",str)==0) return RETURN;
-	if (strcmp("else",str)==0) return ELSE;
+	if (strcmp("return",str)==0) return KEYWORD;
+	if (strcmp("else",str)==0) return KEYWORD;
     return -1;
 }
 

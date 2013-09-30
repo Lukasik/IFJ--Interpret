@@ -7,20 +7,16 @@ enum tTokens
 {
 	BEGIN,
 	END,
-	
-	WHILE,
-	IF,
-	FUNCTION,
+
+	KEYWORD,
 	BOOL,
-	RETURN,
 	NULLV,
-	ELSE,
-	
+
 	PLUS,
 	MINUS,
 	TIMES,
 	DIVISION,
-	
+
 	BIGGER,
 	LESSER,
 	BIGGEREQUAL,
@@ -29,15 +25,15 @@ enum tTokens
 	NOTEQUAL,
 	TYPEEQUAL,
 	TYPENOTEQUAL,
-	
+
 	ASSIGN,
-	
+
 	ID,
 	INT,
 	DOUBLE,
 	STRING,
 	VAR,
-	
+
 	SEMICOLON,
 	DOT,
 	COMMA,
@@ -45,9 +41,9 @@ enum tTokens
 	CLOSEPAREN,
 	OPENBRACE,
 	CLOSEBRACE,
-	
-	INVALIDCHAR,	
-}; 
+
+	INVALIDCHAR,
+};
 
 
 void insertChar(int *index, char **content, int c);

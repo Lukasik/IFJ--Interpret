@@ -1,4 +1,4 @@
 INVALIDCHAR
 BEGIN
-FUNCTION[function]
+KEYWORD[function]
 END
