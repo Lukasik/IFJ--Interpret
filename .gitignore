@@ -1,5 +1,5 @@
 *.o
 *.diff
 *.failed
-lexical_analyzer
-!lexical_analyzer/
+scanner
+!scanner/
