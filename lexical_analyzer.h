@@ -7,12 +7,20 @@ enum tTokens
 {
 	BEGIN,
 	END,
-
+	
+	WHILE,
+	IF,
+	FUNCTION,
+	BOOL,
+	RETURN,
+	NULLV,
+	ELSE,
+	
 	PLUS,
 	MINUS,
 	TIMES,
 	DIVISION,
-
+	
 	BIGGER,
 	LESSER,
 	BIGGEREQUAL,
@@ -21,16 +29,15 @@ enum tTokens
 	NOTEQUAL,
 	TYPEEQUAL,
 	TYPENOTEQUAL,
-
+	
 	ASSIGN,
-
+	
 	ID,
 	INT,
 	DOUBLE,
 	STRING,
-	BOOL,
 	VAR,
-
+	
 	SEMICOLON,
 	DOT,
 	COMMA,
@@ -38,11 +45,24 @@ enum tTokens
 	CLOSEPAREN,
 	OPENBRACE,
 	CLOSEBRACE,
+	
+	INVALIDCHAR,	
+}; 
 
-	WHILE,
-	IF,
 
-	INVALIDCHAR,
-};
-
+void insertChar(int *index, char **content, int c);
 int getToken(FILE *f, char **content);
+int is_paren_brace(int c);
+int isDotSmcComma(int c);
+int isArithmetic (int c);
+int isEquating (FILE *f, int c);
+int reallocation (char **str);
+int comments_and_whtspc(FILE *f);
+int isNotEqual(FILE *f,int c);
+int isBigger(FILE *f, int c);
+int is_begin_or_lesser(FILE *f, int c);
+int isVariable(FILE *f,int c, char **content);
+int isString (FILE *f, int c, char **content);
+int isKeyWord(char *str);
+
+
