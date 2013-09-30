@@ -25,7 +25,7 @@ int isKeyWord(char *str)
 	if (strcmp("else",str)==0) return ELSE;
     return -1;
 }
- 
+
 // funkce co prealokuje ukazatel str na dvojnasobnou velikost
 // volano v pripade, ze je malo pameti pro predani hodnoty syntax. analyzatoru
 // vraci nulu pri uspesne realokaci a 99 v pripade chyby nove alokace
@@ -33,7 +33,7 @@ int reallocation (char **str)
 {
 	allocateSize*=2;
 	char *newStr=malloc(allocateSize*sizeof(char));
-	if (newStr==NULL) 
+	if (newStr==NULL)
 	{
 		free(*str);
 		printError(ALLOCERROR,INTERPRETERROR);
@@ -47,64 +47,64 @@ int reallocation (char **str)
 // vlozi znak
 void insertChar(int *index, char **content, int c)
 {
-	if ((*index)==allocateSize-1) reallocation(content); 
+	if ((*index)==allocateSize-1) reallocation(content);
 			(*content)[(*index)++]=c;
 }
 
 // odstrani bile znaky, potom zkousi zda zde nelezi komentar a v kladnem pripade
 // odstrani komentar a opet odstrani zbytecne bile znaky
 // vraci 0 - odstraneno v poradku
-// vraci INVALIDCHAR pokud viceradkovy komentar nema konec 
+// vraci INVALIDCHAR pokud viceradkovy komentar nema konec
 int comments_and_whtspc(FILE *f)
 {
-	
+
 	int isComment=0;
-	
+
 	// odstrani bile znaky
 	int c=fgetc(f);
-	while (isspace(c)) c=fgetc(f); 
-	
-	
+	while (isspace(c)) c=fgetc(f);
+
+
 	int hlpc=fgetc(f);
-	
+
 	// jestli je komentar jednoradkovy
 	if (c=='/' && hlpc=='/')
 	{
 		isComment=1;
 		while (c!='\n' && c!=EOF) c=fgetc(f);
-		
+
 		if (c==EOF) ungetc(c,f);
-		
+
 		while (isspace(c)) c=fgetc(f);
 		ungetc(c,f);
-		
+
 	}
 	else
 	// jestli je komentar viceradkovy
 	if (c=='/' && hlpc=='*')
 	{
 		isComment=1;
-		
+
 		hlpc=fgetc(f);
 	    c=fgetc(f);
-		
+
 		// hleda konec komentare
 		while (hlpc!='*' || c!='/')
 		{
 			hlpc=c;
 			c=fgetc(f);
-			
+
 			// pokud nenaslo konec komentare ale EOF, jedna se o chybu
 			if (c==EOF) return INVALIDCHAR;
 		}
-		
+
 		// odstraneni prebytecnych bilych znaku za komentarem
 		c=fgetc(f);
 		while (isspace(c)) c=fgetc(f);
-		
+
 		ungetc(c,f);
 	}
-	else 
+	else
 	{
 		ungetc(hlpc,f);
 		ungetc(c,f);
@@ -117,11 +117,11 @@ int isArithmetic (int c)
 {
 	switch (c)
 	{
-		case '-' : return MINUS; 
-		case '+' : return PLUS; 
-		case '*' : return TIMES; 
-		case '/' : return DIVISION;	
-	
+		case '-' : return MINUS;
+		case '+' : return PLUS;
+		case '*' : return TIMES;
+		case '/' : return DIVISION;
+
 		default: return -1;
 	}
 }
@@ -132,23 +132,23 @@ int isDotSmcComma(int c)
 	switch (c)
 	{
 		case ';' : return SEMICOLON;
-		case '.' : return DOT; 
-		case ',' : return COMMA; 
-	
+		case '.' : return DOT;
+		case ',' : return COMMA;
+
 		default : return -1;
 	}
-} 
+}
 
 // vraci kod zavorek nebo -1
 int is_paren_brace(int c)
 {
 	switch (c)
 	{
-		case '(' : return OPENPAREN; 
-		case ')' : return CLOSEPAREN; 
-		case '{' : return OPENBRACE; 
+		case '(' : return OPENPAREN;
+		case ')' : return CLOSEPAREN;
+		case '{' : return OPENBRACE;
 		case '}' : return CLOSEBRACE;
-	
+
 		default : return -1;
 	}
 }
@@ -157,21 +157,21 @@ int is_paren_brace(int c)
 // =			==				===
 int isEquating (FILE *f, int c)
 {
-	if (c == '=')  
+	if (c == '=')
 	{
 		c=fgetc(f);
 		if (c == '=')
 		{
 			c=fgetc(f);
 			if (c== '=') return TYPEEQUAL;
-			else 
+			else
 			{
 				ungetc(c,f);
 				return EQUAL;
 			}
-				
+
 		}
-		else 
+		else
 		{
 			ungetc(c,f);
 			return ASSIGN;
@@ -184,7 +184,7 @@ int isEquating (FILE *f, int c)
 // IFJ13 nema operator negace (!) a nebo -1
 int isNotEqual(FILE *f,int c)
 {
-	if ( c == '!') 
+	if ( c == '!')
 	{
 		c=fgetc(f);
 		if (c == '=')
@@ -198,7 +198,7 @@ int isNotEqual(FILE *f,int c)
 			}
 		}
 		else
-		{ 
+		{
 			ungetc(c,f);
 			return INVALIDCHAR;
 		}
@@ -213,7 +213,7 @@ int isBigger(FILE *f, int c)
 	{
 		c=fgetc(f);
 		if (c == '=') return BIGGEREQUAL;
-		else 
+		else
 		{
 			ungetc(c,f);
 			return BIGGER;
@@ -230,9 +230,9 @@ int is_begin_or_lesser(FILE *f, int c)
 		c=fgetc(f);
 		switch (c)
 		{
-			case '?' : 
+			case '?' :
 				if (
-					(c=fgetc(f))=='p' 
+					(c=fgetc(f))=='p'
 				     &&
 				    (c=fgetc(f))=='h'
 				     &&
@@ -241,10 +241,10 @@ int is_begin_or_lesser(FILE *f, int c)
 				    (isspace((c=fgetc(f))))
 				   ) return BEGIN;
 				else return INVALIDCHAR;
-				
+
 			case '=': return LESSEREQUAL;
-				
-			default: 
+
+			default:
 				ungetc(c,f);
 				return LESSER;
 		}
@@ -258,11 +258,11 @@ int isVariable(FILE *f,int c, char **content)
 {
 	int index=0;
 	int ec;
-	
-	if (c == '$')  
+
+	if (c == '$')
 	{
 		c=fgetc(f);
-		
+
 		// nazev musi zacinat znakem nebo podtrzitkem
 		if (isalpha(c) || c=='_')
 		{
@@ -270,28 +270,28 @@ int isVariable(FILE *f,int c, char **content)
 		}
 		else return INVALIDCHAR;
 		while (isalnum(c=fgetc(f)) || c=='_')
-		{	
+		{
 			insertChar(&index,content,c);
 		}
 		ungetc(c,f);
 		insertChar(&index,content,'\0');
-		
+
 		// pokud je nazev promenne klicove slovo, vrat chybovy token
 		if ((ec=isKeyWord(*content))!=-1) return INVALIDCHAR;
-		
+
 		return VAR;
 	}
 	else return -1;
 }
 
-// token pro STRING --- muze dojit k chybe, pokud neni osetreno 
+// token pro STRING --- muze dojit k chybe, pokud neni osetreno
 // ze string muze byt pozapomenut ukoncen, potom konci cteni znaku ve stringu
 // EOFem a vraci se INVALIDCHAR, jinak STRING nebo -1
 int isString (FILE *f, int c, char **content)
 {
 	int hlpc='a';
 	int index=0;
-	
+
 	if (c == '"') // zacatek retezce
 	{
 		// dokud neni druha " nebo EOF, dava pozor aby tam nebylo \"
@@ -301,9 +301,9 @@ int isString (FILE *f, int c, char **content)
 			insertChar(&index,content,c);
 			hlpc=c;
 		}
-	
+
 		if (c==EOF) return INVALIDCHAR;
-	
+
 		insertChar(&index,content,'\0');
 		return STRING;
 	}
@@ -313,56 +313,56 @@ int isString (FILE *f, int c, char **content)
 
 // vraci token najiteho lexemu pripadne chybovy token INVALIDCHAR
 int getToken(FILE *f, char **content )
-{	
+{
 	(*content)[0]='\0';
 	int index=0;
-	
-	int flag,d,ec,c;
-	
+
+	int flag,ec,c;
+
 	// enumator pro specialni skupiny symbolu
 
-	
+
 	// nacte prvni znak v poradi po bilych znacich a mezerach
-	while((ec=comments_and_whtspc(f))==1) 
+	while((ec=comments_and_whtspc(f))==1)
 		if (ec==INVALIDCHAR) return INVALIDCHAR;
-		
+
 	c=fgetc(f);
-	
+
 	// pro EOF
 	if (c==EOF) return END;
-	
+
 	// aritmeticke operace
 	if ((ec=isArithmetic(c))!=-1) return ec;
-	
+
 	// strednik, tecka, carka
 	if ((ec=isDotSmcComma(c))!=-1) return ec;
-	
+
 	// zavorky
 	if ((ec=is_paren_brace(c))!=-1) return ec;
-	
+
 	// bud jedno, dve, nebo tri rovna se
 	if ((ec=isEquating(f,c))!=-1) return ec;
-	
+
 	// !== != nebo ! tj chyba
 	if ((ec=isNotEqual(f,c))!=-1) return ec;
-	
+
 	// >= a >
 	if ((ec=isBigger(f,c))!=-1) return ec;
-	
+
 	// < , <= , <?php
 	if ((ec=is_begin_or_lesser(f,c))!=-1) return ec;
-	
+
 	// STRING
 	if ((ec=isString(f,c,content))!=-1) return ec;
-	
+
 	if ((ec=isVariable(f,c,content))==INVALIDCHAR) return INVALIDCHAR;
 	else if (ec!=-1) return ec;
-	
+
 	// pro ostatni, zjisti jestli se jedna o znak nebo o symbol vhodny pro ID
 	if (isdigit(c)) flag=NUMBER;
 	if (isalpha(c) || c=='_') flag=CHAR;
 	(*content)[index++]=c;
-	
+
 	// automat pro id, double, int, bool keyword
 	switch (flag)
 	{
@@ -373,14 +373,14 @@ int getToken(FILE *f, char **content )
 				insertChar(&index,content,c);
 			}
 			ungetc(c,f);
-					
+
 			insertChar(&index,content,'\0');
-			
+
 			// pokud je to klicove slovo, vrat spravny token
 			if ((ec=isKeyWord(*content))!=-1) return ec;
-			
+
 			return ID;
-		
+
 		// int nebo double nebo invalidchar
 		case NUMBER :
 			while (isdigit((c=fgetc(f))))
@@ -391,27 +391,27 @@ int getToken(FILE *f, char **content )
 			if (c=='.')
 			{
 				insertChar(&index,content,c);
-						
+
 				if (!isdigit(c=fgetc(f))) return INVALIDCHAR;
-						
+
 				insertChar(&index,content,c);
-						
+
 				while (isdigit((c=fgetc(f))))
 				{
 					insertChar(&index,content,c);
 				}
-				
+
 				// moznost exponentu
 				if (c=='e' || c=='E')
 				{
 					insertChar(&index,content,c);
-							
+
 					c=fgetc(f);
-							
+
 					insertChar(&index,content,c);
-							
+
 					if (c!='+' && c!='-' && !isdigit(c)) return INVALIDCHAR;
-					else 
+					else
 					{
 						// nepovinne -,+
 						if (c=='+' || c=='-')
@@ -419,38 +419,38 @@ int getToken(FILE *f, char **content )
 							c=fgetc(f);
 							insertChar(&index,content,c);
 						}
-								
-						if (!isdigit(c)) return INVALIDCHAR;	
+
+						if (!isdigit(c)) return INVALIDCHAR;
 						while (isdigit((c=fgetc(f))))
 						{
 							insertChar(&index,content,c);
 						}
-								
+
 						ungetc(c,f);
-								
+
 						insertChar(&index,content,'\0');
-								
+
 						return DOUBLE;
 					}
 				}
 				else
 				{
 					ungetc(c,f);
-							
+
 					insertChar(&index,content,'\0');
-							
+
 					return DOUBLE;
 				}
 			}
-			else 
+			else
 			{
 				ungetc(c,f);
-						
+
 				insertChar(&index,content,'\0');
-						
+
 				return INT;
 			}
-					
+
 		default : return INVALIDCHAR;
-	}	
+	}
 }
