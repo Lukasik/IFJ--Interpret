@@ -37,6 +37,12 @@ char* tokenNames[] = {
 
 	[WHILE] = "WHILE",
 	[IF] = "IF",
+	[BOOL] = "BOOL",
+	[FUNCTION] = "FUNCTION",
+	[RETURN] = "RETURN",
+	[NULLV] = "NULLV",
+	[ELSE] = "ELSE",
+
 
 	[INVALIDCHAR] = "INVALIDCHAR"
 };
