@@ -8,4 +8,3 @@ lexical_analyzer: lexical_analyzer.o error.o
 
 clean:
 	rm *.o
-	rm lexical_analyzer -f
