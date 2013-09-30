@@ -5,9 +5,10 @@
 
 
 // chybove hlasky
+// [ALLOCERROR] =
 char *errorMessage[]=
 {
-	[ALLOCERROR] = "(re)alokace se nezdarila!",
+	"(re)alokace se nezdarila!",
 };
 
 // vypise chybove hlaseni
