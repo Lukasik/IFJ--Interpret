@@ -1,4 +1,5 @@
 #include "../../lexical_analyzer.h"
+#include "../../error.h"
 
 char* tokenNames[] = {
 	[BEGIN] = "BEGIN",
@@ -24,7 +25,6 @@ char* tokenNames[] = {
 	[INT] = "INT",
 	[DOUBLE] = "DOUBLE",
 	[STRING] = "STRING",
-	[BOOL] = "BOOL",
 	[VAR] = "VAR",
 
 	[SEMICOLON] = "SEMICOLON",
