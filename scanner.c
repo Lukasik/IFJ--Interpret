@@ -157,22 +157,15 @@ int is_paren_brace(int c)
 // =			==				===
 int isEquating (FILE *f, int c)
 {
+	int d; // pomocna promenna
 	if (c == '=')
 	{
 		c=fgetc(f);
-		if (c == '=')
-		{
-			c=fgetc(f);
-			if (c== '=') return TYPEEQUAL;
-			else
-			{
-				ungetc(c,f);
-				return EQUAL;
-			}
-
-		}
+		d=fgetc(f);
+		if (c == '=' && d == '=') return EQUAL;
 		else
 		{
+			ungetc(d,f);
 			ungetc(c,f);
 			return ASSIGN;
 		}
@@ -190,11 +183,11 @@ int isNotEqual(FILE *f,int c)
 		if (c == '=')
 		{
 			c=fgetc(f);
-			if (c == '=') return TYPENOTEQUAL;
+			if (c == '=') return NOTEQUAL;
 			else
 			{
 				ungetc(c,f);
-				return NOTEQUAL;
+				return INVALIDCHAR;
 			}
 		}
 		else
@@ -291,13 +284,15 @@ int isString (FILE *f, int c, char **content)
 {
 	int hlpc='a';
 	int index=0;
+	int discard=0;
 
 	if (c == '"') // zacatek retezce
 	{
 		// dokud neni druha " nebo EOF, dava pozor aby tam nebylo \"
 		while (((c=fgetc(f))!='"' || hlpc=='\\') && c!=EOF)
 		{
-			// realokace kvuli nedostatku mista
+			if (c<32 || (c=='$' && hlpc!='\\')) discard=1;
+
 			insertChar(&index,content,c);
 			hlpc=c;
 		}
@@ -305,7 +300,8 @@ int isString (FILE *f, int c, char **content)
 		if (c==EOF) return INVALIDCHAR;
 
 		insertChar(&index,content,'\0');
-		return STRING;
+		if (discard==0) return STRING;
+		else return INVALIDCHAR;
 	}
 	else return -1;
 }
