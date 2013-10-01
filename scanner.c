@@ -269,9 +269,6 @@ int isVariable(FILE *f,int c, char **content)
 		ungetc(c,f);
 		insertChar(&index,content,'\0');
 
-		// pokud je nazev promenne klicove slovo, vrat chybovy token
-		if ((ec=isKeyWord(*content))!=-1) return INVALIDCHAR;
-
 		return VAR;
 	}
 	else return -1;
@@ -351,8 +348,7 @@ int getToken(FILE *f, char **content )
 	// STRING
 	if ((ec=isString(f,c,content))!=-1) return ec;
 
-	if ((ec=isVariable(f,c,content))==INVALIDCHAR) return INVALIDCHAR;
-	else if (ec!=-1) return ec;
+	if ((ec=isVariable(f,c,content))!=-1) return ec;
 
 	// pro ostatni, zjisti jestli se jedna o znak nebo o symbol vhodny pro ID
 	if (isdigit(c)) flag=NUMBER;
