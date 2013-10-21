@@ -1,4 +1,4 @@
-výraz - ( ) + - * / . volání funkce porovnání var type
+výraz - ( ) + - * / . operátory porovnání var type ;
 type - int, double, string, nullv, bool
 operátor porovnání - < > <= >= === !==
 příkaz - while, if, return, ;, přiřazení
@@ -14,10 +14,10 @@ return - keyword[return] [výraz] ;
 
 blok - { [příkaz]* }
 
-přiřazení - id = výraz ;
+přiřazení - id = výraz/volání funkce
 
 porovnání - var/type operátor porovnání var/type
 
-volání funkce - id ( [var/type[,var/type]])
+volání funkce - id ( [var/type[,var/type]]) ;
 
 begin, end
