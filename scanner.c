@@ -269,9 +269,6 @@ int isVariable(FILE *f,int c, char **content)
 		ungetc(c,f);
 		insertChar(&index,content,'\0');
 
-		// pokud je nazev promenne klicove slovo, vrat chybovy token
-		if ((ec=isKeyWord(*content))!=-1) return INVALIDCHAR;
-
 		return VAR;
 	}
 	else return -1;
@@ -319,6 +316,7 @@ bool getToken(FILE *f, tToken *t)
 
 
 	// nacte prvni znak v poradi po bilych znacich a mezerach
+<<<<<<< HEAD
 	while((ec=CommentsAndWhitespaces(f))==1)
 	{
 		if (ec == INVALIDCHAR)
@@ -326,6 +324,41 @@ bool getToken(FILE *f, tToken *t)
 			t->name = INVALIDCHAR;
 		}
 	}
+=======
+	while((ec=comments_and_whtspc(f))==1)
+		if (ec==INVALIDCHAR) return INVALIDCHAR;
+
+	c=fgetc(f);
+
+	// pro EOF
+	if (c==EOF) return END;
+
+	// aritmeticke operace
+	if ((ec=isArithmetic(c))!=-1) return ec;
+
+	// strednik, tecka, carka
+	if ((ec=isDotSmcComma(c))!=-1) return ec;
+
+	// zavorky
+	if ((ec=is_paren_brace(c))!=-1) return ec;
+
+	// bud jedno, dve, nebo tri rovna se
+	if ((ec=isEquating(f,c))!=-1) return ec;
+
+	// !== != nebo ! tj chyba
+	if ((ec=isNotEqual(f,c))!=-1) return ec;
+
+	// >= a >
+	if ((ec=isBigger(f,c))!=-1) return ec;
+
+	// < , <= , <?php
+	if ((ec=is_begin_or_lesser(f,c))!=-1) return ec;
+
+	// STRING
+	if ((ec=isString(f,c,content))!=-1) return ec;
+
+	if ((ec=isVariable(f,c,content))!=-1) return ec;
+>>>>>>> 650d7136a250f50ffd3ef2c86c81e81ecde84e9d
 
 	c = fgetc(f);
 
