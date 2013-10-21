@@ -55,7 +55,7 @@ void insertChar(int *index, char **content, int c)
 // odstrani komentar a opet odstrani zbytecne bile znaky
 // vraci 0 - odstraneno v poradku
 // vraci INVALIDCHAR pokud viceradkovy komentar nema konec
-int comments_and_whtspc(FILE *f)
+int CommentsAndWhitespaces(FILE *f)
 {
 
 	int isComment=0;
@@ -140,7 +140,7 @@ int isDotSmcComma(int c)
 }
 
 // vraci kod zavorek nebo -1
-int is_paren_brace(int c)
+int isParenBrace(int c)
 {
 	switch (c)
 	{
@@ -216,7 +216,7 @@ int isBigger(FILE *f, int c)
 }
 
 // vraci tokeny pro <, <= a <?php
-int is_begin_or_lesser(FILE *f, int c)
+int isBeginOrLesser(FILE *f, int c)
 {
 	if (c == '<')
 	{
@@ -308,56 +308,46 @@ int isString (FILE *f, int c, char **content)
 
 
 // vraci token najiteho lexemu pripadne chybovy token INVALIDCHAR
-int getToken(FILE *f, char **content )
+bool getToken(FILE *f, tToken *t)
 {
-	(*content)[0]='\0';
+	t->content[0]='\0';
 	int index=0;
+	int flag = -1,ec,c;
 
-	int flag,ec,c;
-
+	t->name = UNINITIALIZED;
 	// enumator pro specialni skupiny symbolu
 
 
 	// nacte prvni znak v poradi po bilych znacich a mezerach
-	while((ec=comments_and_whtspc(f))==1)
-		if (ec==INVALIDCHAR) return INVALIDCHAR;
+	while((ec=CommentsAndWhitespaces(f))==1)
+	{
+		if (ec == INVALIDCHAR)
+		{
+			t->name = INVALIDCHAR;
+		}
+	}
 
-	c=fgetc(f);
+	c = fgetc(f);
 
-	// pro EOF
-	if (c==EOF) return END;
+	if (c==EOF) t->name = END; // pro EOF
+	else if ((ec=isArithmetic(c))!=-1) t->name = ec; // aritmeticke operace
+	else if ((ec=isDotSmcComma(c))!=-1) t->name = ec; // strednik, tecka, carka
+	else if ((ec=isParenBrace(c))!=-1) t->name = ec; // zavorky
+	else if ((ec=isEquating(f,c))!=-1) t->name = ec; // bud jedno, dve, nebo tri rovna se
+	else if ((ec=isNotEqual(f,c))!=-1) t->name = ec; // !== != nebo ! tj chyba
+	else if ((ec=isBigger(f,c))!=-1) t->name = ec; // >= a >
+	else if ((ec=isBeginOrLesser(f,c))!=-1) t->name = ec; // < , <= , <?php
+	else if ((ec=isString(f,c,&(t->content)))!=-1) t->name = STRING; // STRING
+	else if ((ec=isVariable(f,c,&(t->content)))==INVALIDCHAR) t->name = INVALIDCHAR;
+	else if (ec!=-1) t->name = ec;
+	else if (isdigit(c)) flag=NUMBER; // pro ostatni, zjisti jestli se jedna o znak nebo o symbol vhodny pro ID
+	else if (isalpha(c) || c=='_') flag=CHAR;
+	t->content[index++]=c;
 
-	// aritmeticke operace
-	if ((ec=isArithmetic(c))!=-1) return ec;
-
-	// strednik, tecka, carka
-	if ((ec=isDotSmcComma(c))!=-1) return ec;
-
-	// zavorky
-	if ((ec=is_paren_brace(c))!=-1) return ec;
-
-	// bud jedno, dve, nebo tri rovna se
-	if ((ec=isEquating(f,c))!=-1) return ec;
-
-	// !== != nebo ! tj chyba
-	if ((ec=isNotEqual(f,c))!=-1) return ec;
-
-	// >= a >
-	if ((ec=isBigger(f,c))!=-1) return ec;
-
-	// < , <= , <?php
-	if ((ec=is_begin_or_lesser(f,c))!=-1) return ec;
-
-	// STRING
-	if ((ec=isString(f,c,content))!=-1) return ec;
-
-	if ((ec=isVariable(f,c,content))==INVALIDCHAR) return INVALIDCHAR;
-	else if (ec!=-1) return ec;
-
-	// pro ostatni, zjisti jestli se jedna o znak nebo o symbol vhodny pro ID
-	if (isdigit(c)) flag=NUMBER;
-	if (isalpha(c) || c=='_') flag=CHAR;
-	(*content)[index++]=c;
+	if(t->name != UNINITIALIZED && flag == -1)
+	{
+		return true;
+	}
 
 	// automat pro id, double, int, bool keyword
 	switch (flag)
@@ -366,87 +356,110 @@ int getToken(FILE *f, char **content )
 		case CHAR :
 			while (isalnum(c=fgetc(f)) || c=='_')
 			{
-				insertChar(&index,content,c);
+				insertChar(&index,&(t->content),c);
 			}
 			ungetc(c,f);
 
-			insertChar(&index,content,'\0');
+			insertChar(&index,&(t->content),'\0');
 
 			// pokud je to klicove slovo, vrat spravny token
-			if ((ec=isKeyWord(*content))!=-1) return ec;
-
-			return ID;
+			if ((ec=isKeyWord(t->content))!=-1)
+			{
+				t->name = KEYWORD;
+				return true;
+			}
+			else
+			{
+				t->name = ID;
+				return true;
+			}
 
 		// int nebo double nebo invalidchar
 		case NUMBER :
 			while (isdigit((c=fgetc(f))))
 			{
-				insertChar(&index,content,c);
+				insertChar(&index,&(t->content),c);
 			}
 			// pokud narazi na tecku, uz to nemuze byt integer
 			if (c=='.')
 			{
-				insertChar(&index,content,c);
+				insertChar(&index,&(t->content),c);
 
-				if (!isdigit(c=fgetc(f))) return INVALIDCHAR;
+				if (!isdigit(c=fgetc(f)))
+				{
+					t->name = INVALIDCHAR;
+					return false;
+				}
 
-				insertChar(&index,content,c);
+				insertChar(&index,&(t->content),c);
 
 				while (isdigit((c=fgetc(f))))
 				{
-					insertChar(&index,content,c);
+					insertChar(&index,&(t->content),c);
 				}
 
 				// moznost exponentu
 				if (c=='e' || c=='E')
 				{
-					insertChar(&index,content,c);
+					insertChar(&index,&(t->content),c);
 
 					c=fgetc(f);
 
-					insertChar(&index,content,c);
+					insertChar(&index,&(t->content),c);
 
-					if (c!='+' && c!='-' && !isdigit(c)) return INVALIDCHAR;
+					if (c!='+' && c!='-' && !isdigit(c))
+					{
+						t->name = INVALIDCHAR;
+						return false;
+					}
 					else
 					{
 						// nepovinne -,+
 						if (c=='+' || c=='-')
 						{
 							c=fgetc(f);
-							insertChar(&index,content,c);
+							insertChar(&index,&(t->content),c);
 						}
 
-						if (!isdigit(c)) return INVALIDCHAR;
+						if (!isdigit(c))
+						{
+							t->name = INVALIDCHAR;
+							return false;
+						}
+
 						while (isdigit((c=fgetc(f))))
 						{
-							insertChar(&index,content,c);
+							insertChar(&index,&(t->content),c);
 						}
 
 						ungetc(c,f);
 
-						insertChar(&index,content,'\0');
+						insertChar(&index,&(t->content),'\0');
 
-						return DOUBLE;
+						t->name = DOUBLE;
+						return true;
 					}
 				}
 				else
 				{
 					ungetc(c,f);
 
-					insertChar(&index,content,'\0');
+					insertChar(&index,&(t->content),'\0');
 
-					return DOUBLE;
+					t->name = DOUBLE;
+					return true;
 				}
 			}
 			else
 			{
 				ungetc(c,f);
 
-				insertChar(&index,content,'\0');
+				insertChar(&index,&(t->content),'\0');
 
-				return INT;
+				t->name = INT;
+				return true;
 			}
 
-		default : return INVALIDCHAR;
+		default : return false;
 	}
 }
