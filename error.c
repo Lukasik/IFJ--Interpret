@@ -5,10 +5,12 @@
 
 
 // chybove hlasky
-// [ALLOCERROR] =
 char *errorMessage[]=
 {
-	"(re)alokace se nezdarila!",
+	"(Re)alokace se nezdarila! \n",
+	"Nepodarilo se otevrit zdrojovy kod ! \n",
+	"Chyba v zadani parametru \n",
+	"Syntakticka chyba v kodu"
 };
 
 // vypise chybove hlaseni

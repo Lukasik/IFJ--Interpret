@@ -7,11 +7,16 @@ void printError(int errorCode, int returnCode);
 enum errs
 {
 	ALLOCERROR,
+	SOURCECODEERR,
+	PARAMSERROR,
+	SYNTAXERR,
+	
 };
 
 // navratove kody programu
 enum returns
 {
 	INTERPRETERROR=99,
+	SYNTAXERROR=2,
 };
 
