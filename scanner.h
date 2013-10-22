@@ -10,8 +10,6 @@ enum tTokenNames
 	END,
 
 	KEYWORD,
-	BOOL,
-	NULLV,
 
 	PLUS,
 	MINUS,
@@ -50,7 +48,8 @@ typedef struct tToken
 	char *content;
 } tToken;
 
-bool getToken(FILE *f, tToken *t);
+void getToken(FILE *f, tToken *t);
+bool findToken(FILE *f, tToken *t);
 void insertChar(int *index, char **content, int c);
 int isParenBrace(int c);
 int isDotSmcComma(int c);

@@ -17,10 +17,10 @@ int isKeyWord(char *str)
 {
 	if (strcmp("while",str)==0) return KEYWORD;
     if (strcmp("function",str)==0) return KEYWORD;
-	if (strcmp("true",str)==0) return BOOL;
-	if (strcmp("false",str)==0) return BOOL;
+	if (strcmp("true",str)==0) return KEYWORD;
+	if (strcmp("false",str)==0) return KEYWORD;
 	if (strcmp("if",str)==0) return KEYWORD;
-	if (strcmp("null",str)==0) return NULLV;
+	if (strcmp("null",str)==0) return KEYWORD;
 	if (strcmp("return",str)==0) return KEYWORD;
 	if (strcmp("else",str)==0) return KEYWORD;
     return -1;
@@ -250,7 +250,6 @@ int isBeginOrLesser(FILE *f, int c)
 int isVariable(FILE *f,int c, char **content)
 {
 	int index=0;
-	int ec;
 
 	if (c == '$')
 	{
@@ -303,11 +302,22 @@ int isString (FILE *f, int c, char **content)
 	else return -1;
 }
 
+void getToken(FILE *f, tToken *t)
+{
+	bool result = findToken(f, t);
+
+	if(!result || t->name == INVALIDCHAR)
+	{
+		printError(LEXICALERR, LEXICALERROR);
+	}
+
+	//TODO: garbage collector
+}
 
 // vraci token najiteho lexemu pripadne chybovy token INVALIDCHAR
-bool getToken(FILE *f, tToken *t)
+bool findToken(FILE *f, tToken *t)
 {
-	t->content[0]='\0';
+	t->content[0] = '\0';
 	int index=0;
 	int flag = -1,ec,c;
 
@@ -316,7 +326,6 @@ bool getToken(FILE *f, tToken *t)
 
 
 	// nacte prvni znak v poradi po bilych znacich a mezerach
-<<<<<<< HEAD
 	while((ec=CommentsAndWhitespaces(f))==1)
 	{
 		if (ec == INVALIDCHAR)
@@ -324,41 +333,6 @@ bool getToken(FILE *f, tToken *t)
 			t->name = INVALIDCHAR;
 		}
 	}
-=======
-	while((ec=comments_and_whtspc(f))==1)
-		if (ec==INVALIDCHAR) return INVALIDCHAR;
-
-	c=fgetc(f);
-
-	// pro EOF
-	if (c==EOF) return END;
-
-	// aritmeticke operace
-	if ((ec=isArithmetic(c))!=-1) return ec;
-
-	// strednik, tecka, carka
-	if ((ec=isDotSmcComma(c))!=-1) return ec;
-
-	// zavorky
-	if ((ec=is_paren_brace(c))!=-1) return ec;
-
-	// bud jedno, dve, nebo tri rovna se
-	if ((ec=isEquating(f,c))!=-1) return ec;
-
-	// !== != nebo ! tj chyba
-	if ((ec=isNotEqual(f,c))!=-1) return ec;
-
-	// >= a >
-	if ((ec=isBigger(f,c))!=-1) return ec;
-
-	// < , <= , <?php
-	if ((ec=is_begin_or_lesser(f,c))!=-1) return ec;
-
-	// STRING
-	if ((ec=isString(f,c,content))!=-1) return ec;
-
-	if ((ec=isVariable(f,c,content))!=-1) return ec;
->>>>>>> 650d7136a250f50ffd3ef2c86c81e81ecde84e9d
 
 	c = fgetc(f);
 
@@ -375,12 +349,12 @@ bool getToken(FILE *f, tToken *t)
 	else if (ec!=-1) t->name = ec;
 	else if (isdigit(c)) flag=NUMBER; // pro ostatni, zjisti jestli se jedna o znak nebo o symbol vhodny pro ID
 	else if (isalpha(c) || c=='_') flag=CHAR;
-	t->content[index++]=c;
 
 	if(t->name != UNINITIALIZED && flag == -1)
 	{
 		return true;
 	}
+	t->content[index++]=c;
 
 	// automat pro id, double, int, bool keyword
 	switch (flag)
