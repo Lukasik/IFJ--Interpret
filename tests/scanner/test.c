@@ -34,8 +34,6 @@ char* tokenNames[] = {
 	[CLOSEBRACE] = "CLOSEBRACE",
 
 	[KEYWORD] = "KEYWORD",
-	[BOOL] = "BOOL",
-	[NULLV] = "NULLV",
 
 
 	[INVALIDCHAR] = "INVALIDCHAR"
@@ -46,20 +44,21 @@ int main (int argc, char * argv[])
 	if(argc != 2) exit(1);
 	FILE *f=fopen(argv[1],"rw");
 
-	int token;
-	char *content=malloc(40);
+	tToken *t = malloc(sizeof(tToken));
+	t->content = malloc(40);
 
-	while ((token=getToken(f,&content))!=END)
+	while ((getToken(f,t) && t->name != END))
 	{
-		printf ("%s",tokenNames[token]);
+		printf ("%s",tokenNames[t->name]);
 
-		if(*content!='\0') {
-			printf("[%s]", content);
+		if(*(t->content)!='\0') {
+			printf("[%s]", t->content);
+			*(t->content) = '\0';
 		}
 		printf("\n");
 	}
 
-	printf("%s\n", tokenNames[token]);
+	printf("%s\n", tokenNames[t->name]);
 
 	return 0;
 }
