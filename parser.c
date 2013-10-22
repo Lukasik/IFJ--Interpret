@@ -1,4 +1,5 @@
-include "parser.h"
+#include "parser.h"
+
 
 int isOperator(tToken *token)
 {
@@ -20,8 +21,7 @@ int isType(tToken *token)
 		token->name == INT ||
 		token->name == DOUBLE ||
 		token->name == STRING ||
-		token->name == BOOL ||
-		token->name == NULLV;
+		(token->name == KEYWORD && (strcmp(token->content, "true") == 0 || strcmp(token->content, "false") == 0 || strcmp(token->content, "null") == 0));
 }
 
 int isComparsionOperator(tToken *token)
@@ -41,21 +41,24 @@ int isComparsionOperator(tToken *token)
 // pokud ok, vraci ISOK
 int isWhile(FILE *f, tToken *t)
 {
-	bool result = false;
-
+	DEBUG("kontrola keywordu while");
 	if (strcmp(t->content,"while")!=0) return ISNT;
 
-	result = getToken(f, t);
-	if (!result || t->name!=OPENPAREN) return SYNERR;
+	getToken(f, t);
+	DEBUG("(");
+	if (t->name!=OPENPAREN) return SYNERR;
 
-	result = getToken(f, t);
-	if (!result || isCompare(f,t)!=ISOK) return SYNERR;
+	getToken(f, t);
+	DEBUG("je porovnání?");
+	if (isComparsion(f,t)!=ISOK) return SYNERR;
 
-	result = getToken(f, t);
-	if (!result || t->name!=CLOSEPAREN) return SYNERR;
+	getToken(f, t);
+	DEBUG(")");
+	if (t->name!=CLOSEPAREN) return SYNERR;
 
-	result = getToken(f, t);
-	if (result && isBlock(f, t)==ISOK) return ISOK;
+	getToken(f, t);
+	DEBUG("je blok?");
+	if (isBlock(f, t)==ISOK) return ISOK;
 
 	return SYNERR;
 }
@@ -65,27 +68,32 @@ int isWhile(FILE *f, tToken *t)
 // musi tu byt else!
 int isIf(FILE *f,tToken *t)
 {
-	bool result = false;
-
+	DEBUG("kontrola if keywordu");
 	if (strcmp(t->content,"if")!=0) return ISNT;
 
-	result = getToken(f, t);
-	if (!result || t->name!=OPENPAREN) return SYNERR;
+	getToken(f, t);
+	DEBUG("(");
+	if (t->name!=OPENPAREN) return SYNERR;
 
-	result = getToken(f, t);
-	if (!result || (ec=isCompare(f,t))!=ISOK) return SYNERR;
+	getToken(f, t);
+	DEBUG("je porovnání?");
+	if ((isComparsion(f,t))!=ISOK) return SYNERR;
 
-	result = getToken(f, t);
-	if (!result || t->name!=CLOSEPAREN) return SYNERR;
+	getToken(f, t);
+	DEBUG(")");
+	if (t->name!=CLOSEPAREN) return SYNERR;
 
-	result = getToken(f, t);
-	if (!result || (ec=isBlock)!=ISOK) return SYNERR;
+	getToken(f, t);
+	DEBUG("je blok?");
+	if ((isBlock(f, t))!=ISOK) return SYNERR;
 
-	result = getToken(f, t);
-	if (!result || t->name!=KEYWORD || strcmp("else",t->content)!=0) return SYNERR;
+	getToken(f, t);
+	DEBUG("je else?");
+	if (t->name!=KEYWORD || strcmp("else",t->content)!=0) return SYNERR;
 
-	result = getToken(f, t);
-	if (!result || isBlock(f, t)!=ISOK) return SYNERR;
+	getToken(f, t);
+	DEBUG("je blok?");
+	if (isBlock(f, t)!=ISOK) return SYNERR;
 
 	return ISOK;
 }
@@ -93,13 +101,13 @@ int isIf(FILE *f,tToken *t)
 // vraci ISOK pokud je to return vyraz nebo return;
 int isReturn (FILE *f, tToken *t)
 {
-	bool result = false;
-
+	DEBUG("return");
 	if (strcmp("return",t->content)!=0) return ISNT;
 
-	result = getToken(f, t);
-	if (result && t->name==SEMICOLON) return ISOK;
-	else if (result && (ec=isExpression(f,t))==ISOK) return ISOK;
+	getToken(f, t);
+	DEBUG("; nebo výraz?");
+	if (t->name==SEMICOLON) return ISOK;
+	else if ((isExpression(f,t))==ISOK) return ISOK;
 
 	return SYNERR;
 }
@@ -109,16 +117,17 @@ int isReturn (FILE *f, tToken *t)
 //TODO kontrolovat středník?
 int isAssign (FILE *f, tToken *t)
 {
-	bool result = false;
-
+	DEBUG("je proměnná?");
 	if(t->name != VAR) return SYNERR;
 
-	result = getToken(f, t);
-	if(!result || t->name != ASSIGN) return SYNERR;
+	getToken(f, t);
+	DEBUG("=?");
+	if(t->name != ASSIGN) return SYNERR;
 
-	result = getToken(f, t);
-	if(result && isExpression(f, t) == ISOK) return ISOK;
-	else if(result && isFunctionCall(f, t) == ISOK) return ISOK;
+	getToken(f, t);
+	DEBUG("volání fce nebo výraz?");
+	if(isExpression(f, t) == ISOK) return ISOK;
+	else if(isFunctionCall(f, t) == ISOK) return ISOK;
 
 	return SYNERR;
 }
@@ -127,24 +136,24 @@ int isAssign (FILE *f, tToken *t)
 // vraci ISOK, ISNT nebo SYNERR
 int isExpression (FILE *f, tToken *t)
 {
-	bool result = false;
 	int parens = 0;
-
+	DEBUG("požírám (");
 	while(t->name == OPENPAREN)
 	{
 		++parens;
-		result = getToken(f, t);
+		getToken(f, t);
 	}
 
-	if(result && isOperand(t))
+	DEBUG("je operand?");
+	if(isOperand(t))
 	{
-		result = getToken(f, t);
-
-		if(result && t->name == SEMICOLON && parens == 0)
+		getToken(f, t);
+		DEBUG("je ; a 0x ) nebo operátor?");
+		if(t->name == SEMICOLON && parens == 0)
 		{
 			return ISOK;
 		}
-		else if(result && isOperator(t))
+		else if(isOperator(t))
 		{
 			return doOperation(f, t, &parens);
 		}
@@ -156,38 +165,43 @@ int isExpression (FILE *f, tToken *t)
 
 int doOperation(FILE *f, tToken *t, int *parens)
 {
-	bool result = false;
 
-	result = getToken(f, t);
-
+	getToken(f, t);
+	DEBUG("je (");
 	while(t->name == OPENPAREN)
 	{
+		DEBUG("žeru jednu (");
 		++*parens;
-		result = getToken(f, t);
+		getToken(f, t);
 	}
 
-	if(result && isOperand(t))
+	DEBUG("je operand?");
+	if(isOperand(t))
 	{
-		result = getToken(f, t);
-
-		if(result && t->name == SEMICOLON && *parens == 0)
+		getToken(f, t);
+		DEBUG("; a sedí závorky nebo je ) nebo operátor");
+		if(t->name == SEMICOLON && *parens == 0)
 		{
 			return ISOK;
 		}
-		else if(result && t->name == CLOSEBRACE || isOperator(t))
+		else if((t->name == CLOSEPAREN || isOperator(t)))
 		{
-			while(t->name == CLOSEBRACE)
+			DEBUG("požířám )");
+			while(t->name == CLOSEPAREN)
 			{
-				--*parens;
-				result = getToken(f, t);
+				DEBUG("žeru jednu )");
+				--(*parens);
+				getToken(f, t);
 			}
 
-			if(result && t->name == SEMICOLON && *parens == 0)
+			DEBUG("je ; a sedí závorky nebo je operace?");
+			if(t->name == SEMICOLON && *parens == 0)
 			{
 				return ISOK;
 			}
-			else if(result && isOperator(t))
+			else if(isOperator(t))
 			{
+				DEBUG("je operátor, rekurze");
 				return doOperation(f, t, parens);
 			}
 		}
@@ -198,17 +212,16 @@ int doOperation(FILE *f, tToken *t, int *parens)
 
 int isComparsion(FILE *f, tToken *t)
 {
-	bool result = false;
-
+	DEBUG("je porovnání?");
 	if(isOperand(t))
 	{
-		result = getToken(f, t)
-
-		if(result && isComparsionOperator(t))
+		getToken(f, t);
+		DEBUG("je operátor porovnání?");
+		if(isComparsionOperator(t))
 		{
-			result = getToken(f);
-
-			if(result && isOperand(t))
+			getToken(f, t);
+			DEBUG("je operand?");
+			if(isOperand(t))
 			{
 				return ISOK;
 			}
@@ -220,23 +233,34 @@ int isComparsion(FILE *f, tToken *t)
 
 int isFunctionCall(FILE *f, tToken *t)
 {
-	bool result = false;
-
+	DEBUG("je identifikátor?");
 	if(t->name != ID) return ISNT;
 
-	result = getToken(f, t);
-	if(!result && t->name != OPENPAREN) return SYNERR;
+	getToken(f, t);
+	DEBUG("je (?");
+	if(t->name != OPENPAREN) return SYNERR;
 
-	result = getToken(f, t);
-	if(result && t->name == OPENPAREN) return ISOK;
+	getToken(f, t);
+	DEBUG("je )?");
+	if(t->name == CLOSEPAREN) return ISOK;
+	DEBUG("je operand?");
 	if(isOperand(t))
 	{
-		while(isOperand(t) || t->name == COMMA)
+		DEBUG("je operand nebo ,?");
+		while(isOperand(t))
 		{
-			result = getToken(f, t);
+			getToken(f, t);
+			if(t->name == COMMA)
+			{
+				DEBUG("je čárka");
+				getToken(f, t);
+				if(t->name == CLOSEPAREN) return SYNERR;
+			}
 		}
 
-		if(t->name == CLOSEBRACE) return ISOK;
+		DEBUG("je )?");
+		if(t->name == CLOSEPAREN) return ISOK;
+		DEBUG("není )");
 	}
 
 	return SYNERR;
@@ -246,26 +270,22 @@ int isFunctionCall(FILE *f, tToken *t)
 // pouziva iswhile isif isreturn
 int isCommand(FILE *f, tToken *t)
 {
-	int ec;
 	if (t->name==KEYWORD)
 	{
-		if ((ec=isWhile(f,t))==ISOK)	return ISOK;
-		else if (ec==SYNERR) return SYNERR;
-		else if ((ec=isIf(f,t))==ISOK) return ISOK;
-		else if (ec==SYNERR) return SYNERR;
-		else if ((ec=isReturn(f,t))==ISOK) return ISOK;
-		else if (ec==SYNERR) return SYNERR;
-		else return SYNERR;
+		DEBUG("je keyword");
+		if (isWhile(f,t)==ISOK) return ISOK;
+		else if (isIf(f,t)==ISOK) return ISOK;
+		else if (isReturn(f,t)==ISOK) return ISOK;
 	}
 	else if (t->name==SEMICOLON)
 	{
+		DEBUG("je ;");
 		return ISOK;
 	}
-	else if (t->name==VAR)
+	else if (t->name==VAR && isAssign(f,t) == ISOK)
 	{
-		ec=isAssign(f,t);
-		if (ec!=ISOK) return SYNERR;
-		else return ISOK;
+		DEBUG("je přiřazení");
+		return ISOK;
 	}
 
 	return SYNERR;
@@ -276,22 +296,19 @@ int isCommand(FILE *f, tToken *t)
 // jinak vraci ISNT pokud neni blok a SYNERR pokud je v nem chyba
 int isBlock(FILE *f, tToken *t)
 {
-	bool result = false;
 	// neni blok, vrat ISNT
+	DEBUG("{");
 	if (t->name!=OPENBRACE) return ISNT;
 
-	int ec;
-
 	// precti dalsi token
-	result = getToken(f, t);
+	getToken(f, t);
 
 	// dokud je prikaz
-	while (result && (ec=isCommand(f,t))==ISOK);
-
-	// pokud syntaxerror v commandu vrati SYNERR svemu volajicimu
-	if (ec==SYNERR || !result) return SYNERR;
+	DEBUG("is command");
+	while (isCommand(f,t)==ISOK) getToken(f, t);
 
 	// pokud neni ukoncena slozena zavorka, vraci SYNERR
+	DEBUG("}");
 	if (t->name != CLOSEBRACE) return SYNERR;
 	else
 	{
@@ -306,22 +323,27 @@ int isBlock(FILE *f, tToken *t)
 // zkontroluje jeji spravne sepsani a vraci ISOK pokud ok a SYNERR pokud syntaxError
 int isFunction (FILE *f, tToken *t)
 {
-	bool result = false;
 	// nejedna se o klicove slovo function -> vrati ISNT
+	DEBUG("keyword");
 	if (t->name!=KEYWORD || strcmp(t->content,"function")!=0)
 		return ISNT;
 
 	// jednalo se o klicove slovo function
-	result = getToken(f, t);
+	getToken(f, t);
 
 	// jedna se o ID?
-	if (!result || t->name!=ID) return SYNERR;
-
+	DEBUG("id");
+	printf("%d\n", t->name);
+	if (t->name!=ID) return SYNERR;
 	// jedna se o ( ?
-	if (!result || t->name!=OPENPAREN) return SYNERR;
+	getToken(f, t);
+	DEBUG("(");
+	if (t->name!=OPENPAREN) return SYNERR;
 
+	getToken(f, t);
 	int whatNow=0;
 	// dokud neni )
+	DEBUG("parametry");
 	while (t->name!=CLOSEPAREN)
 	{
 		// ma prijit promenna
@@ -337,25 +359,25 @@ int isFunction (FILE *f, tToken *t)
 		{
 			if (t->name == COMMA)
 			{
-				whatnow++;
+				whatNow++;
 			}
 			else return SYNERR;
 		}
-	}
 
-	// navratovy kod
-	int ec;
+		getToken(f, t);
+	}
 
 	// uz narazil na )
 	// pokud whatNow==0 tak function id ()
 	// pokud whatNow mod 2 =1 function id (x) nebo (x,x) atd ..
-
+	DEBUG("správný počet parametrů a čárek");
 	if (whatNow==0 || whatNow%2 ==1)
 	{
 		// nacte token a pokud je potom block, vse je OK - vraci 0
 		// jinak vraci SYNERR do funkce main
-		result = getToken(f, t);
-		if (!result || (ec=isBlock(f,t))!=ISOK) return SYNERR;
+		getToken(f, t);
+		DEBUG("lezu do bloku");
+		if (isBlock(f,t)!=ISOK) return SYNERR;
 		else return ISOK;
 	}
 	// pokud whatnow mod 2=0 a whatNow neni 0 function id (x,) nebo (x,x,) atd.
@@ -366,9 +388,13 @@ int isFunction (FILE *f, tToken *t)
 
 int main (int argc, char *argv[])
 {
+	int exitCode = 0;
 	tToken *t = malloc(sizeof(tToken));
 
 	if(t == NULL) printError(ALLOCERROR, INTERPRETERROR);
+
+	t->content = malloc(40);
+	if(t->content == NULL) printError(ALLOCERROR, INTERPRETERROR);
 	// pokud spatny pocet parametru
 	if (argc!=2) printError(PARAMSERROR,INTERPRETERROR);
 
@@ -385,29 +411,30 @@ int main (int argc, char *argv[])
 	else ungetc (c,f);
 
 	// typ struktury tokenu
-	tToken *t=getToken(f);
+	getToken(f, t);
 
 	// pokud neni prvni token begin, je to chyba
 	if (t->name != BEGIN) printError(SYNTAXERR,SYNTAXERROR);
 
-	result = getToken(f, t);
-
-	// navratovy kod
-	int ec;
-
+	getToken(f, t);
 	// dokud neni konec programu, zkousi jestli se jedna o povolene veci
 	// tj bud funkce, nebo nejaky z prikazu
-	while (result && t->name!=END)
+	while (t->name!=END)
 	{
+		exitCode = isFunction(f,t);
+		printf("%d\n", t->name);
+		printf("ec: %d\n", exitCode);
 		// syntaxerrory mohou byt prejaty z ostatnich funkci
-		if ((ec=isFunction(f,t))==SYNERR) printError(SYNTAXERR,SYNTAXERROR);
-		else if ((ec=isFunction(f,t))==ISNT)
-				if ((ec=isCommand(f,t))!=ISOK)
+		if (exitCode==SYNERR) printError(SYNTAXERR,SYNTAXERROR);
+		else if (exitCode==ISNT)
+				if (isCommand(f,t)!=ISOK)
 					// blbe pojmenovani, ale jak jinak :-(
 					printError(SYNTAXERR,SYNTAXERROR);
 
-		result = getToken(f, t);
+		getToken(f, t);
 	}
+
+	printf("ok\n");
 
 	return 0;
 }
