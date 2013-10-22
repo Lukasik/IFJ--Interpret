@@ -10,7 +10,7 @@ enum errs
 	SOURCECODEERR,
 	PARAMSERROR,
 	SYNTAXERR,
-	
+	LEXICALERR,
 };
 
 // navratove kody programu
@@ -18,5 +18,6 @@ enum returns
 {
 	INTERPRETERROR=99,
 	SYNTAXERROR=2,
+	LEXICALERROR=1,
 };
 

@@ -10,7 +10,8 @@ char *errorMessage[]=
 	"(Re)alokace se nezdarila! \n",
 	"Nepodarilo se otevrit zdrojovy kod ! \n",
 	"Chyba v zadani parametru \n",
-	"Syntakticka chyba v kodu"
+	"Syntakticka chyba v kodu\n",
+	"Lexikalni chyba v kodu\n",
 };
 
 // vypise chybove hlaseni
@@ -18,6 +19,6 @@ char *errorMessage[]=
 // druhy parametr je navratovy kod ukonceni programu
 void printError(int errorCode, int returnCode)
 {
-	printf("CHYBA %d: %s\n",returnCode,errorMessage[errorCode]);
+	fprintf(stderr, "CHYBA %d: %s",returnCode,errorMessage[errorCode]);
 	exit(returnCode);
 }
