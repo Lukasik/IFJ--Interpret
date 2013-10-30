@@ -14,4 +14,4 @@ parser-test: parser.o error.o scanner.o
 	gcc *.o -o parser
 
 clean:
-	rm *.o
+	@rm *.o parser -f > /dev/null
