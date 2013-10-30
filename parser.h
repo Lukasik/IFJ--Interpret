@@ -18,7 +18,7 @@ int isBlock(FILE *f, tToken *t);
 int isCommand(FILE *f, tToken *t);
 int isWhile(FILE *f, tToken *t);
 int isIf(FILE *f,tToken *t);
-int isExpression (FILE *f, tToken *t);
+int isExpression (FILE *f, tToken *t, bool semicolonEnd);
 int isAssign (FILE *f, tToken *t);
 int isReturn (FILE *f, tToken *t);
 int isOperator(tToken *token);
@@ -26,7 +26,7 @@ int isOperand(tToken *token);
 int isType(tToken *token);
 int isComparsionOperator(tToken *token);
 int isWhile(FILE *f, tToken *t);
-int doOperation(FILE *f, tToken *t, int *parens);
+int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd);
 int isComparsion(FILE *f, tToken *t);
 int isFunctionCall(FILE *f, tToken *t);
 

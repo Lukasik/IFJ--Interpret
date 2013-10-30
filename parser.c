@@ -7,6 +7,7 @@ int isOperator(tToken *token)
 		token->name == PLUS ||
 		token->name == MINUS ||
 		token->name == TIMES ||
+		token->name == DOT ||
 		token->name == DIVISION;
 }
 
@@ -50,9 +51,8 @@ int isWhile(FILE *f, tToken *t)
 
 	getToken(f, t);
 	DEBUG("je porovnání?");
-	if (isComparsion(f,t)!=ISOK) return SYNERR;
+	if (isExpression(f,t, false)!=ISOK) return SYNERR;
 
-	getToken(f, t);
 	DEBUG(")");
 	if (t->name!=CLOSEPAREN) return SYNERR;
 
@@ -77,9 +77,8 @@ int isIf(FILE *f,tToken *t)
 
 	getToken(f, t);
 	DEBUG("je porovnání?");
-	if ((isComparsion(f,t))!=ISOK) return SYNERR;
+	if ((isExpression(f,t, false))!=ISOK) return SYNERR;
 
-	getToken(f, t);
 	DEBUG(")");
 	if (t->name!=CLOSEPAREN) return SYNERR;
 
@@ -107,7 +106,7 @@ int isReturn (FILE *f, tToken *t)
 	getToken(f, t);
 	DEBUG("; nebo výraz?");
 	if (t->name==SEMICOLON) return ISOK;
-	else if ((isExpression(f,t))==ISOK) return ISOK;
+	else if ((isExpression(f,t, true))==ISOK) return ISOK;
 
 	return SYNERR;
 }
@@ -126,7 +125,7 @@ int isAssign (FILE *f, tToken *t)
 
 	getToken(f, t);
 	DEBUG("volání fce nebo výraz?");
-	if(isExpression(f, t) == ISOK) return ISOK;
+	if(isExpression(f, t, true) == ISOK) return ISOK;
 	else if(isFunctionCall(f, t) == ISOK) return ISOK;
 
 	return SYNERR;
@@ -134,7 +133,7 @@ int isAssign (FILE *f, tToken *t)
 
 // isExpression
 // vraci ISOK, ISNT nebo SYNERR
-int isExpression (FILE *f, tToken *t)
+int isExpression (FILE *f, tToken *t, bool semicolonEnd)
 {
 	int parens = 0;
 	DEBUG("požírám (");
@@ -149,13 +148,14 @@ int isExpression (FILE *f, tToken *t)
 	{
 		getToken(f, t);
 		DEBUG("je ; a 0x ) nebo operátor?");
-		if(t->name == SEMICOLON && parens == 0)
+		if(((t->name == SEMICOLON && semicolonEnd) || (t->name == CLOSEPAREN && !semicolonEnd)) && parens == 0)
 		{
 			return ISOK;
 		}
-		else if(isOperator(t))
+		else if(isOperator(t) || isComparsionOperator(t))
 		{
-			return doOperation(f, t, &parens);
+			DEBUG("první doOperation");
+			return doOperation(f, t, &parens, semicolonEnd);
 		}
 
 	}
@@ -163,9 +163,8 @@ int isExpression (FILE *f, tToken *t)
 	return SYNERR;
 }
 
-int doOperation(FILE *f, tToken *t, int *parens)
+int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd)
 {
-
 	getToken(f, t);
 	DEBUG("je (");
 	while(t->name == OPENPAREN)
@@ -180,11 +179,11 @@ int doOperation(FILE *f, tToken *t, int *parens)
 	{
 		getToken(f, t);
 		DEBUG("; a sedí závorky nebo je ) nebo operátor");
-		if(t->name == SEMICOLON && *parens == 0)
+		if((t->name == SEMICOLON && semicolonEnd && *parens == 0) || (t->name == CLOSEPAREN && !semicolonEnd && (*parens == -1 || *parens == 0)))
 		{
 			return ISOK;
 		}
-		else if((t->name == CLOSEPAREN || isOperator(t)))
+		else if((t->name == CLOSEPAREN || isOperator(t)) || isComparsionOperator(t))
 		{
 			DEBUG("požířám )");
 			while(t->name == CLOSEPAREN)
@@ -195,14 +194,14 @@ int doOperation(FILE *f, tToken *t, int *parens)
 			}
 
 			DEBUG("je ; a sedí závorky nebo je operace?");
-			if(t->name == SEMICOLON && *parens == 0)
+			if((t->name == SEMICOLON && semicolonEnd && *parens == 0) || (t->name == CLOSEPAREN && !semicolonEnd && (*parens == -1 || *parens == 0)))
 			{
 				return ISOK;
 			}
-			else if(isOperator(t))
+			else if(isOperator(t) || isComparsionOperator(t))
 			{
 				DEBUG("je operátor, rekurze");
-				return doOperation(f, t, parens);
+				return doOperation(f, t, parens, semicolonEnd);
 			}
 		}
 	}
@@ -305,7 +304,14 @@ int isBlock(FILE *f, tToken *t)
 
 	// dokud je prikaz
 	DEBUG("is command");
-	while (isCommand(f,t)==ISOK) getToken(f, t);
+	if(isCommand(f, t) == ISOK)
+	{
+		while (isCommand(f,t)==ISOK) getToken(f, t);
+	}
+	else if(t->name == CLOSEBRACE)
+	{
+		return ISOK;
+	}
 
 	// pokud neni ukoncena slozena zavorka, vraci SYNERR
 	DEBUG("}");
