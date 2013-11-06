@@ -57,7 +57,7 @@ int isOperand(tToken *token);
 int isType(tToken *token);
 int isComparsionOperator(tToken *token);
 int isWhile(FILE *f, tToken *t);
-int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd, bool isRecursion);
+int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd);
 int isComparsion(FILE *f, tToken *t);
 int isFunctionCall(FILE *f, tToken *t);
 

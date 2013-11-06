@@ -167,7 +167,7 @@ int isExpression (FILE *f, tToken *t, bool semicolonEnd)
 	return SYNERR;
 }
 
-int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd, bool isRecursion)
+int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd)
 {
 	int prevName = -1;
 
