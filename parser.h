@@ -4,6 +4,7 @@
 #include <string.h>
 #include "scanner.h"
 #include "error.h"
+#include "ial.h"
 // enum pro navraty z funkce v parser.c
 enum tret
 {
@@ -11,6 +12,36 @@ enum tret
 	ISNT=1,
 	ISOK=2,
 };
+
+typedef struct sFunction
+{
+	tBSTNodePtr variables;
+	unsigned *elseBranches;
+	unsigned *endIfBranches;
+	unsigned *whileBranches;
+	void *code;
+	char *name;
+	char **paramNames;
+	int paramCount;
+} sFunction;
+
+typedef union variableValue
+{
+	int intv;
+	double doublev;
+	char *stringv;
+	bool boolv;
+} variableValue;
+
+
+typedef struct sVariable
+{
+	bool defined;
+	char *name;
+	unsigned type;
+	variableValue value;
+} sVariable;
+
 
 
 int isFunction (FILE *f, tToken *t);
@@ -26,7 +57,7 @@ int isOperand(tToken *token);
 int isType(tToken *token);
 int isComparsionOperator(tToken *token);
 int isWhile(FILE *f, tToken *t);
-int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd);
+int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd, bool isRecursion);
 int isComparsion(FILE *f, tToken *t);
 int isFunctionCall(FILE *f, tToken *t);
 
@@ -35,5 +66,7 @@ int isFunctionCall(FILE *f, tToken *t);
 #ifndef SHOW_DEBUG
 	#define DEBUG(message);
 #else
-	#define DEBUG(message) printf("%s: %s\n", __PRETTY_FUNCTION__, message);
+	#define DEBUG(message) printf("%s: %s, %s\n", __PRETTY_FUNCTION__, message);
 #endif
+
+sFunction *functionRoot[2];
