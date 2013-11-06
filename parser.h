@@ -66,7 +66,7 @@ int isFunctionCall(FILE *f, tToken *t);
 #ifndef SHOW_DEBUG
 	#define DEBUG(message);
 #else
-	#define DEBUG(message) printf("%s: %s, %s\n", __PRETTY_FUNCTION__, message);
+	#define DEBUG(message) printf("%s: %s\n", __PRETTY_FUNCTION__, message);
 #endif
 
 sFunction *functionRoot[2];

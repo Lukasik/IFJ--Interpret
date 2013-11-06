@@ -47,7 +47,7 @@ int main (int argc, char * argv[])
 	tToken *t = malloc(sizeof(tToken));
 	t->content = malloc(40);
 
-	while ((getToken(f,t) && t->name != END))
+	while ((findToken(f,t) && t->name != END))
 	{
 		printf ("%s",tokenNames[t->name]);
 

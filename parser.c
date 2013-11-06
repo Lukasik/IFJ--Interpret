@@ -159,7 +159,7 @@ int isExpression (FILE *f, tToken *t, bool semicolonEnd)
 		else if(isOperator(t) || isComparsionOperator(t))
 		{
 			DEBUG("první doOperation");
-			return doOperation(f, t, &parens, semicolonEnd, false);
+			return doOperation(f, t, &parens, semicolonEnd);
 		}
 
 	}
@@ -169,8 +169,6 @@ int isExpression (FILE *f, tToken *t, bool semicolonEnd)
 
 int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd)
 {
-	int prevName = -1;
-
 	getToken(f, t);
 	DEBUG("je (");
 	while(t->name == OPENPAREN)
@@ -213,7 +211,7 @@ int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd)
 			else if(isOperator(t) || isComparsionOperator(t))
 			{
 				DEBUG("je operátor, rekurze");
-				return doOperation(f, t, parens, semicolonEnd, true);
+				return doOperation(f, t, parens, semicolonEnd);
 			}
 		}
 	}
