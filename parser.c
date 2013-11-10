@@ -55,7 +55,7 @@ int isWhile(FILE *f, tToken *t)
 	//DEBUG(")");
 	//if (t->name!=CLOSEPAREN) return SYNERR;
 //spatna vec
-	getToken(f, t);
+	// getToken(f, t);
 	DEBUG("je blok?");
 	if (isBlock(f, t)==ISOK) return ISOK;
 
@@ -67,6 +67,7 @@ int isWhile(FILE *f, tToken *t)
 // musi tu byt else!
 int isIf(FILE *f,tToken *t)
 {
+	printf("v ifu: %d, %s\n", t->name, t->content);
 	DEBUG("kontrola if keywordu");
 	if (strcmp(t->content,"if")!=0) return ISNT;
 
@@ -81,11 +82,11 @@ int isIf(FILE *f,tToken *t)
 	// DEBUG(")");
 	//if (t->name!=CLOSEPAREN) return SYNERR;
 //spatna vec
-	getToken(f, t);
+	// getToken(f, t);
 	DEBUG("je blok?");
 	if ((isBlock(f, t))!=ISOK) return SYNERR;
-
 	getToken(f, t);
+	printf("v ifu před else: %d, %s\n", t->name, t->content);
 	DEBUG("je else?");
 	if (t->name!=KEYWORD || strcmp("else",t->content)!=0) return SYNERR;
 
@@ -137,30 +138,55 @@ int isExpression (FILE *f, tToken *t, bool semicolonEnd)
 {
 	int parens = 0;
 
-	while(t->name == OPENPAREN)
+	printf("%d\n", t->name);
+
+	while(t->name != SEMICOLON || t->name != OPENBRACE)
 	{
-		DEBUG("požírám (");
-		++parens;
-		printf("parens: %d\n", parens);
+		while(t->name == OPENPAREN)
+		{
+			DEBUG("požírám (");
+			++parens;
+			getToken(f, t);
+		}
+
+		if(!isOperand(t)) return SYNERR;
+		DEBUG("je operand");
 		getToken(f, t);
+
+		if(t->name == SEMICOLON) break;
+		if(t->name == CLOSEPAREN)
+		{
+			while(t->name == CLOSEPAREN)
+			{
+				DEBUG("požírám )");
+				--parens;
+				getToken(f, t);
+			}
+
+			printf("Po požrám ) je token : %d\n", t->name);
+			printf("parens: %d\n", parens);
+			if(t->name == SEMICOLON) break;
+			if(t->name == OPENBRACE) break;
+		}
+
+		printf("Musí být operátor, je: %d\n", t->name);
+
+		if(isOperator(t) || isComparsionOperator(t))
+		{
+			getToken(f, t);
+			continue;
+		}
+
+		return SYNERR;
 	}
 
-	DEBUG("je operand?");
-	if(isOperand(t))
+	DEBUG("konec while");
+	printf("semicolon: %d, parens: %d\n", semicolonEnd, parens);
+	if((semicolonEnd && parens == 0) || (!semicolonEnd && parens == -1))
 	{
-		getToken(f, t);
-		DEBUG("je ; a 0x ) nebo operátor?");
-		if(((t->name == SEMICOLON && semicolonEnd) || (t->name == CLOSEPAREN && !semicolonEnd)) && parens == 0)
-		{
-			// getToken(f, t);
-			return ISOK;
-		}
-		else if(isOperator(t) || isComparsionOperator(t))
-		{
-			DEBUG("první doOperation");
-			return doOperation(f, t, &parens, semicolonEnd);
-		}
-
+		DEBUG("je OK");
+		// getToken(f, t);
+		return ISOK;
 	}
 
 	return SYNERR;
@@ -183,15 +209,17 @@ int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd)
 	{
 		getToken(f, t);
 		DEBUG("; a sedí závorky nebo je ) nebo operátor");
-		if((
-			t->name == SEMICOLON && semicolonEnd && *parens == 0) ||
-			(t->name == CLOSEPAREN && !semicolonEnd && *parens == 0))
+		if((t->name == SEMICOLON && semicolonEnd && *parens == 0) || (t->name == CLOSEPAREN && !semicolonEnd && *parens == -1))
 		{
-			getToken(f, t);
+			// getToken(f, t);
 			return ISOK;
 		}
-		else if((t->name == CLOSEPAREN || isOperator(t)) || isComparsionOperator(t))
+		else if(isOperator(t) || isComparsionOperator(t) || t->name == CLOSEPAREN)
 		{
+			// if(t->name == SEMICOLON && semicolonEnd && *parens == 0)
+			// {
+			// 	return ISOK;
+			// }
 			DEBUG("je ), operator");
 			while(t->name == CLOSEPAREN)
 			{
@@ -202,9 +230,13 @@ int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd)
 			}
 
 			DEBUG("je ; a sedí závorky nebo je operace?");
-			if((t->name == SEMICOLON && semicolonEnd && *parens == 0) || (!semicolonEnd && *parens == -1))
+			if(!semicolonEnd && (*parens == -1 || *parens == 0))
 			{
-				if(!semicolonEnd) getToken(f, t);
+				// getToken(f, t);
+				return ISOK;
+			}
+			else if(semicolonEnd && t->name == CLOSEPAREN && *parens == 0)
+			{
 				return ISOK;
 			}
 			else if(isOperator(t) || isComparsionOperator(t))
@@ -294,9 +326,15 @@ int isCommand(FILE *f, tToken *t)
 	if (t->name==KEYWORD)
 	{
 		DEBUG("je keyword");
-		if (isWhile(f,t)==ISOK) return ISOK;
-		else if (isIf(f,t)==ISOK) return ISOK;
-		else if (isReturn(f,t)==ISOK) return ISOK;
+
+		if(isWhile(f, t) == ISOK || isIf(f, t) == ISOK || isReturn(f, t) == ISOK)
+		{
+			return ISOK;
+		}
+		else
+		{
+			printError(SYNTAXERR, SYNTAXERROR);
+		}
 	}
 	else if (t->name==SEMICOLON)
 	{
