@@ -1,10 +1,9 @@
 #include "scanner.h"
-#include "error.h"
 
 // primarni nastaveni velikosti alokovane pameti pro predavani syntaktickemu
 // analyzatoru
 int allocateSize=40;
-
+FILE *f;
 // pomocne priznaky
 enum tSymbols
 {
@@ -32,14 +31,14 @@ int isKeyWord(char *str)
 int reallocation (char **str)
 {
 	allocateSize*=2;
-	char *newStr=malloc(allocateSize*sizeof(char));
+	char *newStr= (char *) gmalloc(allocateSize*sizeof(char), free);
 	if (newStr==NULL)
 	{
-		free(*str);
 		printError(ALLOCERROR,INTERPRETERROR);
 	}
+
 	memcpy(newStr,*str,allocateSize*sizeof(char)/2);
-	free(*str);
+	gfree(*str);
 	*str=newStr;
 	return 0;
 }

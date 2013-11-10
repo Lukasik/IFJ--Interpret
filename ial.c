@@ -1,15 +1,12 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include "ial.h"
 
 
-void BST_Init(tBSTNodePtr * node) {
+void BSTF_Init(sFunction ** node) {
     *node = NULL;
 }
 
 
-tBSTNodePtr BST_Search(tBSTNodePtr node, char * key) {
+sFunction * BSTF_Search(sFunction * node, char * key) {
     if(node != NULL) {
         int compare = strcmp(node->key, key);
 
@@ -17,56 +14,133 @@ tBSTNodePtr BST_Search(tBSTNodePtr node, char * key) {
             return node;
         }
         else if(compare > 0) {
-            return BST_Search(node->rptr, key);
+            return BSTF_Search(node->rptr, key);
         }
         else {
-            return BST_Search(node->lptr, key);
+            return BSTF_Search(node->lptr, key);
         }
     }
     return NULL;
 }
 
-void BST_Insert(tBSTNodePtr * node, char * key, char * data) {
+sFunction* BSTF_Insert(sFunction ** node, char * key) {
     if(*node == NULL) {
-        printf("%s\n", key);
-        tBSTNodePtr tmp;
-        if((tmp = malloc(sizeof(struct tBSTNode))) != NULL) {
+
+        sFunction * tmp;
+        if((tmp = malloc(sizeof(sFunction))) != NULL) {
             *node = tmp;
             (*node)->key = key;
-            (*node)->data = data;
             (*node)->lptr = (*node)->rptr = NULL;
+            (*node)->elseBranches = NULL;
+            (*node)->endIfBranches = NULL;
+            (*node)->whileBranches = NULL;
+            (*node)->paramNames = NULL;
+            (*node)->paramCount = 0;
+            BSTV_Init(&(*node)->variables);
+            (*node)->code = NULL;
+
+            gadd(*node, BSTF_Dispose);
         }
         else {
             //chyba mallocu
         }
     }
     else {
-        printf("1%s\n", key);
+
         int compare = strcmp((*node)->key, key);
 
-        if(compare == 0) {
-            (*node)->data = data;
+        if(compare > 0) {
+            BSTF_Insert(&(*node)->rptr, key);
         }
-        else if(compare > 0) {
-            BST_Insert(&(*node)->rptr, key, data);
+        else if (compare < 0) {
+            BSTF_Insert(&(*node)->lptr, key);
         }
-        else {
-            BST_Insert(&(*node)->lptr, key, data);
+    }
+
+    return *node;
+}
+
+void BSTF_Dispose(void * node) {
+    sFunction * treePointer = (sFunction *) node;
+
+    if(treePointer != NULL) {
+        if(treePointer->lptr != NULL) {
+            BSTF_Dispose((void *) treePointer->lptr);
         }
+        if(treePointer->rptr != NULL) {
+            BSTF_Dispose((void *) treePointer->rptr);
+        }
+        free(treePointer);
+        treePointer = NULL;
     }
 }
 
-void BST_Dispose(tBSTNodePtr * node) {
-    if(*node != NULL) {
-            printf("dispose\n");
-        if((*node)->lptr != NULL) {
-            BST_Dispose(&((*node)->lptr));
+//##############################################################################################
+
+void BSTV_Init(sVariable ** node) {
+    *node = NULL;
+}
+
+
+sVariable * BSTV_Search(sVariable * node, char * key) {
+    if(node != NULL) {
+        int compare = strcmp(node->key, key);
+
+        if(compare == 0) {
+            return node;
         }
-        if((*node)->rptr != NULL) {
-            BST_Dispose(&((*node)->rptr));
+        else if(compare > 0) {
+            return BSTV_Search(node->rptr, key);
         }
-        free(*node);
-        *node = NULL;
+        else {
+            return BSTV_Search(node->lptr, key);
+        }
+    }
+    return NULL;
+}
+
+sVariable* BSTV_Insert(sVariable ** node, char * key) {
+    if(*node == NULL) {
+        sVariable * tmp;
+        if((tmp = malloc(sizeof(sVariable))) != NULL) {
+            *node = tmp;
+            (*node)->key = key;
+            (*node)->lptr = (*node)->rptr = NULL;
+            (*node)->defined = false;
+
+            gadd((*node), BSTV_Dispose);
+        }
+        else {
+            //chyba mallocu
+        }
+    }
+    else {
+
+        int compare = strcmp((*node)->key, key);
+
+        if(compare > 0) {
+            BSTV_Insert(&(*node)->rptr, key);
+        }
+        else if (compare < 0) {
+            BSTV_Insert(&(*node)->lptr, key);
+        }
+    }
+
+    return *node;
+}
+
+void BSTV_Dispose(void * node) {
+    sVariable * treePointer = (sVariable *) node;
+    if(treePointer != NULL) {
+
+        if(treePointer->lptr != NULL) {
+            BSTV_Dispose(treePointer->lptr);
+        }
+        if(treePointer->rptr != NULL) {
+            BSTV_Dispose(treePointer->rptr);
+        }
+        free(treePointer);
+        treePointer = NULL;
     }
 }
 
@@ -141,7 +215,7 @@ int find_string(char * str, char * substr) {
             tmp_pos = position+1;
             chr_pos = pch - substr;
             for(i = chr_pos + 1; i <= sub_lenght - 1; i++, tmp_pos++) {
-                //printf("%d %c vs. %d %c\n", i, substr[i], tmp_pos, str[tmp_pos]);
+                //
                 if(substr[i] != str[tmp_pos]) {
                     equal = 0;
                     break;
@@ -150,7 +224,7 @@ int find_string(char * str, char * substr) {
             if(equal == 1) {
                 tmp_pos = position-1;
                 for(i = chr_pos - 1; i >= 0; i--, tmp_pos--) {
-                    //printf("%d %c vs. %d %c\n", i, substr[i], tmp_pos, str[tmp_pos]);
+                    //
                     if(substr[i] != str[tmp_pos]) {
                         equal = 0;
                         break;
@@ -178,8 +252,8 @@ int main( void ) {
     char slovo7[] = "huavagahavap";
     char slovo8[] = "hugp";
     char slovo9[] = "huaahrhrřp";
-    //printf("%d", find_string(veta, slovo));
-    //printf("%s", sort_string(veta));
+    //
+    //
 
     tBSTNodePtr root;
     tBSTNodePtr node;
@@ -193,27 +267,27 @@ int main( void ) {
 
     node = BST_Search(root, slovo3);
     if(node != NULL)
-        printf("%s\n", node->data);
+
 
     BST_Insert(&root, slovo6, veta);
 
     node = BST_Search(root, slovo);
     if(node != NULL)
-        printf("%s\n", node->data);
+
 
     BST_Insert(&root, slovo7, veta);
     BST_Insert(&root, slovo8, veta);
-    printf("%s\n", root->key);
+
     node = BST_Search(root, "hup");
     if(node != NULL)
-        printf("%s\n", node->data);
+
 
     BST_Insert(&root, slovo9, veta);
 
     node = BST_Search(root, slovo9);
     if(node != NULL)
-        printf("9%s\n", node->data);
-    printf("%s\n", root->key);
+
+
     BST_Dispose(&root);
     return 0;
 }*/

@@ -1,8 +1,16 @@
+#ifndef H_SCANNER
+#define H_SCANNER 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdbool.h>
+#include <ctype.h>
+#include "error.h"
+#include "garbage.h"
+
+extern FILE* f;
+
 
 enum tTokenNames
 {
@@ -64,4 +72,4 @@ int isVariable(FILE *f,int c, char **content);
 int isString (FILE *f, int c, char **content);
 int isKeyWord(char *str);
 
-
+#endif

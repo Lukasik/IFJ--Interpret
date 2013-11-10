@@ -1,6 +1,4 @@
-
 #include "parser.h"
-
 
 int isOperator(tToken *token)
 {
@@ -54,9 +52,9 @@ int isWhile(FILE *f, tToken *t)
 	DEBUG("je porovnání?");
 	if (isExpression(f,t, false)!=ISOK) return SYNERR;
 
-	DEBUG(")");
-	if (t->name!=CLOSEPAREN) return SYNERR;
-
+	//DEBUG(")");
+	//if (t->name!=CLOSEPAREN) return SYNERR;
+//spatna vec
 	getToken(f, t);
 	DEBUG("je blok?");
 	if (isBlock(f, t)==ISOK) return ISOK;
@@ -81,9 +79,9 @@ int isIf(FILE *f,tToken *t)
 	if ((isExpression(f,t, false))!=ISOK) return SYNERR;
 
 	// DEBUG(")");
-	// if (t->name!=CLOSEPAREN) return SYNERR;
-
-	// getToken(f, t);
+	//if (t->name!=CLOSEPAREN) return SYNERR;
+//spatna vec
+	getToken(f, t);
 	DEBUG("je blok?");
 	if ((isBlock(f, t))!=ISOK) return SYNERR;
 
@@ -114,12 +112,13 @@ int isReturn (FILE *f, tToken *t)
 
 
 // je prirazeni / vraci ISOK nebo SYNERR
-//TODO kontrolovat středník?
 int isAssign (FILE *f, tToken *t)
 {
 	DEBUG("je proměnná?");
 	if(t->name != VAR) return SYNERR;
-	//TODO BTS_Insert_var();
+
+	BSTV_Insert(&(actualFunction[0]->variables), t->content);
+
 	getToken(f, t);
 	DEBUG("=?");
 	if(t->name != ASSIGN) return SYNERR;
@@ -153,7 +152,7 @@ int isExpression (FILE *f, tToken *t, bool semicolonEnd)
 		DEBUG("je ; a 0x ) nebo operátor?");
 		if(((t->name == SEMICOLON && semicolonEnd) || (t->name == CLOSEPAREN && !semicolonEnd)) && parens == 0)
 		{
-			getToken(f, t);
+			// getToken(f, t);
 			return ISOK;
 		}
 		else if(isOperator(t) || isComparsionOperator(t))
@@ -251,7 +250,14 @@ int isFunctionCall(FILE *f, tToken *t)
 
 	getToken(f, t);
 	DEBUG("je )?");
-	if(t->name == CLOSEPAREN) return ISOK;
+	if(t->name == CLOSEPAREN)
+	{
+		getToken(f ,t);
+		DEBUG("je ;?");
+		if(t->name == SEMICOLON) return ISOK;
+		return SYNERR;
+	}
+
 	DEBUG("je operand?");
 	if(isOperand(t))
 	{
@@ -268,7 +274,13 @@ int isFunctionCall(FILE *f, tToken *t)
 		}
 
 		DEBUG("je )?");
-		if(t->name == CLOSEPAREN) return ISOK;
+		if(t->name == CLOSEPAREN)
+		{
+			getToken(f ,t);
+			DEBUG("je ;?");
+			if(t->name == SEMICOLON) return ISOK;
+			return SYNERR;
+		}
 		DEBUG("není )");
 	}
 
@@ -314,22 +326,11 @@ int isBlock(FILE *f, tToken *t)
 
 	// dokud je prikaz
 	DEBUG("is command");
-	if(isCommand(f, t) == ISOK)
-	{
-		while (isCommand(f,t)==ISOK) getToken(f, t);
-	}
-	else if(t->name == CLOSEBRACE)
-	{
-		return ISOK;
-	}
+	while (isCommand(f,t)==ISOK) getToken(f, t);
 
 	// pokud neni ukoncena slozena zavorka, vraci SYNERR
 	DEBUG("}");
-	if (t->name != CLOSEBRACE) return SYNERR;
-	else
-	{
-		return ISOK; // vse ok, vraci ISOK
-	}
+	if (t->name == CLOSEBRACE) return ISOK;
 
 	return SYNERR;
 }
@@ -354,6 +355,13 @@ int isFunction (FILE *f, tToken *t)
 
 	//TODO: přidání funkce do stromu funkcí a nastavení fce jako aktuální
 	//TODO: pokud je funkce uz definovana tak chyba 5
+	actualFunction[1] = actualFunction[0];
+	if(BSTF_Search(functionTree, t->content))
+	{
+		printError(FUNCTIONEXISTS, FUNCTIONDEFINITIONERROR);
+	}
+
+	actualFunction[0] = BSTF_Insert(&functionTree, t->content);
 
 	// jedna se o ( ?
 	getToken(f, t);
@@ -401,8 +409,13 @@ int isFunction (FILE *f, tToken *t)
 		DEBUG("lezu do bloku");
 		if (isBlock(f,t)!=ISOK) return SYNERR;
 		//TODO: zrušení aktuálnosti fce (nastavit na main)
-		else return ISOK;
+		else
+		{
+			actualFunction[0] = actualFunction[1];
+			return ISOK;
+		}
 	}
+
 	// pokud whatnow mod 2=0 a whatNow neni 0 function id (x,) nebo (x,x,) atd.
 	return SYNERR;
 }
@@ -416,7 +429,7 @@ int main (int argc, char *argv[])
 	if (argc!=2) printError(PARAMSERROR,INTERPRETERROR);
 
 	// pokus o otevreni zdrojaku
-	FILE *f=fopen(argv[1],"r");
+	f=fopen(argv[1],"r");
 	// pripad nepodareneho otevreni
 	if (f==NULL) printError(SOURCECODEERR,INTERPRETERROR);
 
@@ -427,22 +440,14 @@ int main (int argc, char *argv[])
 	if (c!='<') printError(SYNTAXERR,SYNTAXERROR);
 	else ungetc (c,f);
 
-
-	tToken *t = malloc(sizeof(tToken));
+	ginit();
+	tToken *t = (tToken *) gmalloc(sizeof(tToken), free);
 	if(t == NULL) printError(ALLOCERROR, INTERPRETERROR);
-	t->content = malloc(40);
+	t->content = (char *) gmalloc(40, free);
 	if(t->content == NULL) printError(ALLOCERROR, INTERPRETERROR);
 
-
-	// tBSTNodePtr functionTree;
-	// BST_Init(&functionTree);
-	// BST_Insert(&functionTree, "main", )
-
-	//TODO: strom funkcí
-	//TODO: strom proměnných mainu
-	//TODO: alokovat kořen stromu pro main, při
-	// functionRoot[MAIN] = NULL;
-	// functionRoot[MAIN]->variableTree = BST_Init(&functionRoot[MAIN]->variableTree)
+	BSTF_Init(&functionTree);
+	actualFunction[0] = BSTF_Insert(&functionTree, "1");
 
 	// typ struktury tokenu
 	getToken(f, t);
@@ -469,6 +474,17 @@ int main (int argc, char *argv[])
 	}
 
 
+	gfree(t->content);
+	gfree(functionTree);
+	gfree(t);
+	fclose(f);
+
+	for (int i = 0; i < gArraySize; ++i)
+	{
+		if(gArray[i] == NULL) continue;
+		printf("%p\n", (void*) gArray[i]->pointer);
+	}
+	gfreeAll();
 
 	printf("ok\n");
 
