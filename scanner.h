@@ -14,45 +14,50 @@ extern FILE* f;
 
 enum tTokenNames
 {
-	BEGIN,
-	END,
-
-	KEYWORD,
-
 	PLUS,
 	MINUS,
 	TIMES,
 	DIVISION,
-
+	DOT,
 	BIGGER,
 	LESSER,
 	BIGGEREQUAL,
 	LESSEREQUAL,
 	EQUAL,
 	NOTEQUAL,
-	ASSIGN,
-
-	ID,
-	INT,
-	DOUBLE,
-	STRING,
-	VAR,
-
-	SEMICOLON,
-	DOT,
-	COMMA,
 	OPENPAREN,
 	CLOSEPAREN,
+	VALUE,
+	SEMICOLON,
+	ID,
+	VAR,
+
+	BOOLEAN,
+	INTEGER,
+	DOUBLE,
+	STRING,
+	NULLV,
+
+	WHILE,
+	RETURN,
+	IF,
+	ELSE,
+	FUNCTION,
+
+	ASSIGN,
+	COMMA,
 	OPENBRACE,
 	CLOSEBRACE,
-
 	INVALIDCHAR,
+
 	UNINITIALIZED,
+	BEGIN,
+	END,
 };
 
 typedef struct tToken
 {
-	unsigned name;
+	int name;
 	char *content;
 } tToken;
 
@@ -71,5 +76,7 @@ int isBeginOrLesser(FILE *f, int c);
 int isVariable(FILE *f,int c, char **content);
 int isString (FILE *f, int c, char **content);
 int isKeyWord(char *str);
+bool exponent(int *index, char** content, int c);
+int digits(int *index, char** content, int c);
 
 #endif

@@ -2,7 +2,7 @@
 
 // primarni nastaveni velikosti alokovane pameti pro predavani syntaktickemu
 // analyzatoru
-int allocateSize=40;
+int allocateSize=40; //TODO přidat jako položku tokenu
 FILE *f;
 // pomocne priznaky
 enum tSymbols
@@ -11,17 +11,51 @@ enum tSymbols
 	CHAR,
 };
 
+bool exponent(int *index, char** content, int c)
+{
+	insertChar(index, content, c);
+
+	c = fgetc(f);
+
+	if(c == '+' || c == '-')
+	{
+		insertChar(index, content, c);
+		c = fgetc(f);
+	}
+
+	if(isdigit(c))
+	{
+		digits(index, content, c);
+		return true;
+	}
+
+	return false;
+
+}
+
+int digits(int *index, char** content, int c)
+{
+	insertChar(index, content,c);
+
+	while (isdigit((c=fgetc(f))))
+	{
+		insertChar(index, content,c);
+	}
+
+	return c;
+}
+
 // vraci TOKEN pokud je klicove slovo, -1 pokud ne
 int isKeyWord(char *str)
 {
-	if (strcmp("while",str)==0) return KEYWORD;
-    if (strcmp("function",str)==0) return KEYWORD;
-	if (strcmp("true",str)==0) return KEYWORD;
-	if (strcmp("false",str)==0) return KEYWORD;
-	if (strcmp("if",str)==0) return KEYWORD;
-	if (strcmp("null",str)==0) return KEYWORD;
-	if (strcmp("return",str)==0) return KEYWORD;
-	if (strcmp("else",str)==0) return KEYWORD;
+	if (strcmp("while",str)==0) return WHILE;
+    if (strcmp("function",str)==0) return FUNCTION;
+	if (strcmp("true",str)==0) return BOOLEAN;
+	if (strcmp("false",str)==0) return BOOLEAN;
+	if (strcmp("if",str)==0) return IF;
+	if (strcmp("null",str)==0) return NULLV;
+	if (strcmp("return",str)==0) return RETURN;
+	if (strcmp("else",str)==0) return ELSE;
     return -1;
 }
 
@@ -371,7 +405,7 @@ bool findToken(FILE *f, tToken *t)
 			// pokud je to klicove slovo, vrat spravny token
 			if ((ec=isKeyWord(t->content))!=-1)
 			{
-				t->name = KEYWORD;
+				t->name = ec;
 				return true;
 			}
 			else
@@ -382,90 +416,51 @@ bool findToken(FILE *f, tToken *t)
 
 		// int nebo double nebo invalidchar
 		case NUMBER :
-			while (isdigit((c=fgetc(f))))
+			c = digits(&index, &(t->content), c);
+
+			if(c == '.')
 			{
-				insertChar(&index,&(t->content),c);
-			}
-			// pokud narazi na tecku, uz to nemuze byt integer
-			if (c=='.')
-			{
-				insertChar(&index,&(t->content),c);
+				c = digits(&index, &(t->content), c);
 
-				if (!isdigit(c=fgetc(f)))
+				if(tolower(c) == 'e')
 				{
-					t->name = INVALIDCHAR;
-					return false;
-				}
-
-				insertChar(&index,&(t->content),c);
-
-				while (isdigit((c=fgetc(f))))
-				{
-					insertChar(&index,&(t->content),c);
-				}
-
-				// moznost exponentu
-				if (c=='e' || c=='E')
-				{
-					insertChar(&index,&(t->content),c);
-
-					c=fgetc(f);
-
-					insertChar(&index,&(t->content),c);
-
-					if (c!='+' && c!='-' && !isdigit(c))
+					if(exponent(&index, &(t->content), c))
+					{
+						t->name = DOUBLE;
+						return true;
+					}
+					else
 					{
 						t->name = INVALIDCHAR;
 						return false;
 					}
-					else
-					{
-						// nepovinne -,+
-						if (c=='+' || c=='-')
-						{
-							c=fgetc(f);
-							insertChar(&index,&(t->content),c);
-						}
-
-						if (!isdigit(c))
-						{
-							t->name = INVALIDCHAR;
-							return false;
-						}
-
-						while (isdigit((c=fgetc(f))))
-						{
-							insertChar(&index,&(t->content),c);
-						}
-
-						ungetc(c,f);
-
-						insertChar(&index,&(t->content),'\0');
-
-						t->name = DOUBLE;
-						return true;
-					}
 				}
 				else
 				{
-					ungetc(c,f);
-
-					insertChar(&index,&(t->content),'\0');
-
 					t->name = DOUBLE;
 					return true;
 				}
 			}
-			else
+			else if(tolower(c) == 'e')
 			{
-				ungetc(c,f);
-
-				insertChar(&index,&(t->content),'\0');
-
-				t->name = INT;
-				return true;
+				if(exponent(&index, &(t->content), c))
+				{
+					t->name = DOUBLE;
+					return true;
+				}
+				else
+				{
+					t->name = INVALIDCHAR;
+					return false;
+				}
 			}
+
+			t->name = INTEGER;
+			return true;
+
 
 		default : return false;
 	}
 }
+
+
