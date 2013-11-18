@@ -11,24 +11,26 @@ enum tSymbols
 	CHAR,
 };
 
-bool exponent(int *index, char** content, int c)
+bool exponent(int *index, char** content, int *c)
 {
-	insertChar(index, content, c);
+	insertChar(index, content, *c);
 
-	c = fgetc(f);
+	*c = fgetc(f);
 
-	if(c == '+' || c == '-')
+	if(*c == '+' || *c == '-')
 	{
-		insertChar(index, content, c);
-		c = fgetc(f);
+		insertChar(index, content, *c);
+		*c = fgetc(f);
 	}
 
-	if(isdigit(c))
+	if(isdigit(*c))
 	{
-		digits(index, content, c);
+		*c = digits(index, content, *c);
+		insertChar(index, content, '\0');
 		return true;
 	}
 
+	// ungetc(c, f);
 	return false;
 
 }
@@ -338,7 +340,7 @@ int isString (FILE *f, int c, char **content)
 void getToken(FILE *f, tToken *t)
 {
 	bool result = findToken(f, t);
-
+	printf("%d: %s\n", t->name, t->content);
 	if(!result || t->name == INVALIDCHAR)
 	{
 		printError(LEXICALERR, LEXICALERROR);
@@ -387,13 +389,13 @@ bool findToken(FILE *f, tToken *t)
 	{
 		return true;
 	}
-	t->content[index++]=c;
 
 	// automat pro id, double, int, bool keyword
 	switch (flag)
 	{
 		// bud ID, nebo klicove slovo, nebo bool nebo null
 		case CHAR :
+			insertChar(&index,&(t->content),c);
 			while (isalnum(c=fgetc(f)) || c=='_')
 			{
 				insertChar(&index,&(t->content),c);
@@ -424,8 +426,9 @@ bool findToken(FILE *f, tToken *t)
 
 				if(tolower(c) == 'e')
 				{
-					if(exponent(&index, &(t->content), c))
+					if(exponent(&index, &(t->content), &c))
 					{
+						ungetc(c, f);
 						t->name = DOUBLE;
 						return true;
 					}
@@ -437,14 +440,17 @@ bool findToken(FILE *f, tToken *t)
 				}
 				else
 				{
+					ungetc(c, f);
+					insertChar(&index, &(t->content), '\0');
 					t->name = DOUBLE;
 					return true;
 				}
 			}
 			else if(tolower(c) == 'e')
 			{
-				if(exponent(&index, &(t->content), c))
+				if(exponent(&index, &(t->content), &c))
 				{
+					ungetc(c, f);
 					t->name = DOUBLE;
 					return true;
 				}
@@ -455,6 +461,8 @@ bool findToken(FILE *f, tToken *t)
 				}
 			}
 
+			ungetc(c, f);
+			insertChar(&index, &(t->content), '\0');
 			t->name = INTEGER;
 			return true;
 
@@ -462,5 +470,3 @@ bool findToken(FILE *f, tToken *t)
 		default : return false;
 	}
 }
-
-

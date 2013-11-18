@@ -76,7 +76,7 @@ int isBeginOrLesser(FILE *f, int c);
 int isVariable(FILE *f,int c, char **content);
 int isString (FILE *f, int c, char **content);
 int isKeyWord(char *str);
-bool exponent(int *index, char** content, int c);
+bool exponent(int *index, char** content, int *c);
 int digits(int *index, char** content, int c);
 
 #endif
