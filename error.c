@@ -10,6 +10,7 @@ char *errorMessage[]=
 	"Syntakticka chyba v kodu\n",
 	"Lexikalni chyba v kodu\n",
 	"Funkce již existuje\n",
+	"Chyba při práci se zásobníkem\n",
 };
 // vypise chybove hlaseni
 // prvni parametr je kod hlasky
@@ -21,3 +22,4 @@ void printError(int errorCode, int returnCode)
 	fclose(f);
 	exit(returnCode);
 }
+

@@ -18,7 +18,8 @@ enum errs
 	PARAMSERROR,
 	SYNTAXERR,
 	LEXICALERR,
-	FUNCTIONEXISTS
+	FUNCTIONEXISTS,
+	STACKERROR
 };
 
 // navratove kody programu
@@ -29,7 +30,5 @@ enum returns
 	LEXICALERROR=1,
 	FUNCTIONDEFINITIONERROR=3,
 };
-
-
 
 #endif
