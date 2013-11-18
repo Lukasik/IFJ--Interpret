@@ -1,468 +1,427 @@
 #include "parser.h"
 
-int isOperator(tToken *token)
+//TODO napsat jako makra
+int isOperand(int tokenName)
 {
 	return
-		token->name == PLUS ||
-		token->name == MINUS ||
-		token->name == TIMES ||
-		token->name == DOT ||
-		token->name == DIVISION;
+		tokenName == VAR ||
+		tokenName == INTEGER ||
+		tokenName == DOUBLE ||
+		tokenName == STRING ||
+		tokenName == BOOLEAN ||
+		tokenName == NULLV;
 }
 
-int isOperand(tToken *token)
-{
-	return isType(token) || token->name == VAR;
-}
-
-int isType(tToken *token)
+int isOperator(int tokenName)
 {
 	return
-		token->name == INT ||
-		token->name == DOUBLE ||
-		token->name == STRING ||
-		(token->name == KEYWORD && (strcmp(token->content, "true") == 0 || strcmp(token->content, "false") == 0 || strcmp(token->content, "null") == 0));
-}
-
-int isComparsionOperator(tToken *token)
-{
-	return
-		token->name == BIGGER ||
-		token->name == LESSER ||
-		token->name == BIGGEREQUAL ||
-		token->name == LESSEREQUAL ||
-		token->name == EQUAL ||
-		token->name == NOTEQUAL;
-}
-
-// v isCommand zjisti ze je keyword
-// pokud keyword neni while returns ISNT
-// pokud chyba returns SYNERR
-// pokud ok, vraci ISOK
-int isWhile(FILE *f, tToken *t)
-{
-	DEBUG("kontrola keywordu while");
-	if (strcmp(t->content,"while")!=0) return ISNT;
-
-	getToken(f, t);
-	DEBUG("(");
-	if (t->name!=OPENPAREN) return SYNERR;
-
-	getToken(f, t);
-	DEBUG("je porovnání?");
-	if (isExpression(f,t, false)!=ISOK) return SYNERR;
-
-	//DEBUG(")");
-	//if (t->name!=CLOSEPAREN) return SYNERR;
-//spatna vec
-	// getToken(f, t);
-	DEBUG("je blok?");
-	if (isBlock(f, t)==ISOK) return ISOK;
-
-	return SYNERR;
-}
-
-// zjisti jestli je keyword if
-// overi podminku a blok
-// musi tu byt else!
-int isIf(FILE *f,tToken *t)
-{
-	printf("v ifu: %d, %s\n", t->name, t->content);
-	DEBUG("kontrola if keywordu");
-	if (strcmp(t->content,"if")!=0) return ISNT;
-
-	getToken(f, t);
-	DEBUG("(");
-	if (t->name!=OPENPAREN) return SYNERR;
-
-	getToken(f, t);
-	DEBUG("je porovnání?");
-	if ((isExpression(f,t, false))!=ISOK) return SYNERR;
-
-	// DEBUG(")");
-	//if (t->name!=CLOSEPAREN) return SYNERR;
-//spatna vec
-	// getToken(f, t);
-	DEBUG("je blok?");
-	if ((isBlock(f, t))!=ISOK) return SYNERR;
-	getToken(f, t);
-	printf("v ifu před else: %d, %s\n", t->name, t->content);
-	DEBUG("je else?");
-	if (t->name!=KEYWORD || strcmp("else",t->content)!=0) return SYNERR;
-
-	getToken(f, t);
-	DEBUG("je blok?");
-	if (isBlock(f, t)!=ISOK) return SYNERR;
-
-	return ISOK;
-}
-
-// vraci ISOK pokud je to return vyraz nebo return;
-int isReturn (FILE *f, tToken *t)
-{
-	DEBUG("return");
-	if (strcmp("return",t->content)!=0) return ISNT;
-
-	getToken(f, t);
-	DEBUG("; nebo výraz?");
-	if (t->name==SEMICOLON) return ISOK;
-	else if ((isExpression(f,t, true))==ISOK) return ISOK;
-
-	return SYNERR;
+		tokenName == PLUS ||
+		tokenName == MINUS ||
+		tokenName == TIMES ||
+		tokenName == DOT ||
+		tokenName == DIVISION;
 }
 
 
-// je prirazeni / vraci ISOK nebo SYNERR
-int isAssign (FILE *f, tToken *t)
+
+void argumentString(tStack *s, tToken *t)
 {
-	DEBUG("je proměnná?");
-	if(t->name != VAR) return SYNERR;
-
-	BSTV_Insert(&(actualFunction[0]->variables), t->content);
-
-	getToken(f, t);
-	DEBUG("=?");
-	if(t->name != ASSIGN) return SYNERR;
-
-	getToken(f, t);
-	DEBUG("volání fce nebo výraz?");
-	if(isExpression(f, t, true) == ISOK) return ISOK;
-	else if(isFunctionCall(f, t) == ISOK) return ISOK;
-
-	return SYNERR;
+	stackPop(s);
+	stackPush(s, STRING);
 }
 
-// isExpression
-// vraci ISOK, ISNT nebo SYNERR
-int isExpression (FILE *f, tToken *t, bool semicolonEnd)
+void argumentInteger(tStack *s, tToken *t)
 {
-	int parens = 0;
+	stackPop(s);
+	stackPush(s, INTEGER);
+}
 
-	printf("%d\n", t->name);
+void argumentVar(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, VAR);
+}
 
-	while(t->name != SEMICOLON || t->name != OPENBRACE)
+void argumentNull(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NULLV);
+}
+
+void argumentBoolean(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, BOOLEAN);
+}
+
+void argumentDouble(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, DOUBLE);
+}
+
+void semicolon(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, SEMICOLON);
+}
+
+void closebrace(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, CLOSEBRACE);
+}
+
+void closeparen(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, CLOSEPAREN);
+}
+
+void argumentList(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, SEMICOLON);
+	stackPush(s, CLOSEPAREN);
+}
+
+void argumentArgumentList1(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NARGUMENTLIST2);
+	stackPush(s, NARGUMENT);
+}
+
+void argumentArgumentList2(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NARGUMENTLIST2);
+	stackPush(s, NARGUMENT);
+	stackPush(s, COMMA);
+}
+
+void block(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NCOMMANDLIST);
+	stackPush(s, OPENBRACE);
+}
+
+void commandVar(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NFUNCTIONCALLEXPRESSION);
+	stackPush(s, ASSIGN);
+	stackPush(s, VAR);
+}
+
+void commandReturn(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NRETURN);
+	stackPush(s, RETURN);
+}
+
+void commandIf(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NBLOCK);
+	stackPush(s, ELSE);
+	stackPush(s, NBLOCK);
+	stackPush(s, CLOSEPAREN);
+	stackPush(s, NEXPRESSION);
+	stackPush(s, OPENPAREN);
+	stackPush(s, IF);
+}
+
+void commandWhile(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NBLOCK);
+	stackPush(s, CLOSEPAREN);
+	stackPush(s, NEXPRESSION);
+	stackPush(s, OPENPAREN);
+	stackPush(s, WHILE);
+}
+
+void commandList(tStack *s, tToken *t)
+{
+	stackPush(s, NCOMMAND);
+}
+
+void function(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NBLOCK);
+	stackPush(s, NPARAMLIST1);
+	stackPush(s, OPENPAREN);
+	stackPush(s, ID);
+	stackPush(s, FUNCTION);
+}
+
+void functionCall(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NARGUMENTLIST1);
+	stackPush(s, OPENPAREN);
+	stackPush(s, ID);
+}
+
+void expressionSemicolon(tStack *s, tToken *t)
+{
+	// DEBUG("expression vud");
+	stackPop(s);
+	stackPush(s, SEMICOLON);
+	stackPush(s, NEXPRESSION);
+}
+
+void paramList1(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NPARAMLIST2);
+	stackPush(s, VAR);
+}
+
+void paramList2(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NPARAMLIST2);
+	stackPush(s, VAR);
+	stackPush(s, COMMA);
+}
+
+void program(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, NSTATEMENT);
+	stackPush(s, BEGIN);
+}
+
+void returnEnd(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, SEMICOLON);
+}
+
+void returnExpression(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, SEMICOLON);
+	stackPush(s, NEXPRESSION);
+}
+
+void statementCommand(tStack *s, tToken *t)
+{
+	stackPush(s, NCOMMAND);
+}
+
+void statementFunction(tStack *s, tToken *t)
+{
+	stackPush(s, NFUNCTION);
+}
+
+void statementEnd(tStack *s, tToken *t)
+{
+	stackPop(s);
+	stackPush(s, END);
+}
+
+void expression(tStack *s, tToken *t)
+{
+	DEBUG("expression");
+	stackPop(s);
+
+	int top, operation;
+	tStack *tmpStack = gmalloc(sizeof(tStack), free);
+	stackInit(tmpStack, 25);
+
+	do
 	{
-		while(t->name == OPENPAREN)
+		top = stackTopTerminal(s, tmpStack, true);
+		operation = precedenceTable[top][isOperand(t->name) ? VALUE : t->name];
+		// printf("%d\n",top);
+		// printf("%d\n",t->name);
+		// printf("%d", SEMICOLON);
+		// printf("%d", operation);
+		switch(operation)
 		{
-			DEBUG("požírám (");
-			++parens;
-			getToken(f, t);
+			case REDUCE: reduce(s,tmpStack);break;
+			case SHIFT: shift(s, tmpStack, t);break;
+			case EQUALSIGN: equalsign(s,tmpStack, t);break;
+			default: printError(SYNTAXERR, SYNTAXERROR);
 		}
+	// DEBUG(tokenNames[stackTop(s)]);
+	// DEBUG(tokenNames[t->name]);
+	} while(stackTopTerminal(s, tmpStack, false) != SEMICOLON || t->name != SEMICOLON);
 
-		if(!isOperand(t)) return SYNERR;
-		DEBUG("je operand");
-		getToken(f, t);
-
-		if(t->name == SEMICOLON) break;
-		if(t->name == CLOSEPAREN)
-		{
-			while(t->name == CLOSEPAREN)
-			{
-				DEBUG("požírám )");
-				--parens;
-				getToken(f, t);
-			}
-
-			printf("Po požrám ) je token : %d\n", t->name);
-			printf("parens: %d\n", parens);
-			if(t->name == SEMICOLON) break;
-			if(t->name == OPENBRACE) break;
-		}
-
-		printf("Musí být operátor, je: %d\n", t->name);
-
-		if(isOperator(t) || isComparsionOperator(t))
-		{
-			getToken(f, t);
-			continue;
-		}
-
-		return SYNERR;
-	}
-
-	DEBUG("konec while");
-	printf("semicolon: %d, parens: %d\n", semicolonEnd, parens);
-	if((semicolonEnd && parens == 0) || (!semicolonEnd && parens == -1))
-	{
-		DEBUG("je OK");
-		// getToken(f, t);
-		return ISOK;
-	}
-
-	return SYNERR;
+	stackTopTerminal(s, tmpStack, true);
 }
 
-int doOperation(FILE *f, tToken *t, int *parens, bool semicolonEnd)
+
+void reduce(tStack *s,tStack *tmpStack)
 {
-	getToken(f, t);
-	DEBUG("je (");
-	while(t->name == OPENPAREN)
-	{
-		DEBUG("žeru jednu (");
-		++*parens;
-		printf("parens: %d\n", *parens);
-		getToken(f, t);
-	}
+	stackPush(s, REDUCE);
+	stackPop(s);
 
-	DEBUG("je operand?");
-	if(isOperand(t))
-	{
-		getToken(f, t);
-		DEBUG("; a sedí závorky nebo je ) nebo operátor");
-		if((t->name == SEMICOLON && semicolonEnd && *parens == 0) || (t->name == CLOSEPAREN && !semicolonEnd && *parens == -1))
-		{
-			// getToken(f, t);
-			return ISOK;
-		}
-		else if(isOperator(t) || isComparsionOperator(t) || t->name == CLOSEPAREN)
-		{
-			// if(t->name == SEMICOLON && semicolonEnd && *parens == 0)
-			// {
-			// 	return ISOK;
-			// }
-			DEBUG("je ), operator");
-			while(t->name == CLOSEPAREN)
-			{
-				DEBUG("žeru jednu )");
-				--(*parens);
-				printf("parens: %d\n", *parens);
-				getToken(f, t);
-			}
+	while(!stackEmpty(tmpStack)) stackPush(s, stackPop(tmpStack));
 
-			DEBUG("je ; a sedí závorky nebo je operace?");
-			if(!semicolonEnd && (*parens == -1 || *parens == 0))
-			{
-				// getToken(f, t);
-				return ISOK;
-			}
-			else if(semicolonEnd && t->name == CLOSEPAREN && *parens == 0)
-			{
-				return ISOK;
-			}
-			else if(isOperator(t) || isComparsionOperator(t))
-			{
-				DEBUG("je operátor, rekurze");
-				return doOperation(f, t, parens, semicolonEnd);
-			}
+	int top = stackPop(s);
+
+	if(top == VALUE)
+	{
+		top = stackPop(s);
+
+		if(top == SHIFT)
+		{
+			stackPush(s, E);
+			return;
 		}
 	}
-
-	return SYNERR;
-}
-
-int isComparsion(FILE *f, tToken *t)
-{
-	DEBUG("je porovnání?");
-	if(isOperand(t))
+	else if(top == CLOSEPAREN)
 	{
-		getToken(f, t);
-		DEBUG("je operátor porovnání?");
-		if(isComparsionOperator(t))
+		top = stackPop(s);
+
+		if(top == E)
 		{
-			getToken(f, t);
-			DEBUG("je operand?");
-			if(isOperand(t))
+			top = stackPop(s);
+
+			if(top == OPENPAREN)
 			{
-				return ISOK;
-			}
-		}
-	}
+				top = stackPop(s);
 
-	return SYNERR;
-}
-
-int isFunctionCall(FILE *f, tToken *t)
-{
-	DEBUG("je identifikátor?");
-	if(t->name != ID) return ISNT;
-
-	getToken(f, t);
-	DEBUG("je (?");
-	if(t->name != OPENPAREN) return SYNERR;
-
-	getToken(f, t);
-	DEBUG("je )?");
-	if(t->name == CLOSEPAREN)
-	{
-		getToken(f ,t);
-		DEBUG("je ;?");
-		if(t->name == SEMICOLON) return ISOK;
-		return SYNERR;
-	}
-
-	DEBUG("je operand?");
-	if(isOperand(t))
-	{
-		DEBUG("je operand nebo ,?");
-		while(isOperand(t))
-		{
-			getToken(f, t);
-			if(t->name == COMMA)
-			{
-				DEBUG("je čárka");
-				getToken(f, t);
-				if(t->name == CLOSEPAREN) return SYNERR;
+				if(top == SHIFT)
+				{
+					stackPush(s, E);
+					return;
+				}
 			}
 		}
+	}
+	else if(top == E)
+	{
+		top = stackPop(s);
 
-		DEBUG("je )?");
-		if(t->name == CLOSEPAREN)
+		if(isOperator(top))
 		{
-			getToken(f ,t);
-			DEBUG("je ;?");
-			if(t->name == SEMICOLON) return ISOK;
-			return SYNERR;
-		}
-		DEBUG("není )");
-	}
+			top = stackPop(s);
 
-	return SYNERR;
-}
-
-// zjisti jestli je command, vraci ISOK a SYNERR
-// pouziva iswhile isif isreturn
-int isCommand(FILE *f, tToken *t)
-{
-	if (t->name==KEYWORD)
-	{
-		DEBUG("je keyword");
-
-		if(isWhile(f, t) == ISOK || isIf(f, t) == ISOK || isReturn(f, t) == ISOK)
-		{
-			return ISOK;
-		}
-		else
-		{
-			printError(SYNTAXERR, SYNTAXERROR);
-		}
-	}
-	else if (t->name==SEMICOLON)
-	{
-		DEBUG("je ;");
-		return ISOK;
-	}
-	else if (t->name==VAR && isAssign(f,t) == ISOK)
-	{
-		DEBUG("je přiřazení");
-		return ISOK;
-	}
-
-	return SYNERR;
-}
-
-
-// zjisti jestli se jedna o blok, pokud ano, vyhodnoti a vraci 0
-// jinak vraci ISNT pokud neni blok a SYNERR pokud je v nem chyba
-int isBlock(FILE *f, tToken *t)
-{
-	// neni blok, vrat ISNT
-	DEBUG("{");
-	if (t->name!=OPENBRACE) return ISNT;
-
-	// precti dalsi token
-	getToken(f, t);
-
-	// dokud je prikaz
-	DEBUG("is command");
-	while (isCommand(f,t)==ISOK) getToken(f, t);
-
-	// pokud neni ukoncena slozena zavorka, vraci SYNERR
-	DEBUG("}");
-	if (t->name == CLOSEBRACE) return ISOK;
-
-	return SYNERR;
-}
-
-
-// funkce zjisti, jestli se jedna o funci, pokud ne vraci ISNT, pokud ano,
-// zkontroluje jeji spravne sepsani a vraci ISOK pokud ok a SYNERR pokud syntaxError
-int isFunction (FILE *f, tToken *t)
-{
-	// nejedna se o klicove slovo function -> vrati ISNT
-	DEBUG("keyword");
-	if (t->name!=KEYWORD || strcmp(t->content,"function")!=0)
-		return ISNT;
-
-	// jednalo se o klicove slovo function
-	getToken(f, t);
-
-	// jedna se o ID?
-	DEBUG("id");
-	printf("%d\n", t->name);
-	if (t->name!=ID) return SYNERR;
-
-	//TODO: přidání funkce do stromu funkcí a nastavení fce jako aktuální
-	//TODO: pokud je funkce uz definovana tak chyba 5
-	actualFunction[1] = actualFunction[0];
-	if(BSTF_Search(functionTree, t->content))
-	{
-		printError(FUNCTIONEXISTS, FUNCTIONDEFINITIONERROR);
-	}
-
-	actualFunction[0] = BSTF_Insert(&functionTree, t->content);
-
-	// jedna se o ( ?
-	getToken(f, t);
-	DEBUG("(");
-	if (t->name!=OPENPAREN) return SYNERR;
-
-	getToken(f, t);
-	int whatNow=0;
-	// dokud neni )
-	DEBUG("parametry");
-	while (t->name!=CLOSEPAREN)
-	{
-		// ma prijit promenna
-		if (whatNow % 2 == 0)
-		{
-			if (t->name==VAR)
+			if(top == E)
 			{
-				//TODO přidání parametru do struktury funkce
-				//TODO vytvoření prvku stromu s názvem proměné
-				whatNow++;
-			}
-			else return SYNERR;
-		}
-		else // ma prijit carka
-		{
-			if (t->name == COMMA)
-			{
-				whatNow++;
-			}
-			else return SYNERR;
-		}
+				top = stackPop(s);
 
-		getToken(f, t);
+				if(top == SHIFT)
+				{
+					stackPush(s, E);
+					return;
+				}
+			}
+		}
 	}
 
-	// uz narazil na )
-	// pokud whatNow==0 tak function id ()
-	// pokud whatNow mod 2 =1 function id (x) nebo (x,x) atd ..
-	DEBUG("správný počet parametrů a čárek");
-	if (whatNow==0 || whatNow%2 ==1)
+	DEBUG("Neexistuje pravidlo pro reduce");
+	printError(SYNTAXERR, SYNTAXERROR);
+
+}
+
+void shift(tStack *s, tStack *tmpStack, tToken *t)
+{
+	// terminal = stackTopTerminal(s, tmpStack, true);
+
+	stackPush(s, SHIFT);
+
+	while(!stackEmpty(tmpStack)) stackPush(s, stackPop(tmpStack));
+
+	stackPush(s, isOperand(t->name) ? VALUE : t->name );
+	getToken(f, t);
+}
+
+void equalsign(tStack *s,tStack *tmpStack, tToken *t)
+{
+	while(!stackEmpty(tmpStack)) stackPush(s, stackPop(tmpStack));
+
+	stackPush(s, t->name);
+	getToken(f, t);
+}
+
+void stackInit(tStack *s, int size)
+{
+	s->top = -1;
+	s->max = size-1;
+	s->data = gmalloc(sizeof(int)*size, free);
+
+	if(s->data == NULL)
 	{
-		// nacte token a pokud je potom block, vse je OK - vraci 0
-		// jinak vraci SYNERR do funkce main
-		getToken(f, t);
-		DEBUG("lezu do bloku");
-		if (isBlock(f,t)!=ISOK) return SYNERR;
-		//TODO: zrušení aktuálnosti fce (nastavit na main)
-		else
-		{
-			actualFunction[0] = actualFunction[1];
-			return ISOK;
-		}
+		DEBUG("init");
+		printError(ALLOCERROR,INTERPRETERROR);
+	}
+}
+
+int stackPop(tStack *s)
+{
+	if(s->top == -1)
+	{
+		DEBUG("pop");
+		printError(STACKERROR, INTERPRETERROR);
+	}
+		printStack(s);
+
+	return s->data[s->top--];
+}
+
+void stackPush(tStack *s, int data)
+{
+	if(s->top == s->max)
+	{
+		DEBUG("push");
+		printError(STACKERROR, INTERPRETERROR);
+	}
+		printStack(s);
+
+	s->data[++(s->top)] = data;
+}
+
+int stackTop(tStack *s)
+{
+	if(s->top == -1)
+	{
+		DEBUG("top");
+		printError(STACKERROR, INTERPRETERROR);
 	}
 
-	// pokud whatnow mod 2=0 a whatNow neni 0 function id (x,) nebo (x,x,) atd.
-	return SYNERR;
+	return s->data[s->top];
+}
+
+int stackTopTerminal(tStack *s, tStack *tmpStack, bool useTmpStack)
+{
+	for(int i = s->top; i > -1; --i)
+	{
+		if(s->data[i] < NONTERMINALBORDER || s->data[i] >= PRECEDENCEBORDER) return s->data[i];
+		if(useTmpStack) stackPush(tmpStack, stackPop(s));
+	}
+
+	DEBUG("nenašel terminál v zásobníku");
+	printError(SYNTAXERR, SYNTAXERROR);
+	return 0;
 }
 
 
+int stackEmpty(tStack *s)
+{
+	return s->top == -1;
+}
+
+void printStack(tStack *s)
+{
+	int i = 0;
+
+	while(s->top - i >= 0) printf("%s ", tokenNames[s->data[i++]]);
+	printf("\n");
+}
 
 int main (int argc, char *argv[])
 {
-	int exitCode = 0;
+	bool breakParent = false;
+	LLFunction *LLCall;
 	// pokud spatny pocet parametru
 	if (argc!=2) printError(PARAMSERROR,INTERPRETERROR);
 
@@ -481,48 +440,59 @@ int main (int argc, char *argv[])
 	ginit();
 	tToken *t = (tToken *) gmalloc(sizeof(tToken), free);
 	if(t == NULL) printError(ALLOCERROR, INTERPRETERROR);
+
 	t->content = (char *) gmalloc(40, free);
 	if(t->content == NULL) printError(ALLOCERROR, INTERPRETERROR);
+
+	tStack *stack = gmalloc(sizeof(tStack), free);
+	if(stack == NULL) printError(ALLOCERROR, INTERPRETERROR);
+	stackInit(stack, 40);
 
 	BSTF_Init(&functionTree);
 	actualFunction[0] = BSTF_Insert(&functionTree, "1");
 
 	// typ struktury tokenu
 	getToken(f, t);
+	stackPush(stack, NPROGRAM);
 
-	// pokud neni prvni token begin, je to chyba
-	if (t->name != BEGIN) printError(SYNTAXERR,SYNTAXERROR);
-
-	getToken(f, t);
-	// dokud neni konec programu, zkousi jestli se jedna o povolene veci
-	// tj bud funkce, nebo nejaky z prikazu
-	while (t->name!=END)
+	while(t->name != END && !stackEmpty(stack))
 	{
-		exitCode = isFunction(f,t);
-		printf("%d\n", t->name);
-		printf("ec: %d\n", exitCode);
-		// syntaxerrory mohou byt prejaty z ostatnich funkci
-		if (exitCode==SYNERR) printError(SYNTAXERR,SYNTAXERROR);
-		else if (exitCode==ISNT)
-				if (isCommand(f,t)!=ISOK)
-					// blbe pojmenovani, ale jak jinak :-(
-					printError(SYNTAXERR,SYNTAXERROR);
+		while(stackTop(stack) < NONTERMINALBORDER)
+		{
+			DEBUG(tokenNames[t->name]);
 
-		getToken(f, t);
+			if(stackPop(stack) != t->name)
+			{
+				DEBUG("break parent konec");
+				breakParent = true;
+				// getToken(f, t);
+				break;
+			}
+			getToken(f, t);
+		}
+
+		if(breakParent) break;
+		// printf("%d\n", stackTop(stack)-NONTERMINALBORDER);
+		// printf("%d\n", t->name);
+		LLCall = LLRule[LLTable[stackTop(stack)-NONTERMINALBORDER][t->name]];
+
+		if(LLCall == NULL)
+		{
+			DEBUG("není pravidlo ");
+			break;
+		}
+
+		LLCall(stack, t);
 	}
 
-
-	gfree(t->content);
-	gfree(functionTree);
-	gfree(t);
-	fclose(f);
-
-	for (int i = 0; i < gArraySize; ++i)
+	if(stackEmpty(stack) || t->name != END || stackTop(stack) != END || stack->top != 0)
 	{
-		if(gArray[i] == NULL) continue;
-		printf("%p\n", (void*) gArray[i]->pointer);
+		DEBUG("špatné ukončení programu");
+		printError(SYNTAXERR, SYNTAXERROR);
 	}
+
 	gfreeAll();
+	fclose(f);
 
 	printf("ok\n");
 
