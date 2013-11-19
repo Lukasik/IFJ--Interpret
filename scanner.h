@@ -6,11 +6,19 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
+
+typedef struct tToken
+{
+	int name;
+	char *content;
+} tToken;
+
+
 #include "error.h"
 #include "garbage.h"
+#include "debug.h"
 
 extern FILE* f;
-
 
 enum tTokenNames
 {
@@ -55,11 +63,7 @@ enum tTokenNames
 	END,
 };
 
-typedef struct tToken
-{
-	int name;
-	char *content;
-} tToken;
+
 
 void getToken(FILE *f, tToken *t);
 bool findToken(FILE *f, tToken *t);
@@ -68,7 +72,6 @@ int isParenBrace(int c);
 int isDotSmcComma(int c);
 int isArithmetic (int c);
 int isEquating (FILE *f, int c);
-int reallocation (char **str);
 int CommentsAndWhitespaces(FILE *f);
 int isNotEqual(FILE *f,int c);
 int isBigger(FILE *f, int c);

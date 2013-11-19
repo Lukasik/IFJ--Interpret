@@ -11,6 +11,7 @@ enum tSymbols
 	CHAR,
 };
 
+
 bool exponent(int *index, char** content, int *c)
 {
 	insertChar(index, content, *c);
@@ -47,6 +48,7 @@ int digits(int *index, char** content, int c)
 	return c;
 }
 
+
 // vraci TOKEN pokud je klicove slovo, -1 pokud ne
 int isKeyWord(char *str)
 {
@@ -61,29 +63,12 @@ int isKeyWord(char *str)
     return -1;
 }
 
-// funkce co prealokuje ukazatel str na dvojnasobnou velikost
-// volano v pripade, ze je malo pameti pro predani hodnoty syntax. analyzatoru
-// vraci nulu pri uspesne realokaci a 99 v pripade chyby nove alokace
-int reallocation (char **str)
-{
-	allocateSize*=2;
-	char *newStr= (char *) gmalloc(allocateSize*sizeof(char), free);
-	if (newStr==NULL)
-	{
-		printError(ALLOCERROR,INTERPRETERROR);
-	}
-
-	memcpy(newStr,*str,allocateSize*sizeof(char)/2);
-	gfree(*str);
-	*str=newStr;
-	return 0;
-}
-
 // vlozi znak
 void insertChar(int *index, char **content, int c)
 {
-	if ((*index)==allocateSize-1) reallocation(content);
-			(*content)[(*index)++]=c;
+	if ((*index)==allocateSize-1) grealloc((void**) content, &allocateSize, sizeof(char));
+
+	(*content)[(*index)++]=c;
 }
 
 // odstrani bile znaky, potom zkousi zda zde nelezi komentar a v kladnem pripade
@@ -340,7 +325,7 @@ int isString (FILE *f, int c, char **content)
 void getToken(FILE *f, tToken *t)
 {
 	bool result = findToken(f, t);
-	printf("%d: %s\n", t->name, t->content);
+
 	if(!result || t->name == INVALIDCHAR)
 	{
 		printError(LEXICALERR, LEXICALERROR);
@@ -470,3 +455,4 @@ bool findToken(FILE *f, tToken *t)
 		default : return false;
 	}
 }
+
