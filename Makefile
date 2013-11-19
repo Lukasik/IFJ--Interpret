@@ -9,7 +9,7 @@ scanner: scanner.o error.o
 
 parser: parser.o error.o
 
-parser-test: parser.o error.o scanner.o ial.o garbage.o
+parser-test: clean  error.o scanner.o ial.o garbage.o stack.o debug.o parser.o
 	gcc *.o -o parser -g3
 
 clean:

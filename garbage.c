@@ -1,6 +1,6 @@
 #include "garbage.h"
 
-int gArraySize = 10;
+int gArraySize = 1000;
 
 void ginit()
 {
@@ -28,6 +28,24 @@ void * gmalloc(unsigned bytes, void (*f)(void *))
 
 	gadd(pointer, f);
 	return pointer;
+}
+
+void grealloc(void **pointer, int* size, int elementSize)
+{
+	*size *= 2;
+
+	void *new = gmalloc((*size)*elementSize, free);
+
+	if (new == NULL)
+	{
+		printError(ALLOCERROR,INTERPRETERROR);
+	}
+
+	memcpy(new, *pointer, ((*size)*elementSize)/2);
+	gfree(*pointer);
+
+	*pointer = new;
+	return;
 }
 
 void gadd(void * pointer, void (*f)(void *))
