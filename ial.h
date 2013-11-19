@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include "garbage.h"
-
 
 typedef union variableValue
 {
@@ -44,6 +42,12 @@ typedef struct sFunction
 	struct sFunction * lptr;
 	struct sFunction * rptr;
 } sFunction;
+
+#include "garbage.h"
+#include "stack.h"
+#include "debug.h"
+
+
 
 
 /* Prototypy funkcí */

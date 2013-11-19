@@ -29,7 +29,9 @@ sFunction* BSTF_Insert(sFunction ** node, char * key) {
         sFunction * tmp;
         if((tmp = malloc(sizeof(sFunction))) != NULL) {
             *node = tmp;
-            (*node)->key = key;
+            (*node)->key = malloc(strlen(key)+1);
+            if((*node)->key == NULL) printError(ALLOCERROR, INTERPRETERROR);
+            memcpy((*node)->key, key, strlen(key)+1);
             (*node)->lptr = (*node)->rptr = NULL;
             (*node)->elseBranches = NULL;
             (*node)->endIfBranches = NULL;
@@ -38,11 +40,11 @@ sFunction* BSTF_Insert(sFunction ** node, char * key) {
             (*node)->paramCount = 0;
             BSTV_Init(&(*node)->variables);
             (*node)->code = NULL;
-
-            gadd(*node, BSTF_Dispose);
+            return tmp;
         }
         else {
-            //chyba mallocu
+            printError(ALLOCERROR, INTERPRETERROR);
+            return NULL;
         }
     }
     else {
@@ -50,14 +52,17 @@ sFunction* BSTF_Insert(sFunction ** node, char * key) {
         int compare = strcmp((*node)->key, key);
 
         if(compare > 0) {
-            BSTF_Insert(&(*node)->rptr, key);
+            return BSTF_Insert(&(*node)->rptr, key);
         }
         else if (compare < 0) {
-            BSTF_Insert(&(*node)->lptr, key);
+            return BSTF_Insert(&(*node)->lptr, key);
+        }
+        else
+        {
+            printError(FUNCTIONEXISTS, FUNCTIONDEFINITIONERROR);
+            return NULL;
         }
     }
-
-    return *node;
 }
 
 void BSTF_Dispose(void * node) {
@@ -70,6 +75,8 @@ void BSTF_Dispose(void * node) {
         if(treePointer->rptr != NULL) {
             BSTF_Dispose((void *) treePointer->rptr);
         }
+        BSTV_Dispose(treePointer->variables);
+        free(treePointer->key);
         free(treePointer);
         treePointer = NULL;
     }
@@ -104,14 +111,16 @@ sVariable* BSTV_Insert(sVariable ** node, char * key) {
         sVariable * tmp;
         if((tmp = malloc(sizeof(sVariable))) != NULL) {
             *node = tmp;
-            (*node)->key = key;
+            (*node)->key = malloc(strlen(key)+1);
+            if((*node)->key == NULL) printError(ALLOCERROR, INTERPRETERROR);
+            memcpy((*node)->key, key, strlen(key)+1);
             (*node)->lptr = (*node)->rptr = NULL;
             (*node)->defined = false;
 
-            gadd((*node), BSTV_Dispose);
+            // gadd((*node), BSTV_Dispose);
         }
         else {
-            //chyba mallocu
+            printError(ALLOCERROR, INTERPRETERROR);
         }
     }
     else {
@@ -240,54 +249,3 @@ int find_string(char * str, char * substr) {
     }
     return res_pos;
 }
-/*
-int main( void ) {
-    char veta[] = "if you wish to understand others you must";
-    char slovo[] = "musten";
-    char slovo2[] = "fa";
-    char slovo3[] = "alenka";
-    char slovo4[] = "mazličekmiláček";
-    char slovo5[] = "vašek";
-    char slovo6[] = "david";
-    char slovo7[] = "huavagahavap";
-    char slovo8[] = "hugp";
-    char slovo9[] = "huaahrhrřp";
-    //
-    //
-
-    tBSTNodePtr root;
-    tBSTNodePtr node;
-    BST_Init(&root);
-
-    BST_Insert(&root, slovo, veta);
-    BST_Insert(&root, slovo2, veta);
-    BST_Insert(&root, slovo3, veta);
-    BST_Insert(&root, slovo4, veta);
-    BST_Insert(&root, slovo5, veta);
-
-    node = BST_Search(root, slovo3);
-    if(node != NULL)
-
-
-    BST_Insert(&root, slovo6, veta);
-
-    node = BST_Search(root, slovo);
-    if(node != NULL)
-
-
-    BST_Insert(&root, slovo7, veta);
-    BST_Insert(&root, slovo8, veta);
-
-    node = BST_Search(root, "hup");
-    if(node != NULL)
-
-
-    BST_Insert(&root, slovo9, veta);
-
-    node = BST_Search(root, slovo9);
-    if(node != NULL)
-
-
-    BST_Dispose(&root);
-    return 0;
-}*/
