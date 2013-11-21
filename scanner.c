@@ -2,7 +2,7 @@
 
 // primarni nastaveni velikosti alokovane pameti pro predavani syntaktickemu
 // analyzatoru
-int allocateSize=40; //TODO přidat jako položku tokenu
+int allocateSize=40;
 FILE *f;
 // pomocne priznaky
 enum tSymbols
