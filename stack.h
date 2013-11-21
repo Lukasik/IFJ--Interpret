@@ -1,14 +1,7 @@
 #ifndef H_STACK
 #define H_STACK
 
-typedef struct tStack
-{
-	int top;
-	int max;
-	int *data;
-} tStack;
-
-
+#include "structs.h"
 #include "debug.h"
 
 
@@ -20,6 +13,12 @@ int stackTopTerminal(tStack **s, tStack **tmpStack, bool useTmpStack);
 int stackEmpty(tStack *s);
 // void printStack(tStack *s);
 // void printStack(tStack *s);
+void stackVarInit(tStackVar *s, int size);
+sVariable * stackVarPop(tStackVar **s);
+void stackVarPush(tStackVar **s, sVariable* data);
+// int stackTop(tStack **s);
+// int stackTopTerminal(tStack **s, tStack **tmpStack, bool useTmpStack);
+int stackVarEmpty(tStackVar *s);
 
 
 #endif

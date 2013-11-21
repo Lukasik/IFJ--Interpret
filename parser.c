@@ -77,6 +77,20 @@ int LLTable[][36] =
 	{0,0,0,0,0,0,0,0,0,0,0,33,0,0,0,0,33,33,33,33,33,33,0,0,0,0,0,0,0,0,0,0,0,0,0}
 };
 
+int intMaxChars()
+{
+	int num = ~0;
+	int counter = 0;
+
+	while(num > 0)
+	{
+		num /=10;
+		counter++;
+	}
+
+	return counter+1;
+}
+
 //TODO napsat jako makra
 int isOperand(int tokenName)
 {
@@ -310,8 +324,6 @@ void statementEnd(tStack **s, tToken *t)
 
 void expressionParen(tStack **s, tToken *t)
 {
-	// DEBUG("expressionParen");
-	// exit(1);
 	stackPop(s);
 	stackPush(s, SEMICOLON); //zarážka pro výrazy se závorkou
 	stackPush(s, NEXPRESSION);
@@ -323,9 +335,14 @@ void expression(tStack **s, tToken *t)
 {
 	stackPop(s);
 
+	static int literalCounter = 0;
+	char literal[intMaxChars()];
 	int top, operation;
+	sVariable *variable;
 	tStack *tmpStack = gmalloc(sizeof(tStack), free);
 	stackInit(tmpStack, 8);
+	tStackVar *stackVar = gmalloc(sizeof(tStackVar), free);
+	stackVarInit(stackVar, 8);
 
 	do
 	{
@@ -338,7 +355,44 @@ void expression(tStack **s, tToken *t)
 		switch(operation)
 		{
 			case REDUCE: reduce(s, &tmpStack);break;
-			case SHIFT: shift(s, &tmpStack, t);break;
+			case SHIFT:
+				if(isOperand(t->name) && t->name != VAR)
+				{
+					DEBUG("přidávám literál");
+					sprintf(literal, "%d", literalCounter++);
+					variable = BSTV_Insert(&(actualFunction[0]->variables), literal);
+					BSTV_Print(actualFunction[0]);
+					char *endptr;
+
+					switch(t->name)
+					{
+						case INTEGER:
+							variable->value->intv = (int) strtol(t->content, &endptr, 10);
+							break;
+						case DOUBLE:
+							variable->value->doublev = strtod(t->content, &endptr);
+							break;
+						case NULLV: break;
+						case BOOLEAN: variable->value->boolv = strcmp(t->content, "true") == 0 ? true : false;break;
+						case STRING: variable->value->stringv = escapeSequences(t->content);DEBUG(variable->value->stringv);break;
+					}
+
+					variable->type = t->name;
+				}
+				else if(t->name == VAR)
+				{
+					variable = BSTV_Search(actualFunction[0]->variables, t->content);
+
+					if(variable == NULL)
+					{
+						printError(VARIABLENOTEXISTS, UNDECLAREDVARIABLE);
+					}
+				}
+
+				stackVarPush(&stackVar, variable);
+				shift(s, &tmpStack, t);
+				break;
+
 			case EQUALSIGN: equalsign(s, &tmpStack, t);break;
 			case FINISH:
 				stackTopTerminal(s, &tmpStack, true);
@@ -354,6 +408,61 @@ void expression(tStack **s, tToken *t)
 	gfree(tmpStack);
 }
 
+char * escapeSequences(char * str)
+{
+	int index = -1;
+	char substr[5];
+	char *replacements[][2] =
+	{
+		{"\\t", "\t"},
+		{"\\n", "\n"},
+		{"\\\\", "\\"},
+		{"\\\"", "\""},
+		{"\\$", "$"}
+	};
+
+	for(int i = 0; i < 5; ++i)
+	{
+		sprintf(substr, "%s", replacements[i][0]);
+		while((index = find_string(str, substr)) > -1)
+		{
+			str[index] = replacements[i][1][0];
+			shiftString(str, index+1, 1);
+		}
+	}
+
+	for(int i = 0; i <= 255; ++i)
+	{
+		sprintf(substr, "\\x%.2X", i);
+		// DEBUG(substr);
+		while((index = find_string(str, substr)) > -1)
+		{
+			str[index] = i;
+			shiftString(str, index+1, 3);
+		}
+
+		sprintf(substr, "\\x%.2x", i);
+		while((index = find_string(str, substr)) > -1)
+		{
+			str[index] = i;
+			shiftString(str, index+1, 3);
+		}
+	}
+
+	return str;
+}
+
+void shiftString(char * str, unsigned index, unsigned n)
+{
+	unsigned i;
+	DEBUG("shiftuju");
+	for(i = index; i+n < strlen(str); ++i)
+	{
+		str[i] = str[i+n];
+	}
+
+	str[i] = '\0';
+}
 
 void reduce(tStack **s,tStack **tmpStack)
 {
@@ -483,6 +592,7 @@ int main (int argc, char *argv[])
 				break;
 			}
 
+			DEBUG(tokenNames[t->name]);
 			if(LLCall == commandVar && t->name == VAR)
 			{
 				printf("přidávám proměnnou: %s do funkce %s\n", t->content, actualFunction[0]->key);
@@ -499,6 +609,7 @@ int main (int argc, char *argv[])
 			{
 				BSTV_Insert(&(actualFunction[0]->variables), t->content);
 				BSTV_Print(actualFunction[0]);
+				actualFunction[0]->paramCount++;
 			}
 			else if(LLCall == function && t->name == OPENBRACE)
 			{

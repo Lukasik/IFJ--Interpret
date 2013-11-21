@@ -38,6 +38,7 @@ sFunction* BSTF_Insert(sFunction ** node, char * key) {
             (*node)->whileBranches = NULL;
             (*node)->paramNames = NULL;
             (*node)->paramCount = 0;
+            // (*node)->paramNames = malloc; //TODO
             BSTV_Init(&(*node)->variables);
             (*node)->code = NULL;
             return tmp;
@@ -116,8 +117,8 @@ sVariable* BSTV_Insert(sVariable ** node, char * key) {
             memcpy((*node)->key, key, strlen(key)+1);
             (*node)->lptr = (*node)->rptr = NULL;
             (*node)->defined = false;
-
-            // gadd((*node), BSTV_Dispose);
+            (*node)->value = (union variableValue*) malloc(sizeof(variableValue));
+            if((*node)->value == NULL) printError(ALLOCERROR, INTERPRETERROR);
         }
         else {
             printError(ALLOCERROR, INTERPRETERROR);
@@ -148,6 +149,8 @@ void BSTV_Dispose(void * node) {
         if(treePointer->rptr != NULL) {
             BSTV_Dispose(treePointer->rptr);
         }
+        free(treePointer->key);
+        free(treePointer->value);
         free(treePointer);
         treePointer = NULL;
     }

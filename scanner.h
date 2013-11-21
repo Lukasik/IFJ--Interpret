@@ -6,14 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
-
-typedef struct tToken
-{
-	int name;
-	char *content;
-} tToken;
-
-
+#include "structs.h"
 #include "error.h"
 #include "garbage.h"
 #include "debug.h"

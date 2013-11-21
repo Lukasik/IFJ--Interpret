@@ -3,13 +3,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "structs.h"
 #include "error.h"
-
-typedef struct gPointer
-{
-	void * pointer;
-	void (*f)(void *);
-} gPointer;
 
 gPointer ** gArray;
 extern int gArraySize;

@@ -1,6 +1,7 @@
 #ifndef H_DEBUG
 #define H_DEBUG
 
+#include "structs.h"
 #include "scanner.h"
 #include "stack.h"
 #include "parser.h"

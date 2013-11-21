@@ -74,10 +74,60 @@ int stackEmpty(tStack *s)
 {
 	return s->top == -1;
 }
+
 void printStack(tStack *s)
 {
 	int i = 0;
 
 	while(s->top - i >= 0) printf("%s ", tokenNames[s->data[i++]]);
 	printf("\n");
+}
+
+void stackVarInit(tStackVar *s, int size)
+{
+	s->top = -1;
+	s->max = size;
+	s->data = gmalloc(sizeof(int)*size, free);
+
+	if(s->data == NULL)
+	{
+		DEBUG("init");
+		printError(ALLOCERROR,INTERPRETERROR);
+	}
+}
+
+sVariable * stackVarPop(tStackVar **s)
+{
+	if((*s)->top == -1)
+	{
+		DEBUG("pop");
+		printError(STACKERROR, INTERPRETERROR);
+	}
+		// printStack(*s);
+
+	return (*s)->data[(*s)->top--];
+}
+
+void stackVarPush(tStackVar **s, sVariable * data)
+{
+	if((*s)->top == (*s)->max-1)
+	{
+		// DEBUG("Před realokací:");
+		// printf("velikost %d\n", (*s)->max);
+		// printStack(*s);
+		grealloc((void **) s, &((*s)->max), sizeof(int));
+		// DEBUG("PO realokaci:");
+		// printf("velikost %d\n", (*s)->max);
+		// printStack(*s);
+		// DEBUG("push");
+		// printError(STACKERROR, INTERPRETERROR);
+	}
+		// printStack(*s);
+
+	(*s)->data[++((*s)->top)] = data;
+}
+
+int stackVarEmpty(tStackVar *s)
+{
+	return s->top == -1;
 }

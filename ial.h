@@ -6,49 +6,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-
-typedef union variableValue
-{
-	int intv;
-	double doublev;
-	char *stringv;
-	bool boolv;
-} variableValue;
-
-
-typedef struct sVariable
-{
-	bool defined;
-	char *key;
-	unsigned type;
-	variableValue value;
-	struct sVariable * lptr;
-	struct sVariable * rptr;
-} sVariable;
-
-typedef struct sFunction
-{
-	struct sVariable * variables;
-	unsigned *elseBranches;
-	unsigned *endIfBranches;
-	unsigned ifSize; //TODO
-	unsigned *whileBranches;
-	unsigned whileSize; //TODO
-	void *code;
-	int codeSize; //TODO
-	char *key;
-	char **paramNames;
-	int paramCount;
-	struct sFunction * lptr;
-	struct sFunction * rptr;
-} sFunction;
-
+#include "structs.h"
 #include "garbage.h"
 #include "stack.h"
 #include "debug.h"
-
-
-
 
 /* Prototypy funkcí */
 void BSTF_Init(sFunction ** node);

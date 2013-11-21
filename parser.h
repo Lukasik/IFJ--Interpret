@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "structs.h"
 #include "scanner.h"
 #include "error.h"
 #include "ial.h"
@@ -49,6 +50,8 @@ enum precedenceValues
 	EQUALSIGN,
 	FINISH,
 };
+
+int intMaxChars();
 
 int isFunction (FILE *f, tToken *t);
 int isBlock(FILE *f, tToken *t);
@@ -107,7 +110,8 @@ void reduce(tStack **s,tStack **tmpStack);
 void shift(tStack **s, tStack **tmpStack, tToken *t);
 void equalsign(tStack **s, tStack **tmpStack,tToken *t);
 
-typedef void (LLFunction)(tStack **, tToken*); //TODO nepoužíváme nikde token, odebrat
+char * escapeSequences(char * str);
+void shiftString(char * str, unsigned index, unsigned n);
 
 sFunction * actualFunction[2];
 sFunction * functionTree;
