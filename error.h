@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "structs.h"
 #include "garbage.h"
 
 //prototyp funkce
@@ -19,7 +20,8 @@ enum errs
 	SYNTAXERR,
 	LEXICALERR,
 	FUNCTIONEXISTS,
-	STACKERROR
+	STACKERROR,
+	VARIABLENOTEXISTS
 };
 
 // navratove kody programu
@@ -29,6 +31,7 @@ enum returns
 	SYNTAXERROR=2,
 	LEXICALERROR=1,
 	FUNCTIONDEFINITIONERROR=3,
+	UNDECLAREDVARIABLE=5,
 };
 
 #endif

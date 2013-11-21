@@ -11,6 +11,7 @@ char *errorMessage[]=
 	"Lexikalni chyba v kodu\n",
 	"Funkce již existuje\n",
 	"Chyba při práci se zásobníkem\n",
+	"Nedeklarováná proměnná\n",
 };
 // vypise chybove hlaseni
 // prvni parametr je kod hlasky
