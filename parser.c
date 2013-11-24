@@ -340,9 +340,9 @@ void expression(tStack **s, tToken *t)
 	int top, operation;
 	sVariable *variable;
 	tStack *tmpStack = gmalloc(sizeof(tStack), free);
-	stackInit(tmpStack, 8);
+	stackInit(tmpStack, 2);
 	tStackVar *stackVar = gmalloc(sizeof(tStackVar), free);
-	stackVarInit(stackVar, 8);
+	stackVarInit(stackVar, 2);
 
 	do
 	{
@@ -552,8 +552,11 @@ void equalsign(tStack **s,tStack **tmpStack, tToken *t)
 int main (int argc, char *argv[])
 {
 	bool breakParent = false;
-	int innerBraces;
+	bool inFunction = false;
+	int innerBraces = 0;
 	LLFunction *LLCall;
+
+	ginit();
 
 	if (argc!=2) printError(PARAMSERROR,INTERPRETERROR);
 	f=fopen(argv[1],"r");
@@ -564,11 +567,11 @@ int main (int argc, char *argv[])
 	if (c!='<') printError(SYNTAXERR,SYNTAXERROR);
 	else ungetc (c,f);
 
-	ginit();
+
 	tToken *t = (tToken *) gmalloc(sizeof(tToken), free);
 	t->content = (char *) gmalloc(40, free);
 	tStack *stack = gmalloc(sizeof(tStack), free);
-	stackInit(stack, 40);
+	stackInit(stack, 2);
 
 	BSTF_Init(&functionTree);
 	actualFunction[0] = BSTF_Insert(&functionTree, "1");
@@ -614,6 +617,7 @@ int main (int argc, char *argv[])
 			else if(LLCall == function && t->name == OPENBRACE)
 			{
 				innerBraces = 0;
+				inFunction = true;
 			}
 			else if(t->name == OPENBRACE)
 			{
@@ -623,10 +627,12 @@ int main (int argc, char *argv[])
 			else if(t->name == CLOSEBRACE)
 			{
 				--innerBraces;
-				if(innerBraces == 0)
+
+				if(innerBraces == 0 && inFunction)
 				{
 					printf("vylézám z funkce %s", actualFunction[0]->key);
 					actualFunction[0] = actualFunction[1];
+					inFunction = false;
 				}
 			}
 
