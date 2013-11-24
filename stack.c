@@ -32,7 +32,7 @@ void stackPush(tStack **s, int data)
 		// DEBUG("Před realokací:");
 		// printf("velikost %d\n", (*s)->max);
 		// printStack(*s);
-		grealloc((void **) s, &((*s)->max), sizeof(int));
+		grealloc((void **) &((*s)->data), &((*s)->max), sizeof(int));
 		// DEBUG("PO realokaci:");
 		// printf("velikost %d\n", (*s)->max);
 		// printStack(*s);
@@ -87,7 +87,7 @@ void stackVarInit(tStackVar *s, int size)
 {
 	s->top = -1;
 	s->max = size;
-	s->data = gmalloc(sizeof(int)*size, free);
+	s->data = gmalloc(sizeof(sVariable*)*size, free);
 
 	if(s->data == NULL)
 	{
@@ -115,7 +115,7 @@ void stackVarPush(tStackVar **s, sVariable * data)
 		// DEBUG("Před realokací:");
 		// printf("velikost %d\n", (*s)->max);
 		// printStack(*s);
-		grealloc((void **) s, &((*s)->max), sizeof(int));
+		grealloc((void **) &((*s)->data), &((*s)->max), sizeof(sVariable*));
 		// DEBUG("PO realokaci:");
 		// printf("velikost %d\n", (*s)->max);
 		// printStack(*s);
