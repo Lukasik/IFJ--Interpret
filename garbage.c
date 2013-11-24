@@ -1,10 +1,10 @@
 #include "garbage.h"
 
-int gArraySize = 1000;
+int gArraySize = 2;
 
 void ginit()
 {
-	gArray = (gPointer **) malloc(sizeof(gPointer)*gArraySize);
+	gArray = (gPointer **) malloc(sizeof(gPointer*)*gArraySize);
 
 	if(gArray == NULL)
 	{
@@ -34,17 +34,27 @@ void grealloc(void **pointer, int* size, int elementSize)
 {
 	*size *= 2;
 
-	void *new = gmalloc((*size)*elementSize, free);
+	void *new = realloc(*pointer, (*size)*elementSize);
 
 	if (new == NULL)
 	{
+		// gfree(*pointer);
 		printError(ALLOCERROR,INTERPRETERROR);
 	}
 
-	memcpy(new, *pointer, ((*size)*elementSize)/2);
-	gfree(*pointer);
+	if(*pointer != new)
+	{
+		for(int i = 0; i < gArraySize; ++i)
+		{
+			if(gArray[i] != NULL && gArray[i]->pointer == *pointer)
+			{
+				gArray[i]->pointer = new;
+			}
+		}
 
-	*pointer = new;
+		*pointer = new;
+	}
+
 	return;
 }
 
@@ -69,20 +79,14 @@ void gadd(void * pointer, void (*f)(void *))
 
 	gArraySize *= 2;
 
-	gPointer ** gArrayNew = (gPointer **) realloc(gArray, sizeof(gPointer)*gArraySize);
+	gPointer *gArrayNew = (gPointer *) realloc(gArray, sizeof(gPointer*)*gArraySize);
 
-	if(gArrayNew != gArray)
-	{
-		free(gArray);
-
-	}
-
-	gArray = gArrayNew;
-
-	if(gArray == NULL)
+	if(gArrayNew == NULL)
 	{
 		printError(ALLOCERROR, INTERPRETERROR);
 	}
+
+	gArray = gArrayNew;
 
 	for (int i = gArraySize/2; i < gArraySize; ++i)
 	{
@@ -116,5 +120,4 @@ void gfreeAll()
 	}
 
 	free(gArray);
-	gArraySize = 0;
 }
