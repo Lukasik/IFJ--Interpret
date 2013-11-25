@@ -19,6 +19,14 @@ void stackVarPush(tStackVar **s, sVariable* data);
 // int stackTop(tStack **s);
 // int stackTopTerminal(tStack **s, tStack **tmpStack, bool useTmpStack);
 int stackVarEmpty(tStackVar *s);
+int stackFuncEmpty(tStackFunc *s);
+void stackFuncPush(tStackFunc **s, sFunction * data);
+sFunction * stackFuncPop(tStackFunc **s);
+int stackFuncEmpty(tStackFunc *s);
+void stackFuncPush(tStackFunc **s, sFunction * data);
+sFunction * stackFuncPop(tStackFunc **s);
+sFunction * stackFuncTop(tStackFunc **s);
+void stackFuncInit(tStackFunc *s, int size);
 
 
 #endif

@@ -131,3 +131,59 @@ int stackVarEmpty(tStackVar *s)
 {
 	return s->top == -1;
 }
+
+void stackFuncInit(tStackFunc *s, int size)
+{
+	s->top = -1;
+	s->max = size;
+	s->data = gmalloc(sizeof(sFunction)*size, free);
+
+	if(s->data == NULL)
+	{
+		DEBUG("init");
+		printError(ALLOCERROR,INTERPRETERROR);
+	}
+}
+
+sFunction * stackFuncPop(tStackFunc **s)
+{
+	if((*s)->top == -1)
+	{
+		DEBUG("pop");
+		printError(STACKERROR, INTERPRETERROR);
+	}
+		// printStack(*s);
+
+	return (*s)->data[(*s)->top--];
+}
+
+void stackFuncPush(tStackFunc **s, sFunction * data)
+{
+	if((*s)->top == (*s)->max-1)
+	{
+		// DEBUG("Před realokací:");
+		// printf("velikost %d\n", (*s)->max);
+		// printStack(*s);
+		grealloc((void **) s, &((*s)->max), sizeof(int));
+		// DEBUG("PO realokaci:");
+		// printf("velikost %d\n", (*s)->max);
+		// printStack(*s);
+		// DEBUG("push");
+		// printError(STACKERROR, INTERPRETERROR);
+	}
+		// printStack(*s);
+
+	(*s)->data[++((*s)->top)] = data;
+}
+
+sFunction * stackFuncTop(tStackFunc **s)
+{
+	if ((*s)->top==-1) printError(STACKERROR,INTERPRETERROR);
+	return (*s)->data[(*s)->top];
+}
+
+int stackFuncEmpty(tStackFunc *s)
+{
+	return s->top == -1;
+}
+
