@@ -38,7 +38,6 @@ void grealloc(void **pointer, int* size, int elementSize)
 
 	if (new == NULL)
 	{
-		// gfree(*pointer);
 		printError(ALLOCERROR,INTERPRETERROR);
 	}
 

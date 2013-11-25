@@ -20,7 +20,6 @@ int stackPop(tStack **s)
 		DEBUG("pop");
 		printError(STACKERROR, INTERPRETERROR);
 	}
-		// printStack(*s);
 
 	return (*s)->data[(*s)->top--];
 }
@@ -29,17 +28,8 @@ void stackPush(tStack **s, int data)
 {
 	if((*s)->top == (*s)->max-1)
 	{
-		// DEBUG("Před realokací:");
-		// printf("velikost %d\n", (*s)->max);
-		// printStack(*s);
 		grealloc((void **) &((*s)->data), &((*s)->max), sizeof(int));
-		// DEBUG("PO realokaci:");
-		// printf("velikost %d\n", (*s)->max);
-		// printStack(*s);
-		// DEBUG("push");
-		// printError(STACKERROR, INTERPRETERROR);
 	}
-		// printStack(*s);
 
 	(*s)->data[++((*s)->top)] = data;
 }
@@ -103,7 +93,6 @@ sVariable * stackVarPop(tStackVar **s)
 		DEBUG("pop");
 		printError(STACKERROR, INTERPRETERROR);
 	}
-		// printStack(*s);
 
 	return (*s)->data[(*s)->top--];
 }
@@ -112,17 +101,8 @@ void stackVarPush(tStackVar **s, sVariable * data)
 {
 	if((*s)->top == (*s)->max-1)
 	{
-		// DEBUG("Před realokací:");
-		// printf("velikost %d\n", (*s)->max);
-		// printStack(*s);
 		grealloc((void **) &((*s)->data), &((*s)->max), sizeof(sVariable*));
-		// DEBUG("PO realokaci:");
-		// printf("velikost %d\n", (*s)->max);
-		// printStack(*s);
-		// DEBUG("push");
-		// printError(STACKERROR, INTERPRETERROR);
 	}
-		// printStack(*s);
 
 	(*s)->data[++((*s)->top)] = data;
 }
@@ -161,17 +141,8 @@ void stackFuncPush(tStackFunc **s, sFunction * data)
 {
 	if((*s)->top == (*s)->max-1)
 	{
-		// DEBUG("Před realokací:");
-		// printf("velikost %d\n", (*s)->max);
-		// printStack(*s);
 		grealloc((void **) s, &((*s)->max), sizeof(int));
-		// DEBUG("PO realokaci:");
-		// printf("velikost %d\n", (*s)->max);
-		// printStack(*s);
-		// DEBUG("push");
-		// printError(STACKERROR, INTERPRETERROR);
 	}
-		// printStack(*s);
 
 	(*s)->data[++((*s)->top)] = data;
 }
