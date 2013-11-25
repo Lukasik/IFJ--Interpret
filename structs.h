@@ -45,12 +45,17 @@ typedef struct sFunction
 {
 	struct sVariable * variables;
 	unsigned *elseBranches;
-	unsigned *endIfBranches;
-	unsigned ifSize; //TODO
+	unsigned *ifEnds;
+	unsigned ifCounter; 
+	unsigned whileCounter;
+	unsigned ifMax;
 	unsigned *whileBranches;
-	unsigned whileSize; //TODO
+	unsigned *whileEnds;
+	unsigned whileMax;
+	bool defined;
 	void *code;
-	int codeSize; //TODO
+	int codeMax; 
+	unsigned codePosition; 
 	char *key;
 	char **paramNames;
 	int paramCount;
@@ -64,6 +69,13 @@ typedef struct tStackVar
 	int max;
 	sVariable **data;
 } tStackVar;
+
+typedef struct tStackFunc
+{
+	int top;
+	int max;
+	sFunction **data;
+} tStackFunc;
 
 typedef void (LLFunction)(tStack **, tToken*);
 
