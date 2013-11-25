@@ -79,7 +79,7 @@ void gadd(void * pointer, void (*f)(void *))
 
 	gArraySize *= 2;
 
-	gPointer *gArrayNew = (gPointer *) realloc(gArray, sizeof(gPointer*)*gArraySize);
+	gPointer ** gArrayNew = (gPointer **) realloc(gArray, sizeof(gPointer*)*gArraySize);
 
 	if(gArrayNew == NULL)
 	{
