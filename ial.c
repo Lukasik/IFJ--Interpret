@@ -41,7 +41,7 @@ sFunction* BSTF_Insert(sFunction ** node, char * key) {
             // (*node)->paramNames = malloc; //TODO
             BSTV_Init(&(*node)->variables);
             (*node)->code = NULL;
-            return tmp;
+            return *node;
         }
         else {
             printError(ALLOCERROR, INTERPRETERROR);
@@ -110,14 +110,14 @@ sVariable * BSTV_Search(sVariable * node, char * key) {
 sVariable* BSTV_Insert(sVariable ** node, char * key) {
     if(*node == NULL) {
         sVariable * tmp;
-        if((tmp = malloc(sizeof(sVariable))) != NULL) {
+        if((tmp = gmalloc(sizeof(sVariable),free)) != NULL) {
             *node = tmp;
-            (*node)->key = malloc(strlen(key)+1);
+            (*node)->key = gmalloc(strlen(key)+1, free);
             if((*node)->key == NULL) printError(ALLOCERROR, INTERPRETERROR);
             memcpy((*node)->key, key, strlen(key)+1);
             (*node)->lptr = (*node)->rptr = NULL;
             (*node)->defined = false;
-            (*node)->value = (union variableValue*) malloc(sizeof(variableValue));
+            (*node)->value = (union variableValue*) gmalloc(sizeof(variableValue), free);
             if((*node)->value == NULL) printError(ALLOCERROR, INTERPRETERROR);
             (*node)->value->stringv = NULL;
         }
@@ -130,30 +130,32 @@ sVariable* BSTV_Insert(sVariable ** node, char * key) {
         int compare = strcmp((*node)->key, key);
 
         if(compare > 0) {
-            BSTV_Insert(&(*node)->rptr, key);
+            *node = BSTV_Insert(&(*node)->rptr, key);
         }
         else if (compare < 0) {
-            BSTV_Insert(&(*node)->lptr, key);
+            *node = BSTV_Insert(&(*node)->lptr, key);
         }
     }
 
     return *node;
+    // printf("variable ret :%p\n", *node);
 }
 
 void BSTV_Dispose(void * node) {
     sVariable * treePointer = (sVariable *) node;
     if(treePointer != NULL) {
-
         if(treePointer->lptr != NULL) {
             BSTV_Dispose(treePointer->lptr);
         }
         if(treePointer->rptr != NULL) {
             BSTV_Dispose(treePointer->rptr);
         }
-        free(treePointer->key);
-        if(treePointer->value != NULL && treePointer->value->stringv != NULL) free(treePointer->value->stringv);
-        if(treePointer->value != NULL) free(treePointer->value);
-        free(treePointer);
+        DEBUG("dispose");
+        //TODO zjistit proč nefunguje bez garbage až bude čas
+        // if(treePointer->value != NULL && treePointer->type == STRING) free(treePointer->value->stringv);
+        // if(treePointer->value != NULL) free(treePointer->value);
+        // free(treePointer->key);
+        // free(treePointer);
         treePointer = NULL;
     }
 }
