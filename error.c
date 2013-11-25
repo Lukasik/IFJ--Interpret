@@ -12,6 +12,10 @@ char *errorMessage[]=
 	"Funkce již existuje\n",
 	"Chyba při práci se zásobníkem\n",
 	"Nedeklarováná proměnná\n",
+	"Typova nekompatibilita\n",
+	"Deleni nulou\n",
+	"Nedeklarovana funkce\n",
+	"funkce byla volana s malo parametry\n"
 };
 // vypise chybove hlaseni
 // prvni parametr je kod hlasky
