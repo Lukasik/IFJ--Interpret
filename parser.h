@@ -115,6 +115,8 @@ void shiftString(char * str, unsigned index, unsigned n);
 
 sFunction * actualFunction[2];
 sFunction * functionTree;
+tStackVar * stackVariables;
+tStackFunc * stackFunctions;
 extern FILE* f;
 extern int precedenceTable[][15];
 extern int LLTable[][36];

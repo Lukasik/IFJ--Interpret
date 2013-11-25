@@ -79,7 +79,7 @@ int LLTable[][36] =
 
 int intMaxChars()
 {
-	int num = ~0;
+	unsigned num = ~0;
 	int counter = 0;
 
 	while(num > 0)
@@ -557,6 +557,14 @@ int main (int argc, char *argv[])
 	LLFunction *LLCall;
 
 	ginit();
+
+
+	stackVariables = gmalloc(sizeof(tStackVar), free);
+	stackVarInit(stackVariables, 800);
+
+	stackFunctions = gmalloc (sizeof(tStackFunc),free);
+	stackFuncInit (stackFunctions,30);
+
 
 	if (argc!=2) printError(PARAMSERROR,INTERPRETERROR);
 	f=fopen(argv[1],"r");
