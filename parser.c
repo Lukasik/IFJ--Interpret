@@ -361,10 +361,11 @@ void expression(tStack **s, tToken *t)
 					DEBUG("přidávám literál");
 					sprintf(literal, "%d", literalCounter++);
 					variable = BSTV_Insert(&(actualFunction[0]->variables), literal);
+					variable->type = t->name;
 					BSTV_Print(actualFunction[0]);
 					char *endptr;
 
-					switch(t->name)
+					switch(variable->type)
 					{
 						case INTEGER:
 							variable->value->intv = (int) strtol(t->content, &endptr, 10);
@@ -373,11 +374,13 @@ void expression(tStack **s, tToken *t)
 							variable->value->doublev = strtod(t->content, &endptr);
 							break;
 						case NULLV: break;
-						case BOOLEAN: variable->value->boolv = strcmp(t->content, "true") == 0 ? true : false;break;
-						case STRING: variable->value->stringv = escapeSequences(t->content);DEBUG(variable->value->stringv);break;
+						case BOOLEAN: variable->value->boolv = strcmp(t->content, "true") == 0;break;
+						case STRING:
+							// variable->value->stringv = malloc(strlen(t->content)+1);
+							// if(variable->value->stringv == NULL) printError(ALLOCERROR, INTERPRETERROR);
+							// variable->value->stringv[strlen(t->content)] = '\0';
+							variable->value->stringv = escapeSequences(t->content);DEBUG(variable->value->stringv);break;
 					}
-
-					variable->type = t->name;
 				}
 				else if(t->name == VAR)
 				{
@@ -449,7 +452,13 @@ char * escapeSequences(char * str)
 		}
 	}
 
-	return str;
+	char * new = gmalloc(strlen(str)+1, free);
+	// printf("escape: %p", new);
+	// if(new == NULL) printError(ALLOCERROR, INTERPRETERROR);
+	strcpy(new, str);
+	// new[strlen(str)] = '\0';
+
+	return new;
 }
 
 void shiftString(char * str, unsigned index, unsigned n)
@@ -560,10 +569,10 @@ int main (int argc, char *argv[])
 
 
 	stackVariables = gmalloc(sizeof(tStackVar), free);
-	stackVarInit(stackVariables, 800);
+	stackVarInit(stackVariables, 8);
 
 	stackFunctions = gmalloc (sizeof(tStackFunc),free);
-	stackFuncInit (stackFunctions,30);
+	stackFuncInit (stackFunctions, 2);
 
 
 	if (argc!=2) printError(PARAMSERROR,INTERPRETERROR);
