@@ -8,7 +8,7 @@ void BSTF_Init(sFunction ** node) {
 
 sFunction * BSTF_Search(sFunction * node, char * key) {
     if(node != NULL) {
-        int compare = strcmp(node->key, key);
+        int compare = strcmp(key, node->key);
 
         if(compare == 0) {
             return node;
@@ -52,7 +52,7 @@ sFunction* BSTF_Insert(sFunction ** node, char * key) {
     }
     else {
 
-        int compare = strcmp((*node)->key, key);
+        int compare = strcmp(key, (*node)->key);
 
         if(compare > 0) {
             return BSTF_Insert(&(*node)->rptr, key);
@@ -94,7 +94,7 @@ void BSTV_Init(sVariable ** node) {
 
 sVariable * BSTV_Search(sVariable * node, char * key) {
     if(node != NULL) {
-        int compare = strcmp(node->key, key);
+        int compare = strcmp(key, node->key);
 
         if(compare == 0) {
             return node;
@@ -129,7 +129,7 @@ sVariable* BSTV_Insert(sVariable ** node, char * key) {
     }
     else {
 
-        int compare = strcmp((*node)->key, key);
+        int compare = strcmp(key, (*node)->key);
 
         if(compare > 0) {
             return BSTV_Insert(&(*node)->rptr, key);
