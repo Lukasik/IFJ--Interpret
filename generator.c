@@ -5,8 +5,6 @@
 #include <stdbool.h>
 
 
-// TODO: iRETURN CELE
-
 sVariable * duplicateTree(sVariable * root)
 {
 	if(root == NULL)
@@ -16,19 +14,13 @@ sVariable * duplicateTree(sVariable * root)
 
 	sVariable *new, *newItem, *prev;
 	BSTV_Init(&new);
-	gadd(new, BSTV_Dispose);
+
 	tStackVar *stack = gmalloc(sizeof(tStackVar), free);
 	stackVarInit(stack, 20);
 
 	while(root != NULL)
 	{
 		stackVarPush(&stack, root);
-		root = root->lptr;
-	}
-
-	while(!stackVarEmpty(stack) || root->rptr != NULL)
-	{
-		root = stackVarPop(&stack);
 
 		newItem = BSTV_Insert(&new, root->key);
 		memcpy(newItem->key, root->key, strlen(root->key)*sizeof(char)+1);
@@ -37,6 +29,12 @@ sVariable * duplicateTree(sVariable * root)
 		newItem->type = root->type;
 		newItem->lptr = NULL;
 		newItem->rptr = NULL;
+		root = root->lptr;
+	}
+
+	while(!stackVarEmpty(stack) || root->rptr != NULL)
+	{
+		root = stackVarPop(&stack);
 
 		if(root->rptr != NULL)
 		{
@@ -45,6 +43,13 @@ sVariable * duplicateTree(sVariable * root)
 
 			while(root != NULL)
 			{
+				newItem = BSTV_Insert(&new, root->key);
+				memcpy(newItem->key, root->key, strlen(root->key)*sizeof(char)+1);
+				memcpy(newItem->value, root->value, sizeof(variableValue));
+				newItem->defined = root->defined;
+				newItem->type = root->type;
+				newItem->lptr = NULL;
+				newItem->rptr = NULL;
 				stackVarPush(&stack, root);
 				root = root->lptr;
 			}
@@ -621,17 +626,19 @@ void iFunctionCall (sVariable * param, char * function)
 	if (func == NULL) printError(UNDECLAREDFUNCTION,FUNCTIONDEFINITIONERROR);
 
 	duplicateFunction(func);
-
 	topFunction = stackFuncTop(&stackFunctions);
+
+	// BSTV_Print(topFunction->variables);
 	int count=0;
 	sVariable *var;
 	sVariable * argument;
 
 	//TODO je vestavěná? -> může být putstring -> neomezené počet parametrů -> jiný přístup
 
-	while(count < func->paramCount && count != stackVariables->top-1)
+	// while(count <= 0)
+	while(count <= func->paramNames->top && count <= stackVariables->top)
 	{
-		var = BSTV_Search(topFunction->variables, func->paramNames[count]);
+		var = BSTV_Search(topFunction->variables, func->paramNames->data[count]);
 
 		argument = stackVariables->data[count++];
 		var->type = argument->type;
@@ -658,8 +665,12 @@ void iFunctionCall (sVariable * param, char * function)
 		}
 	}
 
-	if(count < func->paramCount ) printError(FEWPARAMETERS,PARAMMISSING);
+	// printf("counter parametrů: %d", count);
+	// printf("parametrů fce: %d", func->paramCount);
+	if(count < func->paramNames->top+1 ) printError(FEWPARAMETERS,PARAMMISSING);
 	stackVariables->top = -1;
+
+	printf("ýýýýýýýýýýýýýýýýýýýýýýýýýý\n");
 }
 
 
@@ -685,7 +696,7 @@ void assign (sVariable * param, char * function)
 {
 	sVariable * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
-	sVariable * top;
+	sVariable * top = NULL;
 
 	if(stackVarEmpty(stackVariables))
 	{
@@ -694,30 +705,28 @@ void assign (sVariable * param, char * function)
 	}
 
 	top = stackVarPop(&stackVariables);
-	// top = 0x32123123;
-	printf("param: %p\n", (void*)top);
-	// param->type = top->type;
-	// switch (top->type)
-	// {
-	// 	case DOUBLE:
-	// 		param->value->doublev = top->value->doublev;
-	// 		break;
+	param->type = top->type;
+	switch (top->type)
+	{
+		case DOUBLE:
+			param->value->doublev = top->value->doublev;
+			break;
 
-	// 	case INTEGER:
-	// 		param->value->intv = top->value->intv;
-	// 		break;
+		case INTEGER:
+			param->value->intv = top->value->intv;
+			break;
 
-	// 	case STRING:
-	// 		if (param->value->stringv != NULL) free(param->value->stringv);
+		case STRING:
+			if (param->value->stringv != NULL) free(param->value->stringv);
 
-	// 		param->value->stringv = gmalloc(sizeof(char)*strlen(top->value->stringv)+1, free);
-	// 		strcpy(param->value->stringv , top->value->stringv);
-	// 		break;
+			param->value->stringv = gmalloc(sizeof(char)*strlen(top->value->stringv)+1, free);
+			strcpy(param->value->stringv , top->value->stringv);
+			break;
 
-	// 	case BOOLEAN:
-	// 		param->value->boolv = top->value->boolv;
-	// 		break;
-	// }
+		case BOOLEAN:
+			param->value->boolv = top->value->boolv;
+			break;
+	}
 }
 
 
@@ -817,11 +826,11 @@ void jmpWHILE (sVariable * param, char * function)
 void generateInstruction(instructionFunction *f, sVariable *var, char * name)
 {
 	tInstruction *instruction;
-	sFunction *topFunction = stackFuncTop(&stackFunctions);
+	// sFunction *topFunction = stackFuncTop(&stackFunctions);
 
 	instruction = gmalloc(sizeof(tInstruction), free);
 	instruction->f = f;
 	instruction->variable = var;
 	instruction->functionName = name;
-	stackInstructionPush(&(topFunction->code), instruction);
+	stackInstructionPush(&(actualFunction[0]->code), instruction);
 }
