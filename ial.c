@@ -36,10 +36,9 @@ sFunction* BSTF_Insert(sFunction ** node, char * key) {
             (*node)->elseBranches = NULL;
             (*node)->ifEnds = NULL;
             (*node)->whileBranches = NULL;
-            (*node)->paramNames = NULL;
-            (*node)->paramCount = 0;
+            (*node)->paramNames = gmalloc(sizeof(tStackString), free);
+            stackStringInit((*node)->paramNames, 5);
             (*node)->codePosition = 0;
-            (*node)->paramNames = NULL;
             BSTV_Init(&(*node)->variables);
             (*node)->code = gmalloc(sizeof(tStackInstruction), free);
             stackInstructionInit((*node)->code, 5);

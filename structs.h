@@ -57,6 +57,13 @@ typedef struct tStackInstruction
 	tInstruction **data;
 } tStackInstruction;
 
+typedef struct tStackString
+{
+	int top;
+	int max;
+	char **data;
+} tStackString;
+
 typedef struct sFunction
 {
 	struct sVariable * variables;
@@ -72,8 +79,7 @@ typedef struct sFunction
 	tStackInstruction *code;
 	unsigned codePosition;
 	char *key;
-	char **paramNames;
-	int paramCount;
+	tStackString *paramNames;
 	struct sFunction * lptr;
 	struct sFunction * rptr;
 } sFunction;

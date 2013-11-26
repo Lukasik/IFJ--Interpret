@@ -35,5 +35,8 @@ int stackInstructionEmpty(tStackInstruction *s);
 void printInstructionStack(tStackInstruction *s);
 tInstruction * stackInstructionTop(tStackInstruction **s);
 
+void stackStringPush(tStackString **s, char* data);
+void stackStringInit(tStackString *s, int size);
+
 
 #endif

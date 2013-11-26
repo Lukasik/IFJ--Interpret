@@ -230,3 +230,29 @@ void printInstructionStack(tStackInstruction *s)
 	}
 	printf("\n");
 }
+
+void stackStringInit(tStackString *s, int size)
+{
+	s->top = -1;
+	s->max = size;
+	s->data = gmalloc(sizeof(char*)*size, free);
+
+	if(s->data == NULL)
+	{
+		DEBUG("init");
+		printError(ALLOCERROR,INTERPRETERROR);
+	}
+}
+
+void stackStringPush(tStackString **s, char* data)
+{
+	if((*s)->top == (*s)->max-1)
+	{
+		grealloc((void **) &((*s)->data), &((*s)->max), sizeof(char*));
+	}
+
+	char *new = gmalloc(strlen(data)+1, free);
+
+	(*s)->data[++((*s)->top)] = new;
+	strcpy(new, data);
+}
