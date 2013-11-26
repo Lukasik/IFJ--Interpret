@@ -13,6 +13,7 @@
 #include "garbage.h"
 #include "debug.h"
 #include "stack.h"
+#include "generator.h"
 
 // enum pro navraty z funkce v parser.c
 enum tret
@@ -106,12 +107,14 @@ void statementEnd(tStack **s, tToken *t);
 void expression(tStack **s, tToken *t);
 void expressionParen(tStack **s, tToken *t);
 
-void reduce(tStack **s,tStack **tmpStack);
+void reduce(tStack **s,tStack **tmpStack, tStackVar **stackVar);
 void shift(tStack **s, tStack **tmpStack, tToken *t);
 void equalsign(tStack **s, tStack **tmpStack,tToken *t);
 
 char * escapeSequences(char * str);
 void shiftString(char * str, unsigned index, unsigned n);
+
+sVariable * generateLiteral(tToken *t);
 
 sFunction * actualFunction[2];
 sFunction * functionTree;
