@@ -1,20 +1,11 @@
 <?php
-$y = 54+(12*6);
-if (1+2))
-{
-	$x = 6;
-}
-else
-{
-	;
-}
+$x = "cvcvc1";
+// $y = 25+(69-85)/846+(14.3);
+// return;
 
-// function xssada($x)
-// {
-//  return;
+// $y = fd($x, "z");
 
-
-// function yasd($x)
+// function fd($a, $b)
 // {
 // 	return;
 // }
