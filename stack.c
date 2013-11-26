@@ -158,3 +158,75 @@ int stackFuncEmpty(tStackFunc *s)
 	return s->top == -1;
 }
 
+void stackInstructionInit(tStackInstruction *s, int size)
+{
+	s->top = -1;
+	s->max = size;
+	s->data = gmalloc(sizeof(tInstruction)*size, free);
+
+	if(s->data == NULL)
+	{
+		DEBUG("init");
+		printError(ALLOCERROR,INTERPRETERROR);
+	}
+}
+
+tInstruction * stackInstructionPop(tStackInstruction **s)
+{
+	if((*s)->top == -1)
+	{
+		DEBUG("pop");
+		printError(STACKERROR, INTERPRETERROR);
+	}
+
+	return (*s)->data[(*s)->top--];
+}
+
+tInstruction * stackInstructionTop(tStackInstruction **s)
+{
+	if((*s)->top == -1)
+	{
+		DEBUG("top");
+		printError(STACKERROR, INTERPRETERROR);
+	}
+
+	return (*s)->data[(*s)->top];
+}
+
+void stackInstructionPush(tStackInstruction **s, tInstruction* data)
+{
+	if((*s)->top == (*s)->max-1)
+	{
+		grealloc((void **) &((*s)->data), &((*s)->max), sizeof(tInstruction));
+	}
+
+	(*s)->data[++((*s)->top)] = data;
+}
+
+int stackInstructionEmpty(tStackInstruction *s)
+{
+	return s->top == -1;
+}
+
+void printInstructionStack(tStackInstruction *s)
+{
+	int i = 0;
+	char *name;
+
+	while(s->top - i >= 0)
+	{
+		if(s->data[i]->f == pushSVar) name = "push";
+		else if(s->data[i]->f == iReturn) name = "return";
+		else if(s->data[i]->f == concatenate) name = "concat";
+		else if(s->data[i]->f == add) name = "add";
+		else if(s->data[i]->f == sub) name = "sub";
+		else if(s->data[i]->f == division) name = "division";
+		else if(s->data[i]->f == mul) name = "mul";
+		else if(s->data[i]->f == assign) name = "assign";
+		else if(s->data[i]->f == iFunctionCall) name = "functionCall";
+		else name = "undefined";
+		i++;
+		DEBUG(name);
+	}
+	printf("\n");
+}

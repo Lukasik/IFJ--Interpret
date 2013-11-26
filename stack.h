@@ -28,5 +28,12 @@ sFunction * stackFuncPop(tStackFunc **s);
 sFunction * stackFuncTop(tStackFunc **s);
 void stackFuncInit(tStackFunc *s, int size);
 
+void stackInstructionInit(tStackInstruction *s, int size);
+tInstruction * stackInstructionPop(tStackInstruction **s);
+void stackInstructionPush(tStackInstruction **s, tInstruction* data);
+int stackInstructionEmpty(tStackInstruction *s);
+void printInstructionStack(tStackInstruction *s);
+tInstruction * stackInstructionTop(tStackInstruction **s);
+
 
 #endif
