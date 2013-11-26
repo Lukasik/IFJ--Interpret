@@ -38,9 +38,11 @@ sFunction* BSTF_Insert(sFunction ** node, char * key) {
             (*node)->whileBranches = NULL;
             (*node)->paramNames = NULL;
             (*node)->paramCount = 0;
-            // (*node)->paramNames = malloc; //TODO
+            (*node)->codePosition = 0;
+            (*node)->paramNames = NULL;
             BSTV_Init(&(*node)->variables);
-            (*node)->code = NULL;
+            (*node)->code = gmalloc(sizeof(tStackInstruction), free);
+            stackInstructionInit((*node)->code, 5);
             return *node;
         }
         else {
@@ -130,10 +132,10 @@ sVariable* BSTV_Insert(sVariable ** node, char * key) {
         int compare = strcmp((*node)->key, key);
 
         if(compare > 0) {
-            *node = BSTV_Insert(&(*node)->rptr, key);
+            return BSTV_Insert(&(*node)->rptr, key);
         }
         else if (compare < 0) {
-            *node = BSTV_Insert(&(*node)->lptr, key);
+            return BSTV_Insert(&(*node)->lptr, key);
         }
     }
 
@@ -150,7 +152,7 @@ void BSTV_Dispose(void * node) {
         if(treePointer->rptr != NULL) {
             BSTV_Dispose(treePointer->rptr);
         }
-        DEBUG("dispose");
+        // DEBUG("dispose");SAS
         //TODO zjistit proč nefunguje bez garbage až bude čas
         // if(treePointer->value != NULL && treePointer->type == STRING) free(treePointer->value->stringv);
         // if(treePointer->value != NULL) free(treePointer->value);
