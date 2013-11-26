@@ -41,21 +41,36 @@ typedef struct sVariable
 	struct sVariable * rptr;
 } sVariable;
 
+typedef void (instructionFunction) (sVariable *, char *);
+
+typedef struct tInstruction
+{
+	instructionFunction *f;
+	sVariable *variable;
+	char *functionName; //název volané funkce
+} tInstruction;
+
+typedef struct tStackInstruction
+{
+	int top;
+	int max;
+	tInstruction **data;
+} tStackInstruction;
+
 typedef struct sFunction
 {
 	struct sVariable * variables;
 	unsigned *elseBranches;
 	unsigned *ifEnds;
-	unsigned ifCounter; 
+	unsigned ifCounter;
 	unsigned whileCounter;
 	unsigned ifMax;
 	unsigned *whileBranches;
 	unsigned *whileEnds;
 	unsigned whileMax;
 	bool defined;
-	void *code;
-	int codeMax; 
-	unsigned codePosition; 
+	tStackInstruction *code;
+	unsigned codePosition;
 	char *key;
 	char **paramNames;
 	int paramCount;
@@ -78,5 +93,7 @@ typedef struct tStackFunc
 } tStackFunc;
 
 typedef void (LLFunction)(tStack **, tToken*);
+
+
 
 #endif
