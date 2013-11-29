@@ -44,7 +44,6 @@ int digits(int *index, char** content, int c)
 	{
 		insertChar(index, content,c);
 	}
-
 	return c;
 }
 
@@ -298,7 +297,7 @@ int isVariable(FILE *f,int c, char **content)
 // EOFem a vraci se INVALIDCHAR, jinak STRING nebo -1
 int isString (FILE *f, int c, char **content)
 {
-	int hlpc='a';
+	int hlpc='"';
 	int index=0;
 	int discard=0;
 
@@ -307,17 +306,17 @@ int isString (FILE *f, int c, char **content)
 		// dokud neni druha " nebo EOF, dava pozor aby tam nebylo \"
 		while (((c=fgetc(f))!='"' || hlpc=='\\') && c!=EOF)
 		{
-			if (c<32 || (c=='$' && hlpc!='\\')) discard=1;
+			hlpc=c;
+			if (c<32) continue;
+			else if(c=='$' && hlpc!='\\') return -1;
 
 			insertChar(&index,content,c);
-			hlpc=c;
 		}
 
-		if (c==EOF) return INVALIDCHAR;
+		if (c==EOF || c != '"') return -1;
 
 		insertChar(&index,content,'\0');
-		if (discard==0) return STRING;
-		else return INVALIDCHAR;
+		return STRING;
 	}
 	else return -1;
 }
@@ -339,7 +338,7 @@ bool findToken(FILE *f, tToken *t)
 {
 	t->content[0] = '\0';
 	int index=0;
-	int flag = -1,ec,c;
+	int flag = -1,ec = -1,c;
 
 	t->name = UNINITIALIZED;
 	// enumator pro specialni skupiny symbolu
@@ -407,7 +406,17 @@ bool findToken(FILE *f, tToken *t)
 
 			if(c == '.')
 			{
+				insertChar(&index, &(t->content), c);
+				c = fgetc(f);
+
+				if(!isdigit(c))
+				{
+					t->name = INVALIDCHAR;
+					return false;
+				}
+
 				c = digits(&index, &(t->content), c);
+				// printf("Je tečka? %c\n", c);
 
 				if(tolower(c) == 'e')
 				{
@@ -444,6 +453,12 @@ bool findToken(FILE *f, tToken *t)
 					t->name = INVALIDCHAR;
 					return false;
 				}
+			}
+
+			if(tolower(c) == '.' || tolower(c) == 'e')
+			{
+				t->name = INVALIDCHAR;
+				return false;
 			}
 
 			ungetc(c, f);
