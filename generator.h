@@ -3,6 +3,10 @@
 
 #include "ial.h"
 #include "scanner.h"
+#include "stack.h"
+#include "structs.h"
+#include "debug.h"
+#include "inbuilt_functions.h"
 
 
 extern sFunction * functionTree;
@@ -14,25 +18,26 @@ bool twoInts (sVariable *par1,sVariable *par2);
 bool twoDoubles (sVariable *par1,sVariable *par2);
 bool intDouble (sVariable *par1,sVariable *par2);
 bool doubleInt (sVariable *par1,sVariable *par2);
-void add (sVariable * param, char * function);
-void sub (sVariable * param, char * function);
-void mul (sVariable * param, char * function);
-void division(sVariable * param, char * function);
-void concatenate (sVariable * param, char * function);
-void equal (sVariable * param, char * function);
-void notEqual (sVariable * param, char * function);
-void bigger (sVariable * param, char * function);
-void lesser (sVariable * param, char * function);
-void lesserEqual (sVariable * param, char * function);
-void biggerEqual (sVariable * param, char * function);
-void iFunctionCall (sVariable * param, char * function);
-void pushSVar(sVariable * param, char * function);
-void iReturn (sVariable * param, char * function);
-void assign (sVariable * param, char * function);
-void jmpIfFalseIF (sVariable * param, char * function);
-void jmpIfFalseWHILE (sVariable * param, char * function);
-void jmpIF (sVariable * param, char * function);
-void jmpWHILE (sVariable * param, char * function);
-void generateInstruction(instructionFunction *f, sVariable *var, char * name);
+void add (char * param, char * function);
+void sub (char * param, char * function);
+void mul (char * param, char * function);
+void division(char * param, char * function);
+void concatenate (char * param, char * function);
+void equal (char * param, char * function);
+void notEqual (char * param, char * function);
+void bigger (char * param, char * function);
+void lesser (char * param, char * function);
+void lesserEqual (char * param, char * function);
+void biggerEqual (char * param, char * function);
+void iFunctionCall (char * param, char * function);
+void pushSVar(char * param, char * function);
+void iReturn (char * param, char * function);
+void assign (char * param, char * function);
+void jmpFalse (char * param, char * function);
+void jmp(char * param, char * function);
+void generateInstruction(instructionFunction *f, char *var, char * name);
+
+int maxChars(int num);
+void interpret(void);
 
 #endif

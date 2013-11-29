@@ -33,9 +33,6 @@ sFunction* BSTF_Insert(sFunction ** node, char * key) {
             if((*node)->key == NULL) printError(ALLOCERROR, INTERPRETERROR);
             memcpy((*node)->key, key, strlen(key)+1);
             (*node)->lptr = (*node)->rptr = NULL;
-            (*node)->elseBranches = NULL;
-            (*node)->ifEnds = NULL;
-            (*node)->whileBranches = NULL;
             (*node)->paramNames = gmalloc(sizeof(tStackString), free);
             stackStringInit((*node)->paramNames, 5);
             (*node)->codePosition = 0;
@@ -118,9 +115,10 @@ sVariable* BSTV_Insert(sVariable ** node, char * key) {
             memcpy((*node)->key, key, strlen(key)+1);
             (*node)->lptr = (*node)->rptr = NULL;
             (*node)->defined = false;
-            (*node)->value = (union variableValue*) gmalloc(sizeof(variableValue), free);
+            (*node)->value = (variableValue*) gmalloc(sizeof(variableValue), free);
             if((*node)->value == NULL) printError(ALLOCERROR, INTERPRETERROR);
             (*node)->value->stringv = NULL;
+            // (*node)->type = NULLV;
         }
         else {
             printError(ALLOCERROR, INTERPRETERROR);
@@ -139,7 +137,6 @@ sVariable* BSTV_Insert(sVariable ** node, char * key) {
     }
 
     return *node;
-    // printf("variable ret :%p\n", *node);
 }
 
 void BSTV_Dispose(void * node) {
@@ -161,7 +158,7 @@ void BSTV_Dispose(void * node) {
     }
 }
 
-char * sort_string (char * str) {
+char * IAL_sort_string (char * str) {
     int left = 0;
     int right = strlen(str) - 1;
     int stack[strlen(str)];
@@ -202,7 +199,7 @@ char * sort_string (char * str) {
     return str;
 }
 
-int find_string(char * str, char * substr) {
+int IAL_find_string(char * str, char * substr) {
     int sub_lenght = strlen(substr);        // délka hledaného podřetězce
     int str_lenght = strlen(str);           // délka řetězce v němž se hledá
     int position = sub_lenght - 1;          // pozice vyhledávání
@@ -212,6 +209,8 @@ int find_string(char * str, char * substr) {
     char * pch;                             // pomocná proměnná pro nalezení pozice znaku v hledaném řetězci
     int chr_pos;                            // pozice znaku v hledaném řetezci
     int i;                                  // pomocná proměnná pro cyklus
+
+    if(sub_lenght == 0) return 0;
 
     while(position < str_lenght) {
         equal = 1;

@@ -384,6 +384,7 @@ void expression(tStack **s, tToken *t)
 	gfree(tmpStack);
 }
 
+//TODO volat při výpisu
 char * escapeSequences(char * str)
 {
 	int index = -1;
@@ -400,7 +401,7 @@ char * escapeSequences(char * str)
 	for(int i = 0; i < 5; ++i)
 	{
 		sprintf(substr, "%s", replacements[i][0]);
-		while((index = find_string(str, substr)) > -1)
+		while((index = IAL_find_string(str, substr)) > -1)
 		{
 			str[index] = replacements[i][1][0];
 			shiftString(str, index+1, 1);
@@ -411,14 +412,14 @@ char * escapeSequences(char * str)
 	{
 		sprintf(substr, "\\x%.2X", i);
 		// DEBUG(substr);
-		while((index = find_string(str, substr)) > -1)
+		while((index = IAL_find_string(str, substr)) > -1)
 		{
 			str[index] = i;
 			shiftString(str, index+1, 3);
 		}
 
 		sprintf(substr, "\\x%.2x", i);
-		while((index = find_string(str, substr)) > -1)
+		while((index = IAL_find_string(str, substr)) > -1)
 		{
 			str[index] = i;
 			shiftString(str, index+1, 3);
@@ -426,10 +427,7 @@ char * escapeSequences(char * str)
 	}
 
 	char * new = gmalloc(strlen(str)+1, free);
-	// printf("escape: %p", new);
-	// if(new == NULL) printError(ALLOCERROR, INTERPRETERROR);
 	strcpy(new, str);
-	// new[strlen(str)] = '\0';
 
 	return new;
 }
@@ -437,7 +435,6 @@ char * escapeSequences(char * str)
 void shiftString(char * str, unsigned index, unsigned n)
 {
 	unsigned i;
-	DEBUG("shiftuju");
 	for(i = index; i+n < strlen(str); ++i)
 	{
 		str[i] = str[i+n];
@@ -452,6 +449,8 @@ void reduce(tStack **s,tStack **tmpStack, tStackVar **stackVar)
 	stackPop(s);
 
 	tInstruction *instruction;
+	sVariable *var;
+	char* pushVarName;
 
 	while(!stackEmpty(*tmpStack)) stackPush(s, stackPop(tmpStack));
 
@@ -465,9 +464,13 @@ void reduce(tStack **s,tStack **tmpStack, tStackVar **stackVar)
 
 		if(top == SHIFT)
 		{
+			var = stackVarPop(stackVar);
+			pushVarName = gmalloc(strlen(var->key)+1, free);
+			strcpy(pushVarName, var->key);
+
 			instruction = gmalloc(sizeof(tInstruction), free);
 			instruction->f=pushSVar;
-			instruction->variable = stackVarPop(stackVar);
+			instruction->variable = pushVarName;
 			instruction->functionName = NULL;
 
 			stackInstructionPush(&(actualFunction[0]->code), instruction);
@@ -541,7 +544,7 @@ void reduce(tStack **s,tStack **tmpStack, tStackVar **stackVar)
 		}
 	}
 
-	DEBUG("Neexistuje pravidlo pro reduce");
+	// DEBUG("Neexistuje pravidlo pro reduce");
 	printError(SYNTAXERR, SYNTAXERROR);
 
 }
@@ -574,7 +577,8 @@ sVariable * generateLiteral(tToken *t)
 	sprintf(literal, "%d", literalCounter++);
 	sVariable *argvar = BSTV_Insert(&(actualFunction[0]->variables), literal);
 	argvar->type = t->name;
-	BSTV_Print(actualFunction[0]);
+	argvar->defined = true;
+	// BSTV_Print(actualFunction[0]);
 	char *endptr;
 
 	switch(argvar->type)
@@ -587,13 +591,40 @@ sVariable * generateLiteral(tToken *t)
 			break;
 		case NULLV: break;
 		case BOOLEAN: argvar->value->boolv = strcmp(t->content, "true") == 0;break;
-		case STRING: argvar->value->stringv = escapeSequences(t->content);DEBUG(argvar->value->stringv);break;
+		case STRING: argvar->value->stringv = escapeSequences(t->content);break;
 	}
 
 	return argvar;
 }
 
-int main (int argc, char *argv[])
+void generateParams(tToken *t)
+{
+	BSTV_Insert(&(actualFunction[0]->variables), t->content);
+	stackStringPush(&(actualFunction[0]->paramNames), t->content);
+}
+
+void generateArguments(tToken *t, LLFunction *LLCall)
+{
+	sFunction *topFunction = actualFunction[0];
+	sVariable *argvar;
+	char *pushVarName;
+
+	if(LLCall == argumentVar)
+	{
+		argvar = BSTV_Search(topFunction->variables , t->content);
+
+	}
+	else
+	{
+		argvar = generateLiteral(t);
+	}
+
+	pushVarName = gmalloc(strlen(argvar->key)+1, free);
+	strcpy(pushVarName, argvar->key);
+	generateInstruction(pushSVar, pushVarName, NULL);
+}
+
+void parse(tStack *stack, tToken *t)
 {
 	bool breakParent = false;
 	bool inFunction = false;
@@ -602,10 +633,200 @@ int main (int argc, char *argv[])
 	sVariable *destination = NULL;
 	char * calledFunctionName = NULL;
 	int innerBraces = 0;
+	int *dstJump;
+	char* variableName;
 	LLFunction *LLCall;
+	tInstruction *instruction;
+	sFunction *topFunction;
 
+	tStack *conditionStack = gmalloc(sizeof(tStack), free);
+	stackInit(conditionStack, 2);
+	tStackIf *ifStack = gmalloc(sizeof(tStackIf), free);
+	stackIfInit(ifStack, 2);
+	tStack *whileStack = gmalloc(sizeof(tStack), free);
+	stackInit(whileStack, 2);
+
+	getToken(f, t);
+	stackPush(&stack, NPROGRAM);
+
+	while(t->name != END && !stackEmpty(stack))
+	{
+		while(stackTop(&stack) < NONTERMINALBORDER)
+		{
+
+			if(t->name == SEMICOLON && waitingSemicolon)
+			{
+				generateInstruction(generatedFunction, variableName, calledFunctionName);
+
+				waitingSemicolon = false;
+				generatedFunction = NULL;
+				variableName = NULL;
+				calledFunctionName = NULL;
+			}
+
+			if(stackPop(&stack) != t->name)
+			{
+				breakParent = true;
+				break;
+			}
+
+			if(LLCall == commandVar && t->name == VAR)
+			{
+				destination = BSTV_Insert(&(actualFunction[0]->variables), t->content);
+				waitingSemicolon = true;
+				generatedFunction = assign;
+				variableName = gmalloc(strlen(destination->key)+1,free);
+				strcpy(variableName, destination->key);
+				// destination = NULL;
+			}
+			else if(LLCall == commandIf && t->name == IF)
+			{
+				stackPush(&conditionStack, IF);
+			}
+			else if(LLCall == commandWhile && t->name == WHILE)
+			{
+				stackPush(&conditionStack, WHILE);
+				stackPush(&whileStack, actualFunction[0]->code->top+1);
+			}
+			else if(LLCall == block && t->name == OPENBRACE)
+			{
+				++innerBraces;
+				if(!stackEmpty(conditionStack) && stackTop(&conditionStack) == IF)
+				{
+					generateInstruction(jmpFalse, NULL, NULL);
+					instruction = stackInstructionTop(&(actualFunction[0]->code));
+					// if(instruction->f == pushSVar) name = "push";
+					// 	else if(instruction->f == iReturn) name = "return";
+					// 	else if(instruction->f == concatenate) name = "concat";
+					// 	else if(instruction->f == add) name = "add";
+					// 	else if(instruction->f == sub) name = "sub";
+					// 	else if(instruction->f == division) name = "division";
+					// 	else if(instruction->f == mul) name = "mul";
+					// 	else if(instruction->f == assign) name = "assign";
+					// 	else if(instruction->f == iFunctionCall) name = "functionCall";
+					// 	else if(instruction->f == jmp) name = "jmp";
+					// 	else if(instruction->f == jmpFalse) name = "jmpFalse";
+					// 	else if(instruction->f == bigger) name = "bigger";
+					// 	else if(instruction->f == lesser) name = "lesser";
+					// 	else if(instruction->f == biggerEqual) name = "biggerEqual";
+					// 	else if(instruction->f == lesserEqual) name = "lesserEqual";
+					// 	else if(instruction->f == equal) name = "equal";
+					// 	else if(instruction->f == notEqual) name = "notEqual";
+					// 	else name = "undefined";
+
+					// 	DEBUG(name);
+					stackIfPush(&ifStack, 1, &(instruction->destination));
+				}
+				else if(!stackEmpty(conditionStack) && stackTop(&conditionStack) == WHILE)
+				{
+					generateInstruction(jmpFalse, NULL, NULL);
+					stackPush(&whileStack, actualFunction[0]->code->top);
+				}
+			}
+			else if(t->name == CLOSEBRACE)
+			{
+				--innerBraces;
+
+				if(innerBraces == 0 && inFunction)
+				{
+					generateInstruction(iReturn, NULL, NULL);
+					actualFunction[0] = actualFunction[1];
+					inFunction = false;
+				}
+				else if(!stackEmpty(conditionStack))
+				{
+					if(stackTop(&conditionStack) == IF)
+					{
+						stackPop(&conditionStack);
+						stackPush(&conditionStack, ELSE);
+
+						generateInstruction(jmp, NULL, NULL);
+						dstJump = stackIfTop(&ifStack);
+						*dstJump = actualFunction[0]->code->top+1;
+
+						instruction = stackInstructionTop(&(actualFunction[0]->code));
+						stackIfPush(&ifStack, -1, &(instruction->destination));
+					}
+					else if(stackTop(&conditionStack) == ELSE)
+					{
+						stackPop(&conditionStack);
+
+						dstJump = stackIfTop(&ifStack);
+						*dstJump = actualFunction[0]->code->top+1;
+						stackIfPop(&ifStack);
+					}
+					else if(stackTop(&conditionStack) == WHILE)
+					{
+						stackPop(&conditionStack);
+						generateInstruction(jmp, NULL, NULL);
+						instruction = stackInstructionTop(&(actualFunction[0]->code));
+						actualFunction[0]->code->data[stackPop(&whileStack)]->destination = actualFunction[0]->code->top+1;
+						instruction->destination = stackPop(&whileStack);
+					}
+				}
+
+			}
+			else if(LLCall == commandReturn)
+			{
+				waitingSemicolon = true;
+				generatedFunction = iReturn;
+			}
+			else if(LLCall == function && t->name == ID)
+			{
+				actualFunction[1] = actualFunction[0];
+				actualFunction[0] = BSTF_Insert(&functionTree, t->content);
+				innerBraces = 0;
+				inFunction = true;
+			}
+			else if((LLCall == paramList1 || LLCall == paramList2) && t->name == VAR)
+			{
+				generateParams(t);
+			}
+			else if(LLCall == functionCall && t->name == VAR)
+			{
+				topFunction = stackFuncTop(&stackFunctions);
+				destination = BSTV_Search(topFunction->variables, t->content);
+				waitingSemicolon = true;
+				generatedFunction = assign;
+				variableName = NULL;
+				// variableName = gmalloc(strlen(destination->key)+1,free);
+				// strcpy(variableName, destination->key);
+				calledFunctionName = destination->key;
+				destination = NULL;
+			}
+			else if(LLCall == functionCall && t->name == ID)
+			{
+				calledFunctionName = gmalloc(strlen(t->content)+1, free);
+				strcpy(calledFunctionName, t->content);
+			}
+			else if(isOperand(t->name) && (LLCall == argumentDouble || LLCall == argumentNull || LLCall == argumentBoolean || LLCall ==  argumentVar || LLCall == argumentInteger || LLCall == argumentString))
+			{
+				generateArguments(t, LLCall);
+			}
+			else if(LLCall == argumentList && t->name == CLOSEPAREN)
+			{
+				generateInstruction(iFunctionCall, NULL, calledFunctionName);
+			}
+
+			getToken(f, t);
+		}
+
+		if(breakParent) break;
+
+		LLCall = LLRule[LLTable[stackTop(&stack)-NONTERMINALBORDER][t->name]];
+
+		if(LLCall == NULL)
+		{
+			break;
+		}
+
+		LLCall(&stack, t);
+	}
+}
+
+int main (int argc, char *argv[])
+{
 	ginit();
-
 
 	stackVariables = gmalloc(sizeof(tStackVar), free);
 	stackVarInit(stackVariables, 8);
@@ -626,186 +847,61 @@ int main (int argc, char *argv[])
 	tToken *t = (tToken *) gmalloc(sizeof(tToken), free);
 	t->content = (char *) gmalloc(40, free);
 	tStack *stack = gmalloc(sizeof(tStack), free);
+
 	stackInit(stack, 2);
 
 	BSTF_Init(&functionTree);
 	actualFunction[0] = BSTF_Insert(&functionTree, "1");
-	BSTF_Print(functionTree);
+	// BSTF_Print(functionTree);
 	gadd(functionTree, BSTF_Dispose);
+	BSTF_Insert(&functionTree, "boolval");
+	BSTF_Insert(&functionTree, "intval");
+	BSTF_Insert(&functionTree, "strval");
+	BSTF_Insert(&functionTree, "doubleval");
+	BSTF_Insert(&functionTree, "put_string");
+	BSTF_Insert(&functionTree, "find_string");
+	BSTF_Insert(&functionTree, "sort_string");
+	BSTF_Insert(&functionTree, "get_substring");
+	BSTF_Insert(&functionTree, "get_string");
+	BSTF_Insert(&functionTree, "strlen");
 
 	stackFuncPush(&stackFunctions, actualFunction[0]);
-	tInstruction *instruction;
-	sFunction *topFunction;
 
-	// typ struktury tokenu
-	getToken(f, t);
-	stackPush(&stack, NPROGRAM);
-
-	while(t->name != END && !stackEmpty(stack))
-	{
-		while(stackTop(&stack) < NONTERMINALBORDER)
-		{
-
-			if(t->name == SEMICOLON && waitingSemicolon)
-			{
-				if(generatedFunction == pushSVar) {DEBUG("push");}
-				else if(generatedFunction == iReturn) {DEBUG("return");}
-				else if(generatedFunction == concatenate) {DEBUG("concat");}
-				else if(generatedFunction == add) {DEBUG("add");}
-				else if(generatedFunction == sub) {DEBUG("sub");}
-				else if(generatedFunction == division) {DEBUG("division");}
-				else if(generatedFunction == mul) {DEBUG("mul");}
-				else if(generatedFunction == assign) {DEBUG("assign");}
-				else if(generatedFunction == iFunctionCall) {DEBUG("functionCall");}
-				else DEBUG("undefined");
-				DEBUG("generuji");
-
-				generateInstruction(generatedFunction, destination, calledFunctionName);
-
-				waitingSemicolon = false;
-				generatedFunction = NULL;
-				destination = NULL;
-			}
-
-			if(stackPop(&stack) != t->name)
-			{
-				DEBUG("break parent konec");
-				breakParent = true;
-				// getToken(f, t);
-				break;
-			}
-
-			DEBUG(tokenNames[t->name]);
-			if(LLCall == commandVar && t->name == VAR)
-			{
-				printf("přidávám proměnnou: %s do funkce %s\n", t->content, actualFunction[0]->key);
-				// destination = gmalloc(sizeof(sVariable), free);
-				destination = BSTV_Insert(&(actualFunction[0]->variables), t->content);
-				printf("destination: %p\n", destination);
-				waitingSemicolon = true;
-				generatedFunction = assign;
-				BSTV_Print(actualFunction[0]);
-			}
-			else if(LLCall == function && t->name == ID)
-			{
-				actualFunction[1] = actualFunction[0];
-				actualFunction[0] = BSTF_Insert(&functionTree, t->content);
-				BSTF_Print(functionTree);
-				innerBraces = 0;
-				inFunction = true;
-			}
-			else if((LLCall == paramList1 || LLCall == paramList2) && t->name == VAR)
-			{
-				BSTV_Insert(&(actualFunction[0]->variables), t->content);
-				stackStringPush(&(actualFunction[0]->paramNames), t->content);
-				BSTV_Print(actualFunction[0]);
-			}
-			else if(LLCall == functionCall && t->name == VAR)
-			{
-				topFunction = stackFuncTop(&stackFunctions);
-				destination = BSTV_Search(topFunction->variables, t->content);
-				waitingSemicolon = true;
-				generatedFunction = assign;
-			}
-			else if(LLCall == functionCall && t->name == ID)
-			{
-				// waitingSemicolon = true;
-				// generatedFunction = iFunctionCall;
-				calledFunctionName = gmalloc(strlen(t->content)+1, free);
-				strcpy(calledFunctionName, t->content);
-			}
-			else if(isOperand(t->name) && (LLCall == argumentDouble || LLCall == argumentNull || LLCall == argumentBoolean || LLCall ==  argumentVar || LLCall == argumentInteger || LLCall == argumentString))
-			{
-				topFunction = stackFuncTop(&stackFunctions);
-				sVariable *argvar;
-
-				if(LLCall == argumentVar)
-				{
-					argvar = BSTV_Search(topFunction->variables , t->content);
-				}
-				else
-				{
-					argvar = generateLiteral(t);
-				}
-
-				generateInstruction(pushSVar, argvar, NULL);
-			}
-			else if(LLCall == argumentList && t->name == CLOSEPAREN)
-			{
-				generateInstruction(iFunctionCall, NULL, calledFunctionName);
-				calledFunctionName = NULL;
-			}
-			else if(t->name == OPENBRACE)
-			{
-				DEBUG("přidávám {");
-				++innerBraces;
-			}
-			else if(t->name == CLOSEBRACE)
-			{
-				DEBUG("closebraces:");
-				--innerBraces;
-				printf("%d\n", innerBraces);
-				printf("infcuntion %d\n", inFunction);
-				fflush(stdout);
-
-				if(innerBraces == 0 && inFunction)
-				{
-					DEBUG("kód funkce:");
-					fflush(stdout);
-					topFunction = stackFuncTop(&stackFunctions);
-					instruction = stackInstructionTop(&(topFunction->code));
-					if(instruction->f != iReturn) generateInstruction(iReturn, NULL, NULL);
-					printf("vylézám z funkce %s", actualFunction[0]->key);
-					printInstructionStack(actualFunction[0]->code);
-					actualFunction[0] = actualFunction[1];
-					inFunction = false;
-
-
-
-					DEBUG("konec");
-				}
-			}
-
-			getToken(f, t);
-		}
-
-		if(breakParent) break;
-
-		LLCall = LLRule[LLTable[stackTop(&stack)-NONTERMINALBORDER][t->name]];
-
-		if(LLCall == NULL)
-		{
-			DEBUG("není pravidlo ");
-			break;
-		}
-
-		LLCall(&stack, t);
-	}
+	parse(stack, t);
 
 	if(stackEmpty(stack) || t->name != END || stackTop(&stack) != END || stack->top != 0)
 	{
-		DEBUG("špatné ukončení programu");
+		// DEBUG("špatné ukončení programu");
 		printError(SYNTAXERR, SYNTAXERROR);
 	}
 
 	generateInstruction(iReturn, NULL, NULL);
-	printInstructionStack(stackFunctions->data[0]->code);
+	// printInstructionStack(stackFunctions->data[0]->code);
 
-	while(!stackFuncEmpty(stackFunctions))
-	{
-		topFunction = stackFuncTop(&stackFunctions);
-		instruction = topFunction->code->data[topFunction->codePosition++];
-		instruction->f(instruction->variable, instruction->functionName);
-	}
-
-	// sVariable *v = BSTV_Search(stackFunctions->data[0]->variables, "x");
-	// printf("%d", tokenNames[v->type]);
-	// printf("%s", v->value->stringv);
-	// v = BSTV_Search(stackFunctions->data[0]->variables, "y");
-	// printf("%f", v->value->doublev);
+	interpret();
 
 	gfreeAll();
 	fclose(f);
 
 	return 0;
 }
+//TODO
+// zpětná lomítka
+// samotný dollar se nesmí vyskytovat ve string
+// tiskne jen znaky větší než 31 31ux nebrat
+
+
+// findstring
+// doubleval
+// doubleval("3e");
+
+// 13 kdyz jsou dva stejne parametry dolarA dolarA
+// return musi bejt s vyrazemvyrazem
+
+//OPRAVENO
+// nedefinovana promenna v podminkove vetvi kera neprobehne
+// nedefinovana promena v else vetvi
+// lex  31654. je lex
+// 32123..31 je lex
+// neukončený řetězec
+// u volani funkce putstring kdyz praskneme nedefinovanou hodnotu tak to spadne

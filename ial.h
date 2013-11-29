@@ -23,7 +23,7 @@ sVariable* BSTV_Insert(sVariable ** node, char * key);
 void BSTV_Dispose(void * node);
 
 
-char * sort_string(char * str);
-int find_string(char * str, char * substr);
+char * IAL_sort_string(char * str);
+int IAL_find_string(char * str, char * substr);
 
 #endif

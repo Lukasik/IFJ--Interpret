@@ -45,6 +45,7 @@ int stackTop(tStack **s)
 	return (*s)->data[(*s)->top];
 }
 
+
 int stackTopTerminal(tStack **s, tStack **tmpStack, bool useTmpStack)
 {
 	for(int i = (*s)->top; i > -1; --i)
@@ -69,7 +70,7 @@ void printStack(tStack *s)
 {
 	int i = 0;
 
-	while(s->top - i >= 0) printf("%s ", tokenNames[s->data[i++]]);
+	while(s->top - i >= 0) printf("%d ", s->data[i++]);
 	printf("\n");
 }
 
@@ -224,9 +225,26 @@ void printInstructionStack(tStackInstruction *s)
 		else if(s->data[i]->f == mul) name = "mul";
 		else if(s->data[i]->f == assign) name = "assign";
 		else if(s->data[i]->f == iFunctionCall) name = "functionCall";
+		else if(s->data[i]->f == jmp) name = "jmp";
+		else if(s->data[i]->f == jmpFalse) name = "jmpFalse";
+		else if(s->data[i]->f == bigger) name = "bigger";
+		else if(s->data[i]->f == lesser) name = "lesser";
+		else if(s->data[i]->f == biggerEqual) name = "biggerEqual";
+		else if(s->data[i]->f == lesserEqual) name = "lesserEqual";
+		else if(s->data[i]->f == equal) name = "equal";
+		else if(s->data[i]->f == notEqual) name = "notEqual";
 		else name = "undefined";
+
+		if(s->data[i]->f == jmp || s->data[i]->f == jmpFalse)
+		{
+			printf("%d: %s cíl: %d\n", i, name, s->data[i]->destination);
+		}
+		else
+		{
+			printf("%d: %s\n", i, name);
+		}
+
 		i++;
-		DEBUG(name);
 	}
 	printf("\n");
 }
@@ -255,4 +273,52 @@ void stackStringPush(tStackString **s, char* data)
 
 	(*s)->data[++((*s)->top)] = new;
 	strcpy(new, data);
+}
+
+void stackIfInit(tStackIf *s, int size)
+{
+	s->top = -1;
+	s->max = size;
+	s->counter = 0;
+	s->data = gmalloc(sizeof(tIf*)*size, free);
+
+	if(s->data == NULL)
+	{
+		DEBUG("init");
+		printError(ALLOCERROR,INTERPRETERROR);
+	}
+}
+
+void stackIfPop(tStackIf **s)
+{
+	if((*s)->top == -1)
+	{
+		DEBUG("pop");
+		printError(STACKERROR, INTERPRETERROR);
+	}
+
+	(*s)->top -= 2;
+	(*s)->counter--;
+}
+
+void stackIfPush(tStackIf **s, int type, int *destination)
+{
+	if((*s)->top == (*s)->max-1)
+	{
+		grealloc((void **) &((*s)->data), &((*s)->max), sizeof(tIf));
+	}
+	(*s)->data[++((*s)->top)] = gmalloc(sizeof(tIf), free);
+	(*s)->data[(*s)->top]->type = (*s)->counter++ * type;
+	(*s)->data[(*s)->top]->destination = destination;
+}
+
+int * stackIfTop(tStackIf **s)
+{
+	if((*s)->top == -1)
+	{
+		DEBUG("top");
+		printError(STACKERROR, INTERPRETERROR);
+	}
+
+	return (*s)->data[(*s)->top]->destination;
 }

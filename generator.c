@@ -1,8 +1,4 @@
 #include "generator.h"
-#include "scanner.h"
-#include "stack.h"
-#include "structs.h"
-#include <stdbool.h>
 
 
 sVariable * duplicateTree(sVariable * root)
@@ -69,7 +65,7 @@ void duplicateFunction (sFunction *f)
 {
 	sFunction *tmpFunc = gmalloc (sizeof(sFunction), free);
 	memcpy(tmpFunc,f,sizeof(sFunction));
-	tmpFunc->codePosition=tmpFunc->whileCounter=tmpFunc->ifCounter=0;
+	tmpFunc->codePosition=0;
 	tmpFunc->variables=duplicateTree(f->variables);
 	stackFuncPush(&stackFunctions,tmpFunc);
 }
@@ -116,7 +112,7 @@ bool doubleInt (sVariable *par1,sVariable *par2)
 // -------------------------------------------------------------
 
 // instrukce souctu +
-void add (sVariable * param, char * function)
+void add (char * param, char * function)
 {
 	sVariable *par1, *par2, * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
@@ -157,7 +153,7 @@ void add (sVariable * param, char * function)
 
 
 // operace rozdilu -
-void sub (sVariable * param, char * function)
+void sub (char * param, char * function)
 {
 	sVariable *par1, *par2, * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
@@ -198,7 +194,7 @@ void sub (sVariable * param, char * function)
 
 
 // instrukce nasobeni
-void mul (sVariable * param, char * function)
+void mul (char * param, char * function)
 {
 	sVariable *par1, *par2, * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
@@ -238,7 +234,7 @@ void mul (sVariable * param, char * function)
 }
 
 // instrukce deleni, osetruje deleni nulou
-void division(sVariable * param, char * function)
+void division(char * param, char * function)
 {
 	sVariable *par1, *par2, * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
@@ -246,18 +242,17 @@ void division(sVariable * param, char * function)
 	par2 = stackVarPop(&stackVariables);
 	par1 = stackVarPop(&stackVariables);
 
+	source->type=DOUBLE;
 	// oba parametry int . vraci int
 	if (twoInts(par1,par2))
 	{
-		source->type=INTEGER;
 		if (par2->value->intv==0) printError(ZERODIVISION,ZERODIV);
-		source->value->intv=par1->value->intv / par2->value->intv;
+		source->value->doublev=par1->value->intv / (double)par2->value->intv;
 		stackVarPush(&stackVariables, source);
 	}
 	// oba double
 	else if (twoDoubles(par1,par2))
 	{
-		source->type=DOUBLE;
 		if (par2->value->doublev==0.0) printError(ZERODIVISION,ZERODIV);
 		source->value->doublev=par1->value->doublev / par2->value->doublev;
 		stackVarPush(&stackVariables, source);
@@ -265,7 +260,6 @@ void division(sVariable * param, char * function)
 	// double a int
 	else if (doubleInt(par1,par2))
 	{
-		source->type=DOUBLE;
 		if (par2->value->intv==0) printError(ZERODIVISION,ZERODIV);
 		source->value->doublev=par1->value->doublev / (double)par2->value->intv;
 		stackVarPush(&stackVariables, source);
@@ -273,7 +267,6 @@ void division(sVariable * param, char * function)
 	// int a double
 	else if (intDouble(par1,par2))
 	{
-		source->type=DOUBLE;
 		if (par2->value->doublev==0.0) printError(ZERODIVISION,ZERODIV);
 		source->value->doublev=(double)par1->value->intv / par2->value->doublev;
 		stackVarPush(&stackVariables, source);
@@ -297,7 +290,7 @@ int maxChars(int num)
 }
 
 // konkatenace retezcu
-void concatenate (sVariable * param, char * function)
+void concatenate (char * param, char * function)
 {
 	sVariable *par1, *par2, * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
@@ -345,7 +338,6 @@ void concatenate (sVariable * param, char * function)
 		case NULLV:
 			source->value->stringv = gmalloc (sizeof(char)*par1Length+1, free);
 			strcpy(source->value->stringv , par1->value->stringv);
-			stackVarPush(&stackVariables, source);
 			break;
 
 		case STRING:
@@ -362,7 +354,7 @@ void concatenate (sVariable * param, char * function)
 
 
 // operator ===
-void equal (sVariable * param, char * function)
+void equal (char * param, char * function)
 {
 	sVariable *par1, *par2, * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
@@ -405,7 +397,7 @@ void equal (sVariable * param, char * function)
 }
 
 // operator !==
-void notEqual (sVariable * param, char * function)
+void notEqual (char * param, char * function)
 {
 	sVariable *par1, *par2, * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
@@ -447,7 +439,7 @@ void notEqual (sVariable * param, char * function)
 }
 
 //operator >
-void bigger (sVariable * param, char * function)
+void bigger (char * param, char * function)
 {
 	sVariable *par1, *par2, * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
@@ -480,7 +472,7 @@ void bigger (sVariable * param, char * function)
 				break;
 
 			case NULLV:
-				 printError(INCOMPATIBLETYPE,INCOMPATIBLE);
+				source->value->boolv = false;
 				break;
 		}
 
@@ -489,7 +481,7 @@ void bigger (sVariable * param, char * function)
 }
 
 //operator <
-void lesser (sVariable * param, char * function)
+void lesser (char * param, char * function)
 {
 	sVariable *par1, *par2, * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
@@ -522,7 +514,7 @@ void lesser (sVariable * param, char * function)
 				break;
 
 			case NULLV:
-				 printError(INCOMPATIBLETYPE,INCOMPATIBLE);
+				source->value->boolv = false;
 				break;
 		}
 
@@ -531,7 +523,7 @@ void lesser (sVariable * param, char * function)
 }
 
 //operator <=
-void lesserEqual (sVariable * param, char * function)
+void lesserEqual (char * param, char * function)
 {
 	sVariable *par1, *par2, * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
@@ -564,7 +556,7 @@ void lesserEqual (sVariable * param, char * function)
 				break;
 
 			case NULLV:
-				 printError(INCOMPATIBLETYPE,INCOMPATIBLE);
+				 source->value->boolv = true;
 				break;
 		}
 
@@ -573,7 +565,7 @@ void lesserEqual (sVariable * param, char * function)
 }
 
 // operator >=
-void biggerEqual (sVariable * param, char * function)
+void biggerEqual (char * param, char * function)
 {
 	sVariable *par1, *par2, * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
@@ -605,7 +597,7 @@ void biggerEqual (sVariable * param, char * function)
 				break;
 
 			case NULLV:
-				 printError(INCOMPATIBLETYPE,INCOMPATIBLE);
+				source->value->boolv = true;
 				break;
 		}
 
@@ -620,71 +612,130 @@ void biggerEqual (sVariable * param, char * function)
 // pokud ano, naduplikuje ji, pushne na zasobnik funkci, pozici v kodu nastavi na 0
 
 //TODO
-void iFunctionCall (sVariable * param, char * function)
+void iFunctionCall (char * param, char * function)
 {
 	sFunction *topFunction, * func = BSTF_Search(functionTree, function);
 	if (func == NULL) printError(UNDECLAREDFUNCTION,FUNCTIONDEFINITIONERROR);
 
-	duplicateFunction(func);
-	topFunction = stackFuncTop(&stackFunctions);
-
-	// BSTV_Print(topFunction->variables);
-	int count=0;
-	sVariable *var;
-	sVariable * argument;
-
 	//TODO je vestavěná? -> může být putstring -> neomezené počet parametrů -> jiný přístup
-
-	// while(count <= 0)
-	while(count <= func->paramNames->top && count <= stackVariables->top)
+	if (strcmp(func->key,"boolval") == 0)
 	{
-		var = BSTV_Search(topFunction->variables, func->paramNames->data[count]);
-
-		argument = stackVariables->data[count++];
-		var->type = argument->type;
-		var->defined = true;
-
-		switch(var->type)
-		{
-			case DOUBLE:
-				var->value->doublev = argument->value->doublev;
-			break;
-
-			case INTEGER:
-				var->value->intv = argument->value->intv;
-				break;
-
-			case STRING:
-				var->value->stringv = gmalloc(sizeof(char)*strlen(argument->value->stringv)+1, free);
-				strcpy(var->value->stringv , argument->value->stringv);
-				break;
-
-			case BOOLEAN:
-				var->value->boolv = argument->value->boolv;
-				break;
-		}
+		if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+		stackVariables->top=0;
+		boolval();
 	}
+	else if (strcmp(func->key,"doubleval") == 0)
+	{
+		if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+		stackVariables->top=0;
+		doubleval();
+	}
+	else if (strcmp(func->key,"intval") == 0)
+	{
+		if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+		stackVariables->top=0;
+		intval();
+	}
+	else if (strcmp(func->key,"strval") == 0)
+	{
+		if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+		stackVariables->top=0;
+		strval();
+	}
+	else if (strcmp(func->key,"strlen") == 0)
+	{
+		if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+		stackVariables->top=0;
+		strlength();
+	}
+	else if (strcmp(func->key,"get_string") == 0)
+	{
+		stackVariables->top= -1;
+		get_string();
+	}
+	else if (strcmp(func->key,"put_string") == 0)
+	{
+		put_string();
+	}
+	else if (strcmp(func->key,"sort_string") == 0)
+	{
+		if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+		stackVariables->top = 0;
+		sort_string();
+	}
+	else if (strcmp(func->key,"find_string") == 0)
+	{
+		if (stackVariables->top < 1) printError(FEWPARAMETERS,PARAMMISSING);
+		stackVariables->top = 1;
+		find_string();
+	}
+	else if (strcmp(func->key,"get_substring") == 0)
+	{
+		if (stackVariables->top < 2) printError(FEWPARAMETERS,PARAMMISSING);
+		stackVariables->top = 2;
+		get_substring();
+	}
+	else
+	{
+		duplicateFunction(func);
+		topFunction = stackFuncTop(&stackFunctions);
 
-	// printf("counter parametrů: %d", count);
-	// printf("parametrů fce: %d", func->paramCount);
-	if(count < func->paramNames->top+1 ) printError(FEWPARAMETERS,PARAMMISSING);
-	stackVariables->top = -1;
+		// DEBUG(topFunction->key);
 
-	printf("ýýýýýýýýýýýýýýýýýýýýýýýýýý\n");
+		// BSTV_Print(topFunction->variables);
+		int count=0;
+		sVariable *var;
+		sVariable * argument;
+
+		while(count <= func->paramNames->top && count <= stackVariables->top)
+		{
+			var = BSTV_Search(topFunction->variables, func->paramNames->data[count]);
+
+			argument = stackVariables->data[count++];
+			var->type = argument->type;
+			var->defined = true;
+
+			switch(var->type)
+			{
+				case DOUBLE:
+					var->value->doublev = argument->value->doublev;
+				break;
+
+				case INTEGER:
+					var->value->intv = argument->value->intv;
+					break;
+
+				case STRING:
+					var->value->stringv = gmalloc(sizeof(char)*strlen(argument->value->stringv)+1, free);
+					strcpy(var->value->stringv , argument->value->stringv);
+					break;
+
+				case BOOLEAN:
+					var->value->boolv = argument->value->boolv;
+					break;
+			}
+		}
+
+		if(count < func->paramNames->top+1 ) printError(FEWPARAMETERS,PARAMMISSING);
+		stackVariables->top = -1;
+	}
 }
 
 
 // v parseru pri redukci <i -> E se naalokuje novy prvek, tato funkce na nej dostane ukazatel
 // a ten ve spravnou chvili strci na zasobnik
-void pushSVar(sVariable * param, char * function)
+void pushSVar(char * param, char * function)
 {
-	stackVarPush(&stackVariables, param);
+	sFunction *topFunction = stackFuncTop(&stackFunctions);
+	sVariable *var = BSTV_Search(topFunction->variables, param);
+	if(var == NULL || var->defined == false) printError(VARIABLENOTEXISTS, UNDECLAREDVARIABLE);
+	stackVarPush(&stackVariables, var);
 }
 
 
 // popne ze zasobniku funkci, pokracuje se na zasobniku funkci na pozici, codePosition
 // musi byt az za vyrazem
-void iReturn (sVariable * param, char * function)
+void iReturn (char * param, char * function)
 {
 	stackFuncPop(&stackFunctions);
 }
@@ -692,145 +743,95 @@ void iReturn (sVariable * param, char * function)
 
 // musi byt az za vyrazem / volanim fce
 // nahraje hodnotu z vrcholu zasobniku hodnot hodnotu pro assign do par1
-void assign (sVariable * param, char * function)
+void assign (char * param, char * function)
 {
 	sVariable * source = gmalloc(sizeof(sVariable),free);
 	source->value = gmalloc (sizeof(variableValue),free);
 	sVariable * top = NULL;
+	sFunction *topFunction = stackFuncTop(&stackFunctions);
+	sVariable *var = BSTV_Search(topFunction->variables, param);
+	var->defined = true;
 
 	if(stackVarEmpty(stackVariables))
 	{
-		param->type = NULLV;
+		var->type = NULLV;
 		return;
 	}
 
 	top = stackVarPop(&stackVariables);
-	param->type = top->type;
+
+	var->type = top->type; //TADY SE D8V8 NULLV
+
 	switch (top->type)
 	{
 		case DOUBLE:
-			param->value->doublev = top->value->doublev;
+			var->value->doublev = top->value->doublev;
 			break;
 
 		case INTEGER:
-			param->value->intv = top->value->intv;
+			var->value->intv = top->value->intv;
 			break;
 
 		case STRING:
-			if (param->value->stringv != NULL) free(param->value->stringv);
+			if (var->value->stringv != NULL) gfree(var->value->stringv);
 
-			param->value->stringv = gmalloc(sizeof(char)*strlen(top->value->stringv)+1, free);
-			strcpy(param->value->stringv , top->value->stringv);
+			var->value->stringv = gmalloc(sizeof(char)*(strlen(top->value->stringv)+1), free);
+			strcpy(var->value->stringv , top->value->stringv);
 			break;
 
 		case BOOLEAN:
-			param->value->boolv = top->value->boolv;
+			var->value->boolv = top->value->boolv;
 			break;
 	}
+
 }
 
 
 // skoc, pokud vyraz podminky if je false
 // dava se az za vyraz podminky
-void jmpIfFalseIF (sVariable * param, char * function)
-{
-	sVariable * top = stackVarPop(&stackVariables);
-	bool result;
-	switch (top->type)
-	{
-		case DOUBLE:
-			if (top->value->doublev==0.0) result=false;
-			else result=true;
-			break;
-
-		case INTEGER:
-			if (top->value->intv==0) result=false;
-			else result=true;
-			break;
-
-		case STRING:
-			if (strcmp("",top->value->stringv)==0) result=false;
-			else result=true;
-			break;
-
-		case BOOLEAN:
-			result=top->value->boolv;
-			break;
-
-		case NULLV:
-			result=false;
-		break;
-	}
-
-	if (result==false)
-	{
-		sFunction *f = stackFuncTop(&stackFunctions);
-		f->codePosition = f->elseBranches[f->ifCounter++];
-	}
-}
-
-
-// stejne jako jmpIFFalseIF, jen pro while
-void jmpIfFalseWHILE (sVariable * param, char * function)
-{
-	sVariable * top = stackVarPop(&stackVariables);
-	bool result;
-	switch (top->type)
-	{
-		case DOUBLE:
-			if (top->value->doublev==0.0) result=false;
-			else result=true;
-			break;
-
-		case INTEGER:
-			if (top->value->intv==0) result=false;
-			else result=true;
-			break;
-
-		case STRING:
-			if (strcmp("",top->value->stringv)==0) result=false;
-			else result=true;
-			break;
-
-		case BOOLEAN:
-			result=top->value->boolv;
-			break;
-
-		case NULLV:
-			result=false;
-		break;
-	}
-
-	if (result==false)
-	{
-		sFunction *f = stackFuncTop(&stackFunctions);
-		f->codePosition = f->whileBranches[f->whileCounter++];
-	}
-}
-
-
-
-// nepodminene skoky, provedou se vzdy
-void jmpIF (sVariable * param, char * function)
+void jmpFalse (char * param, char * function)
 {
 	sFunction *f = stackFuncTop(&stackFunctions);
-	f->codePosition = f->ifEnds[f->ifCounter++];
+
+	boolval();
+
+	sVariable * top = stackVarPop(&stackVariables);
+
+	if (top->value->boolv==false)
+	{
+		f->codePosition = f->code->data[f->codePosition-1]->destination;
+	}
 }
 
-void jmpWHILE (sVariable * param, char * function)
+void jmp(char * param, char * function)
 {
 	sFunction *f = stackFuncTop(&stackFunctions);
-	f->codePosition = f->whileEnds[f->whileCounter++];
+	f->codePosition = f->code->data[f->codePosition-1]->destination;
 }
 
-void generateInstruction(instructionFunction *f, sVariable *var, char * name)
+void generateInstruction(instructionFunction *f, char *var, char * name)
 {
 	tInstruction *instruction;
-	// sFunction *topFunction = stackFuncTop(&stackFunctions);
 
 	instruction = gmalloc(sizeof(tInstruction), free);
 	instruction->f = f;
 	instruction->variable = var;
 	instruction->functionName = name;
+	instruction->destination = 0;
 	stackInstructionPush(&(actualFunction[0]->code), instruction);
+}
+
+void interpret(void)
+{
+	sFunction * topFunction;
+	tInstruction * instruction;
+	char*name;
+
+	while(!stackFuncEmpty(stackFunctions))
+	{
+		topFunction = stackFuncTop(&stackFunctions);
+		instruction = topFunction->code->data[topFunction->codePosition++];
+		instruction->f(instruction->variable, instruction->functionName);
+	}
+
 }

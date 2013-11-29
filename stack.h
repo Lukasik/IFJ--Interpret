@@ -38,5 +38,10 @@ tInstruction * stackInstructionTop(tStackInstruction **s);
 void stackStringPush(tStackString **s, char* data);
 void stackStringInit(tStackString *s, int size);
 
+int * stackIfTop(tStackIf **s);
+void stackIfPush(tStackIf **s, int type, int *destination);
+void stackIfPop(tStackIf **s);
+void stackIfInit(tStackIf *s, int size);
+
 
 #endif

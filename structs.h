@@ -36,17 +36,18 @@ typedef struct sVariable
 	bool defined;
 	char *key;
 	unsigned type;
-	union variableValue *value;
+	variableValue *value;
 	struct sVariable * lptr;
 	struct sVariable * rptr;
 } sVariable;
 
-typedef void (instructionFunction) (sVariable *, char *);
+typedef void (instructionFunction) (char *, char *);
 
 typedef struct tInstruction
 {
 	instructionFunction *f;
-	sVariable *variable;
+	char *variable;
+	int destination;
 	char *functionName; //název volané funkce
 } tInstruction;
 
@@ -67,14 +68,6 @@ typedef struct tStackString
 typedef struct sFunction
 {
 	struct sVariable * variables;
-	unsigned *elseBranches;
-	unsigned *ifEnds;
-	unsigned ifCounter;
-	unsigned whileCounter;
-	unsigned ifMax;
-	unsigned *whileBranches;
-	unsigned *whileEnds;
-	unsigned whileMax;
 	bool defined;
 	tStackInstruction *code;
 	unsigned codePosition;
@@ -97,6 +90,20 @@ typedef struct tStackFunc
 	int max;
 	sFunction **data;
 } tStackFunc;
+
+typedef struct tIf
+{
+	int type;
+	int *destination;
+} tIf;
+
+typedef struct tStackIf
+{
+	int top;
+	int max;
+	int counter;
+	tIf **data;
+} tStackIf;
 
 typedef void (LLFunction)(tStack **, tToken*);
 
