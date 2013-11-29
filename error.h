@@ -26,6 +26,7 @@ enum errs
 	ZERODIVISION,
 	UNDECLAREDFUNCTION,
 	FEWPARAMETERS,
+	OTHERSERRS,
 };
 
 // navratove kody programu
@@ -39,7 +40,7 @@ enum returns
 	INCOMPATIBLE=12,
 	ZERODIV=10,
 	PARAMMISSING=4,
-	
+	OTHERS=13,
 };
 
 #endif
