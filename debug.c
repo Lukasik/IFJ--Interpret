@@ -60,6 +60,7 @@ char* tokenNames[256] = {
 	[REDUCE] = "REDUCE",
 	[SHIFT] = "SHIFT",
 	[EQUALSIGN] = "EQUALSIGN",
+	[NEXPRESSIONPAREN] = "NEXPRESSIONPAREN",
 };
 
 void BSTF_Print2(sFunction* TempTree, char* sufix, char fromdir)
