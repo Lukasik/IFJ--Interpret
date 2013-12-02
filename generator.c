@@ -825,7 +825,6 @@ void interpret(void)
 {
 	sFunction * topFunction;
 	tInstruction * instruction;
-	char*name;
 
 	while(!stackFuncEmpty(stackFunctions))
 	{

@@ -27,6 +27,8 @@ enum errs
 	UNDECLAREDFUNCTION,
 	FEWPARAMETERS,
 	OTHERSERRS,
+	RETYPEERR,
+	SAMEPARAM,
 };
 
 // navratove kody programu
@@ -41,6 +43,7 @@ enum returns
 	ZERODIV=10,
 	PARAMMISSING=4,
 	OTHERS=13,
+	RETYPE=11,
 };
 
 #endif

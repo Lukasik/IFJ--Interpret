@@ -6,13 +6,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "stack.h"
 #include "structs.h"
 #include "scanner.h"
 #include "error.h"
 #include "ial.h"
 #include "garbage.h"
 #include "debug.h"
-#include "stack.h"
 #include "generator.h"
 
 // enum pro navraty z funkce v parser.c
@@ -98,7 +98,6 @@ void argumentArgumentList1(tStack **s, tToken *t);
 void paramList1(tStack **s, tToken *t);
 void paramList2(tStack **s, tToken *t);
 void program(tStack **s, tToken *t);
-void returnEnd(tStack **s, tToken *t);
 void returnExpression(tStack **s, tToken *t);
 void statement(tStack **s, tToken *t);
 void statementFunction(tStack **s, tToken *t);

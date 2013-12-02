@@ -299,21 +299,28 @@ int isString (FILE *f, int c, char **content)
 {
 	int hlpc='"';
 	int index=0;
-	int discard=0;
 
 	if (c == '"') // zacatek retezce
 	{
 		// dokud neni druha " nebo EOF, dava pozor aby tam nebylo \"
 		while (((c=fgetc(f))!='"' || hlpc=='\\') && c!=EOF)
 		{
-			hlpc=c;
+
 			if (c<32) continue;
 			else if(c=='$' && hlpc!='\\') return -1;
-
+			else if(c=='\\') {
+				hlpc = '\\';
+				continue;
+			}
+			else if(hlpc == '\\' && c == 't') c = '\t';
+			else if(hlpc == '\\' && c == 'n') c = '\n';
+			else if(hlpc == '\\' && c == '"') c = '"';
+			else if(hlpc == '\\') insertChar(&index, content, '\\');
+			hlpc=c;
 			insertChar(&index,content,c);
 		}
 
-		if (c==EOF || c != '"') return -1;
+		if (c != '"') return -1;
 
 		insertChar(&index,content,'\0');
 		return STRING;
@@ -345,11 +352,12 @@ bool findToken(FILE *f, tToken *t)
 
 
 	// nacte prvni znak v poradi po bilych znacich a mezerach
-	while((ec=CommentsAndWhitespaces(f))==1)
+	while((ec=CommentsAndWhitespaces(f))!=0)
 	{
 		if (ec == INVALIDCHAR)
 		{
 			t->name = INVALIDCHAR;
+			return false;
 		}
 	}
 

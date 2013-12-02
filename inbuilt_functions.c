@@ -45,6 +45,8 @@ void boolval(void) {
 void doubleval(void) {
     sVariable * retVal = gmalloc(sizeof(sVariable),free);
     retVal->value = gmalloc(sizeof(variableValue),free);
+    int index = 0;
+    char* str;
 
     sVariable * term = stackVarPop(&stackVariables);
 
@@ -71,8 +73,41 @@ void doubleval(void) {
             break;
 
         case STRING:
-            if(term->value->stringv[0] == '-') retVal->value->doublev = 0;
-            else sscanf(term->value->stringv, "%g", &(retVal->value->doublev));
+            str = term->value->stringv;
+
+            if(!isdigit(*str))
+            {
+                retVal->value->doublev = 0.0;
+                break;
+            }
+
+            while(isdigit(str[index])) index++;
+
+            if(str[index] == '.')
+            {
+                if(!isdigit(str[++index]))
+                    printError(RETYPEERR, RETYPE);
+                while(isdigit(str[index])) ++index;
+            }
+
+            if(tolower(str[index]) == 'e')
+            {
+                ++index;
+                if(!isdigit(str[index]))
+                {
+                    if(str[index] != '+' && str[index] != '-')
+                    {
+                        printError(RETYPEERR, RETYPE);
+                    }
+                    else
+                    {
+                        ++index;
+                        if(!isdigit(str[index])) printError(RETYPEERR, RETYPE);
+                    }
+                }
+            }
+
+            sscanf(term->value->stringv, "%lf", &(retVal->value->doublev));
             break;
     }
 
@@ -197,8 +232,7 @@ void put_string(void) {
 
             switch(term->type)
             {
-                case NULLV: printf("");break;
-                case BOOLEAN: term->value->boolv ? printf("1") : printf("");break;
+                case BOOLEAN: if(term->value->boolv) printf("1");break;
                 case INTEGER:printf("%d",term->value->intv);break;
                 case DOUBLE:printf("%g",term->value->doublev);break;
                 case STRING:printf("%s", term->value->stringv);break;

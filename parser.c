@@ -48,7 +48,7 @@ LLFunction *LLRule[] =
 	closeparen,
 	paramList2,
 	program,
-	returnEnd,
+	NULL,
 	returnExpression,
 	statementCommand,
 	statementFunction,
@@ -71,7 +71,7 @@ int LLTable[][36] =
 	{0,0,0,0,0,0,0,0,0,0,0,0,22,0,0,0,23,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0,0,0,24,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,25,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,26,0},
-	{0,0,0,0,0,0,0,0,0,0,0,28,0,0,27,0,28,28,28,28,28,28,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0,0,28,0,0,0,0,28,28,28,28,28,28,0,0,0,0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,0,29,0,0,0,0,0,29,29,29,0,30,0,0,0,0,0,0,0,31},
 	{0,0,0,0,0,0,0,0,0,0,0,32,0,0,0,0,32,32,32,32,32,32,0,0,0,0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0,0,33,0,0,0,0,33,33,33,33,33,33,0,0,0,0,0,0,0,0,0,0,0,0,0}
@@ -293,12 +293,6 @@ void program(tStack **s, tToken *t)
 	stackPush(s, BEGIN);
 }
 
-void returnEnd(tStack **s, tToken *t)
-{
-	stackPop(s);
-	stackPush(s, SEMICOLON);
-}
-
 void returnExpression(tStack **s, tToken *t)
 {
 	stackPop(s);
@@ -354,6 +348,7 @@ void expression(tStack **s, tToken *t)
 				if(isOperand(t->name) && t->name != VAR)
 				{
 					variable = generateLiteral(t);
+					stackVarPush(&stackVar, variable);
 				}
 				else if(t->name == VAR)
 				{
@@ -363,9 +358,10 @@ void expression(tStack **s, tToken *t)
 					{
 						printError(VARIABLENOTEXISTS, UNDECLAREDVARIABLE);
 					}
+					stackVarPush(&stackVar, variable);
 				}
 
-				stackVarPush(&stackVar, variable);
+
 				shift(s, &tmpStack, t);
 				break;
 
@@ -389,24 +385,24 @@ char * escapeSequences(char * str)
 {
 	int index = -1;
 	char substr[5];
-	char *replacements[][2] =
-	{
-		{"\\t", "\t"},
-		{"\\n", "\n"},
-		{"\\\\", "\\"},
-		{"\\\"", "\""},
-		{"\\$", "$"}
-	};
+	// char *replacements[][2] =
+	// {
+	// 	{"\\t", "\t"},
+	// 	{"\\n", "\n"},
+	// 	{"\\\\", "\\"},
+	// 	{"\\\"", "\""},
+	// 	{"\\$", "$"},
+	// };
 
-	for(int i = 0; i < 5; ++i)
-	{
-		sprintf(substr, "%s", replacements[i][0]);
-		while((index = IAL_find_string(str, substr)) > -1)
-		{
-			str[index] = replacements[i][1][0];
-			shiftString(str, index+1, 1);
-		}
-	}
+	// for(int i = 0; i < 5; ++i)
+	// {
+	// 	sprintf(substr, "%s", replacements[i][0]);
+	// 	while((index = IAL_find_string(str, substr)) > -1)
+	// 	{
+	// 		str[index] = replacements[i][1][0];
+	// 		shiftString(str, index+1, 1);
+	// 	}
+	// }
 
 	for(int i = 0; i <= 255; ++i)
 	{
@@ -599,6 +595,7 @@ sVariable * generateLiteral(tToken *t)
 
 void generateParams(tToken *t)
 {
+	if(BSTV_Search(actualFunction[0]->variables, t->content) != NULL) printError(SAMEPARAM, OTHERS);
 	BSTV_Insert(&(actualFunction[0]->variables), t->content);
 	stackStringPush(&(actualFunction[0]->paramNames), t->content);
 }
@@ -612,7 +609,7 @@ void generateArguments(tToken *t, LLFunction *LLCall)
 	if(LLCall == argumentVar)
 	{
 		argvar = BSTV_Search(topFunction->variables , t->content);
-
+		if(argvar == NULL) argvar = BSTV_Insert(&(topFunction->variables), t->content);
 	}
 	else
 	{
@@ -635,7 +632,7 @@ void parse(tStack *stack, tToken *t)
 	int innerBraces = 0;
 	int *dstJump;
 	char* variableName;
-	LLFunction *LLCall;
+	LLFunction *LLCall = NULL;
 	tInstruction *instruction;
 	sFunction *topFunction;
 
@@ -695,26 +692,6 @@ void parse(tStack *stack, tToken *t)
 				{
 					generateInstruction(jmpFalse, NULL, NULL);
 					instruction = stackInstructionTop(&(actualFunction[0]->code));
-					// if(instruction->f == pushSVar) name = "push";
-					// 	else if(instruction->f == iReturn) name = "return";
-					// 	else if(instruction->f == concatenate) name = "concat";
-					// 	else if(instruction->f == add) name = "add";
-					// 	else if(instruction->f == sub) name = "sub";
-					// 	else if(instruction->f == division) name = "division";
-					// 	else if(instruction->f == mul) name = "mul";
-					// 	else if(instruction->f == assign) name = "assign";
-					// 	else if(instruction->f == iFunctionCall) name = "functionCall";
-					// 	else if(instruction->f == jmp) name = "jmp";
-					// 	else if(instruction->f == jmpFalse) name = "jmpFalse";
-					// 	else if(instruction->f == bigger) name = "bigger";
-					// 	else if(instruction->f == lesser) name = "lesser";
-					// 	else if(instruction->f == biggerEqual) name = "biggerEqual";
-					// 	else if(instruction->f == lesserEqual) name = "lesserEqual";
-					// 	else if(instruction->f == equal) name = "equal";
-					// 	else if(instruction->f == notEqual) name = "notEqual";
-					// 	else name = "undefined";
-
-					// 	DEBUG(name);
 					stackIfPush(&ifStack, 1, &(instruction->destination));
 				}
 				else if(!stackEmpty(conditionStack) && stackTop(&conditionStack) == WHILE)
@@ -885,23 +862,3 @@ int main (int argc, char *argv[])
 
 	return 0;
 }
-//TODO
-// zpětná lomítka
-// samotný dollar se nesmí vyskytovat ve string
-// tiskne jen znaky větší než 31 31ux nebrat
-
-
-// findstring
-// doubleval
-// doubleval("3e");
-
-// 13 kdyz jsou dva stejne parametry dolarA dolarA
-// return musi bejt s vyrazemvyrazem
-
-//OPRAVENO
-// nedefinovana promenna v podminkove vetvi kera neprobehne
-// nedefinovana promena v else vetvi
-// lex  31654. je lex
-// 32123..31 je lex
-// neukončený řetězec
-// u volani funkce putstring kdyz praskneme nedefinovanou hodnotu tak to spadne
