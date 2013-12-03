@@ -1,0 +1,10 @@
+<?php
+$x = boolval("");
+if ($x)
+{
+	put_string("ne");
+}
+else
+{
+	put_string("ano");
+}
