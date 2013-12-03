@@ -12,7 +12,7 @@ do
 	codeShould=`./getCode $testfile`
 	./${binary} $testfile > ${testfile%.php}.out.tmp 2>/dev/null
 	codeReal=$?
-	printf "%11s: %d (%d) " ${testfile:6} ${codeReal} ${codeShould}
+	printf "%11s: %2d " ${testfile:6} ${codeReal}
 
 	if [ $codeReal -eq $codeShould ];
 	then
