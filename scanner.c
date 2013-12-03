@@ -299,23 +299,77 @@ int isString (FILE *f, int c, char **content)
 {
 	int hlpc='"';
 	int index=0;
+	int handled = 0;
+	char* endptr;
+	char replaced[5] = {'\0'};
 
 	if (c == '"') // zacatek retezce
 	{
 		// dokud neni druha " nebo EOF, dava pozor aby tam nebylo \"
-		while (((c=fgetc(f))!='"' || hlpc=='\\') && c!=EOF)
+		while (((c=fgetc(f))!='"' || (hlpc=='\\' && handled == 1)) && c!=EOF)
 		{
-
 			if (c<32) continue;
-			else if(c=='$' && hlpc!='\\') return -1;
-			else if(c=='\\') {
-				hlpc = '\\';
+			else if(c == '\\' && handled == 0)
+			{
+				hlpc = c;
+
+				replaced[0] = '\\';
+				handled = 1;
 				continue;
 			}
-			else if(hlpc == '\\' && c == 't') c = '\t';
-			else if(hlpc == '\\' && c == 'n') c = '\n';
-			else if(hlpc == '\\' && c == '"') c = '"';
-			else if(hlpc == '\\') insertChar(&index, content, '\\');
+			else if(handled == 1)
+			{
+				hlpc = c;
+				handled = 0;
+				switch(c)
+				{
+					case '\\':
+					case '$':
+					case '"':break;
+					case 't': c='\t'; break;
+					case 'n': c='\n'; break;
+					case 'x': replaced[1] = 'x'; handled = 2;continue;break;
+					default: insertChar(&index,content,'\\');continue;
+				}
+			}
+			else if(handled == 2)
+			{
+				hlpc = c;
+				if(isxdigit(c))
+				{
+					handled = 3;
+					replaced[2] = c;
+					continue;
+				}
+				else
+				{
+					handled = 0;
+					insertChar(&index,content, replaced[0]);
+					insertChar(&index,content, replaced[1]);
+				}
+			}
+			else if(handled == 3)
+			{
+				hlpc = c;
+				if(isxdigit(c))
+				{
+					replaced[3] = c;
+					handled = strtol(&(replaced[2]), &endptr, 16);
+					// printf("handled: %c\n", handled);
+					insertChar(&index, content, handled);
+					handled = 0;
+					continue;
+				}
+				else
+				{
+					handled = 0;
+					insertChar(&index,content, replaced[0]);
+					insertChar(&index,content, replaced[1]);
+					insertChar(&index,content, replaced[2]);
+				}
+			}
+			else if(c == '$') return -1;
+
 			hlpc=c;
 			insertChar(&index,content,c);
 		}

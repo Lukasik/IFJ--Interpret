@@ -383,8 +383,8 @@ void expression(tStack **s, tToken *t)
 //TODO volat při výpisu
 char * escapeSequences(char * str)
 {
-	int index = -1;
-	char substr[5];
+	// int index = -1;
+	// char substr[5];
 	// char *replacements[][2] =
 	// {
 	// 	{"\\t", "\t"},
@@ -404,23 +404,23 @@ char * escapeSequences(char * str)
 	// 	}
 	// }
 
-	for(int i = 0; i <= 255; ++i)
-	{
-		sprintf(substr, "\\x%.2X", i);
-		// DEBUG(substr);
-		while((index = IAL_find_string(str, substr)) > -1)
-		{
-			str[index] = i;
-			shiftString(str, index+1, 3);
-		}
+	// for(int i = 0; i <= 255; ++i)
+	// {
+	// 	sprintf(substr, "\\x%.2X", i);
+	// 	// DEBUG(substr);
+	// 	while((index = IAL_find_string(str, substr)) > -1)
+	// 	{
+	// 		str[index] = i;
+	// 		shiftString(str, index+1, 3);
+	// 	}
 
-		sprintf(substr, "\\x%.2x", i);
-		while((index = IAL_find_string(str, substr)) > -1)
-		{
-			str[index] = i;
-			shiftString(str, index+1, 3);
-		}
-	}
+	// 	sprintf(substr, "\\x%.2x", i);
+	// 	while((index = IAL_find_string(str, substr)) > -1)
+	// 	{
+	// 		str[index] = i;
+	// 		shiftString(str, index+1, 3);
+	// 	}
+	// }
 
 	char * new = gmalloc(strlen(str)+1, free);
 	strcpy(new, str);
@@ -631,7 +631,7 @@ void parse(tStack *stack, tToken *t)
 	char * calledFunctionName = NULL;
 	int innerBraces = 0;
 	int *dstJump;
-	char* variableName;
+	char* variableName = NULL;
 	LLFunction *LLCall = NULL;
 	tInstruction *instruction;
 	sFunction *topFunction;
@@ -674,7 +674,6 @@ void parse(tStack *stack, tToken *t)
 				generatedFunction = assign;
 				variableName = gmalloc(strlen(destination->key)+1,free);
 				strcpy(variableName, destination->key);
-				// destination = NULL;
 			}
 			else if(LLCall == commandIf && t->name == IF)
 			{
@@ -766,8 +765,6 @@ void parse(tStack *stack, tToken *t)
 				waitingSemicolon = true;
 				generatedFunction = assign;
 				variableName = NULL;
-				// variableName = gmalloc(strlen(destination->key)+1,free);
-				// strcpy(variableName, destination->key);
 				calledFunctionName = destination->key;
 				destination = NULL;
 			}
@@ -848,12 +845,10 @@ int main (int argc, char *argv[])
 
 	if(stackEmpty(stack) || t->name != END || stackTop(&stack) != END || stack->top != 0)
 	{
-		// DEBUG("špatné ukončení programu");
 		printError(SYNTAXERR, SYNTAXERROR);
 	}
 
 	generateInstruction(iReturn, NULL, NULL);
-	// printInstructionStack(stackFunctions->data[0]->code);
 
 	interpret();
 
