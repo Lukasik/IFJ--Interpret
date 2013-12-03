@@ -142,7 +142,7 @@ void stackFuncPush(tStackFunc **s, sFunction * data)
 {
 	if((*s)->top == (*s)->max-1)
 	{
-		grealloc((void **) s, &((*s)->max), sizeof(int));
+		grealloc((void **) &((*s)->data), &((*s)->max), sizeof(sFunction));
 	}
 
 	(*s)->data[++((*s)->top)] = data;
