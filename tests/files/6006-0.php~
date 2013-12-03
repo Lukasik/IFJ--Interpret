@@ -1,0 +1,47 @@
+<?php
+$x = 100;
+$y = 6;
+while ($x - $y > 10)
+{
+	$x = $x - 1;
+	if($x > 50)
+	{
+		printf($x);
+		if($x > 25)
+		{
+			printf($x);
+			if($x > 40)
+			{
+				printf($x);
+			}
+			else
+			{
+				printf($x);
+			}
+		}
+		else
+		{
+			printf($x);
+		}
+	}
+	else
+	{
+		printf($x);
+		if($x < 20)
+		{
+			printf($x);
+			if($x < 74)
+			{
+				printf($x);
+			}
+			else
+			{
+				printf($x);
+			}
+		}
+		else
+		{
+			printf($x);
+		}
+	}
+}

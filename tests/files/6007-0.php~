@@ -1,0 +1,33 @@
+<?php
+$w = intval("\x31\x32\x33");
+$x = boolval("\x31\x32\x33");
+$y = doubleval("\x31\x32\x33");
+$z = strval("\x31\x32\x33");
+
+if($w > 100) {
+	$e = printf("ano\n");
+}
+else {
+	$e = printf("ne\n");
+}
+
+if($x) {
+	$e = printf("ano\n");
+}
+else {
+	$e = printf("ne\n");
+}
+
+if($y < 100.0) {
+	$e = printf("ne\n");
+}
+else {
+	$e = printf("ano\n");
+}
+
+if($z) {
+	$e = printf("ano\n");
+}
+else {
+	$e = printf("ne\n");
+}
