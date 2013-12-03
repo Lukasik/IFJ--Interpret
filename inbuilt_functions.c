@@ -172,7 +172,7 @@ void strval(void) {
             }
             else {
                 retVal->value->stringv = gmalloc(1*sizeof(char), free);
-                strcpy(retVal->value->stringv, "0");
+                strcpy(retVal->value->stringv, "");
             }
             break;
 
@@ -183,6 +183,7 @@ void strval(void) {
 
         case DOUBLE:
             retVal->value->stringv = gmalloc(sizeof(char)*36, free); //max delka double
+            // printf("double: %g\n", term->value->doublev);
             sprintf(retVal->value->stringv,"%g",term->value->doublev);
             break;
 
