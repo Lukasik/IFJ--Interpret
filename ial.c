@@ -308,7 +308,7 @@ int IAL_find_string(char * str, char * substr) {
                 break;
             }
         }
-        position += sub_lenght;
+        ++position;
     }
     return res_pos;
 }
