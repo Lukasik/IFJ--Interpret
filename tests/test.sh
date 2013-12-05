@@ -10,7 +10,14 @@ rm -f files/*.out.tmp 2> /dev/null >&2
 ls files/*.php | while read testfile
 do
 	codeShould=`./getCode $testfile`
-	./${binary} $testfile > ${testfile%.php}.out.tmp 2>/dev/null
+
+	if [ -f ${testfile%.php}".in" ];
+	then
+		input=${testfile%.php}".in"
+	else
+		input=/dev/null
+	fi
+	./${binary} $testfile < ${input} > ${testfile%.php}.out.tmp 2>/dev/null
 	codeReal=$?
 	printf "%11s: %2d " ${testfile:6} ${codeReal}
 
