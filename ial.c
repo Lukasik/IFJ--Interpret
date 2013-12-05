@@ -92,15 +92,24 @@ tVariable * BSTV_Search(tVariable * node, char * key) {
     if(node != NULL) {
         int compare = strcmp(key, node->key);
 
-        if(compare == 0) {
-            return node;
+        while(compare != 0)
+        {
+            if(compare > 0)
+            {
+                node = node->rptr;
+            }
+            else
+            {
+                node = node->lptr;
+            }
+
+            if(node == NULL) return NULL;
+
+            compare = strcmp(key, node->key);
         }
-        else if(compare > 0) {
-            return BSTV_Search(node->rptr, key);
-        }
-        else {
-            return BSTV_Search(node->lptr, key);
-        }
+
+        return node;
+
     }
     return NULL;
 }
@@ -115,6 +124,7 @@ tVariable* BSTV_Insert(tVariable ** node, char * key) {
         newElement->defined = false;
         newElement->value = (tVariableValue*) gmalloc(sizeof(tVariableValue), free);
         newElement->value->stringv = NULL;
+        newElement->usable = false;
 
         *node=newElement;
         return newElement;
@@ -141,6 +151,7 @@ tVariable* BSTV_Insert(tVariable ** node, char * key) {
         newElement->defined = false;
         newElement->value = (tVariableValue*) gmalloc(sizeof(tVariableValue), free);
         newElement->value->stringv = NULL;
+        newElement->usable = false;
 
         if (strcmp(tmp->key, key) > 0) tmp->lptr=newElement;
         else tmp->rptr=newElement;
