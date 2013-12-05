@@ -9,15 +9,15 @@
 #include "inbuilt_functions.h"
 
 
-extern sFunction * functionTree;
+extern tFunction * functionTree;
 
-void duplicateFunction (sFunction *f);
-bool isInt (sVariable *var);
-bool isDouble (sVariable *var);
-bool twoInts (sVariable *par1,sVariable *par2);
-bool twoDoubles (sVariable *par1,sVariable *par2);
-bool intDouble (sVariable *par1,sVariable *par2);
-bool doubleInt (sVariable *par1,sVariable *par2);
+void duplicateFunction (tFunction *f);
+bool isInt (tVariable *var);
+bool isDouble (tVariable *var);
+bool twoInts (tVariable *par1,tVariable *par2);
+bool twoDoubles (tVariable *par1,tVariable *par2);
+bool intDouble (tVariable *par1,tVariable *par2);
+bool doubleInt (tVariable *par1,tVariable *par2);
 void add (char * param, char * function);
 void sub (char * param, char * function);
 void mul (char * param, char * function);

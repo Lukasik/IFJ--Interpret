@@ -9,12 +9,12 @@ typedef struct tToken
 } tToken;
 
 
-typedef struct tStack
+typedef struct sInteger
 {
 	int top;
 	int max;
 	int *data;
-} tStack;
+} sInteger;
 
 typedef struct gPointer
 {
@@ -22,24 +22,24 @@ typedef struct gPointer
 	void (*f)(void *);
 } gPointer;
 
-typedef union variableValue
+typedef union tVariableValue
 {
 	int intv;
 	double doublev;
 	char *stringv;
 	bool boolv;
-} variableValue;
+} tVariableValue;
 
 
-typedef struct sVariable
+typedef struct tVariable
 {
 	bool defined;
 	char *key;
 	unsigned type;
-	variableValue *value;
-	struct sVariable * lptr;
-	struct sVariable * rptr;
-} sVariable;
+	tVariableValue *value;
+	struct tVariable * lptr;
+	struct tVariable * rptr;
+} tVariable;
 
 typedef void (instructionFunction) (char *, char *);
 
@@ -51,45 +51,45 @@ typedef struct tInstruction
 	char *functionName; //název volané funkce
 } tInstruction;
 
-typedef struct tStackInstruction
+typedef struct sInstruction
 {
 	int top;
 	int max;
 	tInstruction **data;
-} tStackInstruction;
+} sInstruction;
 
-typedef struct tStackString
+typedef struct sString
 {
 	int top;
 	int max;
 	char **data;
-} tStackString;
+} sString;
+
+typedef struct tFunction
+{
+	struct tVariable * variables;
+	bool defined;
+	sInstruction *code;
+	unsigned codePosition;
+	char *key;
+	sString *paramNames;
+	struct tFunction * lptr;
+	struct tFunction * rptr;
+} tFunction;
+
+typedef struct sVariable
+{
+	int top;
+	int max;
+	tVariable **data;
+} sVariable;
 
 typedef struct sFunction
 {
-	struct sVariable * variables;
-	bool defined;
-	tStackInstruction *code;
-	unsigned codePosition;
-	char *key;
-	tStackString *paramNames;
-	struct sFunction * lptr;
-	struct sFunction * rptr;
+	int top;
+	int max;
+	tFunction **data;
 } sFunction;
-
-typedef struct tStackVar
-{
-	int top;
-	int max;
-	sVariable **data;
-} tStackVar;
-
-typedef struct tStackFunc
-{
-	int top;
-	int max;
-	sFunction **data;
-} tStackFunc;
 
 typedef struct tIf
 {
@@ -97,15 +97,15 @@ typedef struct tIf
 	int *destination;
 } tIf;
 
-typedef struct tStackIf
+typedef struct sIf
 {
 	int top;
 	int max;
 	int counter;
 	tIf **data;
-} tStackIf;
+} sIf;
 
-typedef void (LLFunction)(tStack **, tToken*);
+typedef void (LLFunction)(sInteger **, tToken*);
 
 
 

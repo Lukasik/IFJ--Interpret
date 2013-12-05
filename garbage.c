@@ -1,6 +1,7 @@
 #include "garbage.h"
 
-int gArraySize = 2;
+int gArraySize = 1000;
+int gArrayIndex = 0;
 
 void ginit()
 {
@@ -26,13 +27,40 @@ void * gmalloc(unsigned bytes, void (*f)(void *))
 		printError(ALLOCERROR, INTERPRETERROR);
 	}
 
-	gadd(pointer, f);
+	if(gArraySize == gArrayIndex)
+	{
+
+		gArraySize *= 2;
+
+		gPointer ** gArrayNew = (gPointer **) realloc(gArray, sizeof(gPointer*)*gArraySize);
+
+		if(gArrayNew == NULL)
+		{
+			printError(ALLOCERROR, INTERPRETERROR);
+		}
+
+		gArray = gArrayNew;
+
+		for (int i = gArraySize/2; i < gArraySize; ++i)
+		{
+			gArray[i] = NULL;
+		}
+
+		gadd(pointer, f);
+	}
+	else
+	{
+		gArray[gArrayIndex] = (gPointer *) malloc(sizeof(gPointer));
+		gArray[gArrayIndex]->pointer = pointer;
+		gArray[gArrayIndex++]->f = f;
+	}
+
 	return pointer;
 }
 
 void grealloc(void **pointer, int* size, int elementSize)
 {
-	*size *= 2;
+	*size += 20;
 
 	void *new = realloc(*pointer, (*size)*elementSize);
 
@@ -59,40 +87,50 @@ void grealloc(void **pointer, int* size, int elementSize)
 
 void gadd(void * pointer, void (*f)(void *))
 {
-	for(int i = 0; i < gArraySize; ++i)
+	// for(int i = 0; i < gArraySize; ++i)
+	// {
+	// 	if(gArray[i] == NULL)
+	// 	{
+	// 		gArray[i] = (gPointer *) malloc(sizeof(gPointer));
+
+	// 		if(gArray[i] == NULL)
+	// 		{
+	// 			printError(ALLOCERROR, INTERPRETERROR);
+	// 		}
+
+	// 		gArray[i]->pointer = pointer;
+	// 		gArray[i]->f = f;
+	// 		return;
+	// 	}
+	// }
+
+	if(gArraySize == gArrayIndex)
 	{
-		if(gArray[i] == NULL)
+
+		gArraySize *= 2;
+
+		gPointer ** gArrayNew = (gPointer **) realloc(gArray, sizeof(gPointer*)*gArraySize);
+
+		if(gArrayNew == NULL)
 		{
-			gArray[i] = (gPointer *) malloc(sizeof(gPointer));
-
-			if(gArray[i] == NULL)
-			{
-				printError(ALLOCERROR, INTERPRETERROR);
-			}
-
-			gArray[i]->pointer = pointer;
-			gArray[i]->f = f;
-			return;
+			printError(ALLOCERROR, INTERPRETERROR);
 		}
+
+		gArray = gArrayNew;
+
+		for (int i = gArraySize/2; i < gArraySize; ++i)
+		{
+			gArray[i] = NULL;
+		}
+
+		gadd(pointer, f);
 	}
-
-	gArraySize *= 2;
-
-	gPointer ** gArrayNew = (gPointer **) realloc(gArray, sizeof(gPointer*)*gArraySize);
-
-	if(gArrayNew == NULL)
+	else
 	{
-		printError(ALLOCERROR, INTERPRETERROR);
+		gArray[gArrayIndex] = (gPointer *) malloc(sizeof(gPointer));
+		gArray[gArrayIndex]->pointer = pointer;
+		gArray[gArrayIndex++]->f = f;
 	}
-
-	gArray = gArrayNew;
-
-	for (int i = gArraySize/2; i < gArraySize; ++i)
-	{
-		gArray[i] = NULL;
-	}
-
-	gadd(pointer, f);
 }
 
 

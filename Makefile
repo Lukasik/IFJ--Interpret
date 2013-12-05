@@ -1,4 +1,5 @@
-CFLAGS=-std=c99 -pedantic -Wall -Wextra -Wno-unused-parameter -g3 -O3
+CFLAGS=-std=c99 -pedantic -Wall -O3
+
 .PHONY: scanner, parser
 
 %.o: %.c

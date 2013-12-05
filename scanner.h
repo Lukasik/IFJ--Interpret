@@ -69,7 +69,7 @@ int CommentsAndWhitespaces(FILE *f);
 int isNotEqual(FILE *f,int c);
 int isBigger(FILE *f, int c);
 int isBeginOrLesser(FILE *f, int c);
-int isVariable(FILE *f,int c, char **content);
+int itVariable(FILE *f,int c, char **content);
 int isString (FILE *f, int c, char **content);
 int isKeyWord(char *str);
 bool exponent(int *index, char** content, int *c);

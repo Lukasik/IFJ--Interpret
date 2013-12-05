@@ -1,6 +1,6 @@
 #include "stack.h"
 
-void stackInit(tStack *s, int size)
+void stackInit(sInteger *s, int size)
 {
 	s->top = -1;
 	s->max = size;
@@ -13,7 +13,7 @@ void stackInit(tStack *s, int size)
 	}
 }
 
-int stackPop(tStack **s)
+int stackPop(sInteger **s)
 {
 	if((*s)->top == -1)
 	{
@@ -24,7 +24,7 @@ int stackPop(tStack **s)
 	return (*s)->data[(*s)->top--];
 }
 
-void stackPush(tStack **s, int data)
+void stackPush(sInteger **s, int data)
 {
 	if((*s)->top == (*s)->max-1)
 	{
@@ -34,7 +34,7 @@ void stackPush(tStack **s, int data)
 	(*s)->data[++((*s)->top)] = data;
 }
 
-int stackTop(tStack **s)
+int stackTop(sInteger **s)
 {
 	if((*s)->top == -1)
 	{
@@ -46,7 +46,7 @@ int stackTop(tStack **s)
 }
 
 
-int stackTopTerminal(tStack **s, tStack **tmpStack, bool useTmpStack)
+int stackTopTerminal(sInteger **s, sInteger **tmpStack, bool useTmpStack)
 {
 	for(int i = (*s)->top; i > -1; --i)
 	{
@@ -61,12 +61,12 @@ int stackTopTerminal(tStack **s, tStack **tmpStack, bool useTmpStack)
 }
 
 
-int stackEmpty(tStack *s)
+int stackEmpty(sInteger *s)
 {
 	return s->top == -1;
 }
 
-void printStack(tStack *s)
+void prinsInteger(sInteger *s)
 {
 	int i = 0;
 
@@ -74,7 +74,7 @@ void printStack(tStack *s)
 	printf("\n");
 }
 
-void stackVarInit(tStackVar *s, int size)
+void stackVarInit(sVariable *s, int size)
 {
 	s->top = -1;
 	s->max = size;
@@ -87,7 +87,7 @@ void stackVarInit(tStackVar *s, int size)
 	}
 }
 
-sVariable * stackVarPop(tStackVar **s)
+tVariable * stackVarPop(sVariable **s)
 {
 	if((*s)->top == -1)
 	{
@@ -98,26 +98,26 @@ sVariable * stackVarPop(tStackVar **s)
 	return (*s)->data[(*s)->top--];
 }
 
-void stackVarPush(tStackVar **s, sVariable * data)
+void stackVarPush(sVariable **s, tVariable * data)
 {
 	if((*s)->top == (*s)->max-1)
 	{
-		grealloc((void **) &((*s)->data), &((*s)->max), sizeof(sVariable*));
+		grealloc((void **) &((*s)->data), &((*s)->max), sizeof(tVariable*));
 	}
 
 	(*s)->data[++((*s)->top)] = data;
 }
 
-int stackVarEmpty(tStackVar *s)
+int stackVarEmpty(sVariable *s)
 {
 	return s->top == -1;
 }
 
-void stackFuncInit(tStackFunc *s, int size)
+void stackFuncInit(sFunction *s, int size)
 {
 	s->top = -1;
 	s->max = size;
-	s->data = gmalloc(sizeof(sFunction)*size, free);
+	s->data = gmalloc(sizeof(tFunction)*size, free);
 
 	if(s->data == NULL)
 	{
@@ -126,40 +126,40 @@ void stackFuncInit(tStackFunc *s, int size)
 	}
 }
 
-sFunction * stackFuncPop(tStackFunc **s)
+tFunction * stackFuncPop(sFunction **s)
 {
 	if((*s)->top == -1)
 	{
 		DEBUG("pop");
 		printError(STACKERROR, INTERPRETERROR);
 	}
-		// printStack(*s);
+		// prinsInteger(*s);
 
 	return (*s)->data[(*s)->top--];
 }
 
-void stackFuncPush(tStackFunc **s, sFunction * data)
+void stackFuncPush(sFunction **s, tFunction * data)
 {
 	if((*s)->top == (*s)->max-1)
 	{
-		grealloc((void **) &((*s)->data), &((*s)->max), sizeof(sFunction));
+		grealloc((void **) &((*s)->data), &((*s)->max), sizeof(tFunction));
 	}
 
 	(*s)->data[++((*s)->top)] = data;
 }
 
-sFunction * stackFuncTop(tStackFunc **s)
+tFunction * stackFuncTop(sFunction **s)
 {
 	if ((*s)->top==-1) printError(STACKERROR,INTERPRETERROR);
 	return (*s)->data[(*s)->top];
 }
 
-int stackFuncEmpty(tStackFunc *s)
+int stackFuncEmpty(sFunction *s)
 {
 	return s->top == -1;
 }
 
-void stackInstructionInit(tStackInstruction *s, int size)
+void stackInstructionInit(sInstruction *s, int size)
 {
 	s->top = -1;
 	s->max = size;
@@ -172,7 +172,7 @@ void stackInstructionInit(tStackInstruction *s, int size)
 	}
 }
 
-tInstruction * stackInstructionPop(tStackInstruction **s)
+tInstruction * stackInstructionPop(sInstruction **s)
 {
 	if((*s)->top == -1)
 	{
@@ -183,7 +183,7 @@ tInstruction * stackInstructionPop(tStackInstruction **s)
 	return (*s)->data[(*s)->top--];
 }
 
-tInstruction * stackInstructionTop(tStackInstruction **s)
+tInstruction * stackInstructionTop(sInstruction **s)
 {
 	if((*s)->top == -1)
 	{
@@ -194,7 +194,7 @@ tInstruction * stackInstructionTop(tStackInstruction **s)
 	return (*s)->data[(*s)->top];
 }
 
-void stackInstructionPush(tStackInstruction **s, tInstruction* data)
+void stackInstructionPush(sInstruction **s, tInstruction* data)
 {
 	if((*s)->top == (*s)->max-1)
 	{
@@ -204,12 +204,12 @@ void stackInstructionPush(tStackInstruction **s, tInstruction* data)
 	(*s)->data[++((*s)->top)] = data;
 }
 
-int stackInstructionEmpty(tStackInstruction *s)
+int stackInstructionEmpty(sInstruction *s)
 {
 	return s->top == -1;
 }
 
-void printInstructionStack(tStackInstruction *s)
+void printInstructionStack(sInstruction *s)
 {
 	int i = 0;
 	char *name;
@@ -249,7 +249,7 @@ void printInstructionStack(tStackInstruction *s)
 	printf("\n");
 }
 
-void stackStringInit(tStackString *s, int size)
+void stackStringInit(sString *s, int size)
 {
 	s->top = -1;
 	s->max = size;
@@ -262,7 +262,7 @@ void stackStringInit(tStackString *s, int size)
 	}
 }
 
-void stackStringPush(tStackString **s, char* data)
+void stackStringPush(sString **s, char* data)
 {
 	if((*s)->top == (*s)->max-1)
 	{
@@ -275,7 +275,7 @@ void stackStringPush(tStackString **s, char* data)
 	strcpy(new, data);
 }
 
-void stackIfInit(tStackIf *s, int size)
+void stackIfInit(sIf *s, int size)
 {
 	s->top = -1;
 	s->max = size;
@@ -289,7 +289,7 @@ void stackIfInit(tStackIf *s, int size)
 	}
 }
 
-void stackIfPop(tStackIf **s)
+void stackIfPop(sIf **s)
 {
 	if((*s)->top == -1)
 	{
@@ -301,7 +301,7 @@ void stackIfPop(tStackIf **s)
 	(*s)->counter--;
 }
 
-void stackIfPush(tStackIf **s, int type, int *destination)
+void stackIfPush(sIf **s, int type, int *destination)
 {
 	if((*s)->top == (*s)->max-1)
 	{
@@ -312,7 +312,7 @@ void stackIfPush(tStackIf **s, int type, int *destination)
 	(*s)->data[(*s)->top]->destination = destination;
 }
 
-int * stackIfTop(tStackIf **s)
+int * stackIfTop(sIf **s)
 {
 	if((*s)->top == -1)
 	{

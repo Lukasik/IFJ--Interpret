@@ -12,14 +12,14 @@
 #include "debug.h"
 
 /* Prototypy funkcí */
-void BSTF_Init(sFunction ** node);
-sFunction* BSTF_Search(sFunction * node, char * key);
-sFunction* BSTF_Insert(sFunction ** node, char * key);
+void BSTF_Init(tFunction ** node);
+tFunction* BSTF_Search(tFunction * node, char * key);
+tFunction* BSTF_Insert(tFunction ** node, char * key);
 void BSTF_Dispose(void * node);
 
-void BSTV_Init(sVariable ** node);
-sVariable* BSTV_Search(sVariable * node, char * key);
-sVariable* BSTV_Insert(sVariable ** node, char * key);
+void BSTV_Init(tVariable ** node);
+tVariable* BSTV_Search(tVariable * node, char * key);
+tVariable* BSTV_Insert(tVariable ** node, char * key);
 void BSTV_Dispose(void * node);
 
 

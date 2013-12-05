@@ -5,43 +5,34 @@
 #include "debug.h"
 
 
-void stackInit(tStack *s, int size);
-int stackPop(tStack **s);
-void stackPush(tStack **s, int data);
-int stackTop(tStack **s);
-int stackTopTerminal(tStack **s, tStack **tmpStack, bool useTmpStack);
-int stackEmpty(tStack *s);
-// void printStack(tStack *s);
-// void printStack(tStack *s);
-void stackVarInit(tStackVar *s, int size);
-sVariable * stackVarPop(tStackVar **s);
-void stackVarPush(tStackVar **s, sVariable* data);
-// int stackTop(tStack **s);
-// int stackTopTerminal(tStack **s, tStack **tmpStack, bool useTmpStack);
-int stackVarEmpty(tStackVar *s);
-int stackFuncEmpty(tStackFunc *s);
-void stackFuncPush(tStackFunc **s, sFunction * data);
-sFunction * stackFuncPop(tStackFunc **s);
-int stackFuncEmpty(tStackFunc *s);
-void stackFuncPush(tStackFunc **s, sFunction * data);
-sFunction * stackFuncPop(tStackFunc **s);
-sFunction * stackFuncTop(tStackFunc **s);
-void stackFuncInit(tStackFunc *s, int size);
-
-void stackInstructionInit(tStackInstruction *s, int size);
-tInstruction * stackInstructionPop(tStackInstruction **s);
-void stackInstructionPush(tStackInstruction **s, tInstruction* data);
-int stackInstructionEmpty(tStackInstruction *s);
-void printInstructionStack(tStackInstruction *s);
-tInstruction * stackInstructionTop(tStackInstruction **s);
-
-void stackStringPush(tStackString **s, char* data);
-void stackStringInit(tStackString *s, int size);
-
-int * stackIfTop(tStackIf **s);
-void stackIfPush(tStackIf **s, int type, int *destination);
-void stackIfPop(tStackIf **s);
-void stackIfInit(tStackIf *s, int size);
+void stackInit(sInteger *s, int size);
+int stackPop(sInteger **s);
+void stackPush(sInteger **s, int data);
+int stackTop(sInteger **s);
+int stackTopTerminal(sInteger **s, sInteger **tmpStack, bool useTmpStack);
+int stackEmpty(sInteger *s);
+void prinsInteger(sInteger *s);
+void stackVarInit(sVariable *s, int size);
+tVariable * stackVarPop(sVariable **s);
+void stackVarPush(sVariable **s, tVariable * data);
+int stackVarEmpty(sVariable *s);
+void stackFuncInit(sFunction *s, int size);
+tFunction * stackFuncPop(sFunction **s);
+void stackFuncPush(sFunction **s, tFunction * data);
+tFunction * stackFuncTop(sFunction **s);
+int stackFuncEmpty(sFunction *s);
+void stackInstructionInit(sInstruction *s, int size);
+tInstruction * stackInstructionPop(sInstruction **s);
+tInstruction * stackInstructionTop(sInstruction **s);
+void stackInstructionPush(sInstruction **s, tInstruction* data);
+int stackInstructionEmpty(sInstruction *s);
+void printInstructionStack(sInstruction *s);
+void stackStringInit(sString *s, int size);
+void stackStringPush(sString **s, char* data);
+void stackIfInit(sIf *s, int size);
+void stackIfPop(sIf **s);
+void stackIfPush(sIf **s, int type, int *destination);
+int * stackIfTop(sIf **s);
 
 
 #endif

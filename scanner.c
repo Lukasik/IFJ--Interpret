@@ -266,7 +266,7 @@ int isBeginOrLesser(FILE *f, int c)
 
 // Vraci token VAR pokud je vse vporadku, invalidchar char pokud se promenna
 // jmenuje stejne jako klicove slovo jinak -1
-int isVariable(FILE *f,int c, char **content)
+int itVariable(FILE *f,int c, char **content)
 {
 	int index=0;
 
@@ -308,7 +308,10 @@ int isString (FILE *f, int c, char **content)
 		// dokud neni druha " nebo EOF, dava pozor aby tam nebylo \"
 		while (((c=fgetc(f))!='"' || (hlpc=='\\' && handled == 1)) && c!=EOF)
 		{
-			if (c<32) continue;
+			if (c<32)
+			{
+				return -1;
+			}
 			else if(c == '\\' && handled == 0)
 			{
 				hlpc = c;
@@ -329,7 +332,7 @@ int isString (FILE *f, int c, char **content)
 					case 't': c='\t'; break;
 					case 'n': c='\n'; break;
 					case 'x': replaced[1] = 'x'; handled = 2;continue;break;
-					default: insertChar(&index,content,'\\');continue;
+					default: insertChar(&index,content,'\\');
 				}
 			}
 			else if(handled == 2)
@@ -374,6 +377,13 @@ int isString (FILE *f, int c, char **content)
 			insertChar(&index,content,c);
 		}
 
+		if(c == '"' && handled != 0)
+		{
+			for(int i = 0; i < handled; ++i)
+			{
+				insertChar(&index, content, replaced[i]);
+			}
+		}
 		if (c != '"') return -1;
 
 		insertChar(&index,content,'\0');
@@ -390,8 +400,6 @@ void getToken(FILE *f, tToken *t)
 	{
 		printError(LEXICALERR, LEXICALERROR);
 	}
-
-	//TODO: garbage collector
 }
 
 // vraci token najiteho lexemu pripadne chybovy token INVALIDCHAR
@@ -426,7 +434,7 @@ bool findToken(FILE *f, tToken *t)
 	else if ((ec=isBigger(f,c))!=-1) t->name = ec; // >= a >
 	else if ((ec=isBeginOrLesser(f,c))!=-1) t->name = ec; // < , <= , <?php
 	else if ((ec=isString(f,c,&(t->content)))!=-1) t->name = STRING; // STRING
-	else if ((ec=isVariable(f,c,&(t->content)))==INVALIDCHAR) t->name = INVALIDCHAR;
+	else if ((ec=itVariable(f,c,&(t->content)))==INVALIDCHAR) t->name = INVALIDCHAR;
 	else if (ec!=-1) t->name = ec;
 	else if (isdigit(c)) flag=NUMBER; // pro ostatni, zjisti jestli se jedna o znak nebo o symbol vhodny pro ID
 	else if (isalpha(c) || c=='_') flag=CHAR;

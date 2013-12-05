@@ -8,6 +8,7 @@
 
 gPointer ** gArray;
 extern int gArraySize;
+extern int gArrayIndex;
 
 void * gmalloc(unsigned bytes, void (*f)(void *));
 void grealloc(void **pointer, int* size, int elementSize);

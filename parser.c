@@ -91,7 +91,6 @@ int intMaxChars()
 	return counter+1;
 }
 
-//TODO napsat jako makra
 int isOperand(int tokenName)
 {
 	return
@@ -121,75 +120,75 @@ int isOperator(int tokenName)
 
 
 
-void argumentString(tStack **s, tToken *t)
+void argumentString(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, STRING);
 }
 
-void argumentInteger(tStack **s, tToken *t)
+void argumentInteger(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, INTEGER);
 }
 
-void argumentVar(tStack **s, tToken *t)
+void argumentVar(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, VAR);
 }
 
-void argumentNull(tStack **s, tToken *t)
+void argumentNull(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NULLV);
 }
 
-void argumentBoolean(tStack **s, tToken *t)
+void argumentBoolean(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, BOOLEAN);
 }
 
-void argumentDouble(tStack **s, tToken *t)
+void argumentDouble(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, DOUBLE);
 }
 
-void semicolon(tStack **s, tToken *t)
+void semicolon(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, SEMICOLON);
 }
 
-void closebrace(tStack **s, tToken *t)
+void closebrace(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, CLOSEBRACE);
 }
 
-void closeparen(tStack **s, tToken *t)
+void closeparen(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, CLOSEPAREN);
 }
 
-void argumentList(tStack **s, tToken *t)
+void argumentList(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, SEMICOLON);
 	stackPush(s, CLOSEPAREN);
 }
 
-void argumentArgumentList1(tStack **s, tToken *t)
+void argumentArgumentList1(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NARGUMENTLIST2);
 	stackPush(s, NARGUMENT);
 }
 
-void argumentArgumentList2(tStack **s, tToken *t)
+void argumentArgumentList2(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NARGUMENTLIST2);
@@ -197,14 +196,14 @@ void argumentArgumentList2(tStack **s, tToken *t)
 	stackPush(s, COMMA);
 }
 
-void block(tStack **s, tToken *t)
+void block(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NCOMMANDLIST);
 	stackPush(s, OPENBRACE);
 }
 
-void commandVar(tStack **s, tToken *t)
+void commandVar(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NFUNCTIONCALLEXPRESSION);
@@ -212,14 +211,14 @@ void commandVar(tStack **s, tToken *t)
 	stackPush(s, VAR);
 }
 
-void commandReturn(tStack **s, tToken *t)
+void commandReturn(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NRETURN);
 	stackPush(s, RETURN);
 }
 
-void commandIf(tStack **s, tToken *t)
+void commandIf(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NBLOCK);
@@ -231,7 +230,7 @@ void commandIf(tStack **s, tToken *t)
 	stackPush(s, IF);
 }
 
-void commandWhile(tStack **s, tToken *t)
+void commandWhile(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NBLOCK);
@@ -241,12 +240,12 @@ void commandWhile(tStack **s, tToken *t)
 	stackPush(s, WHILE);
 }
 
-void commandList(tStack **s, tToken *t)
+void commandList(sInteger **s, tToken *t)
 {
 	stackPush(s, NCOMMAND);
 }
 
-void function(tStack **s, tToken *t)
+void function(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NBLOCK);
@@ -256,7 +255,7 @@ void function(tStack **s, tToken *t)
 	stackPush(s, FUNCTION);
 }
 
-void functionCall(tStack **s, tToken *t)
+void functionCall(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NARGUMENTLIST1);
@@ -264,21 +263,21 @@ void functionCall(tStack **s, tToken *t)
 	stackPush(s, ID);
 }
 
-void expressionSemicolon(tStack **s, tToken *t)
+void expressionSemicolon(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, SEMICOLON);
 	stackPush(s, NEXPRESSION);
 }
 
-void paramList1(tStack **s, tToken *t)
+void paramList1(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NPARAMLIST2);
 	stackPush(s, VAR);
 }
 
-void paramList2(tStack **s, tToken *t)
+void paramList2(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NPARAMLIST2);
@@ -286,37 +285,37 @@ void paramList2(tStack **s, tToken *t)
 	stackPush(s, COMMA);
 }
 
-void program(tStack **s, tToken *t)
+void program(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, NSTATEMENT);
 	stackPush(s, BEGIN);
 }
 
-void returnExpression(tStack **s, tToken *t)
+void returnExpression(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, SEMICOLON);
 	stackPush(s, NEXPRESSION);
 }
 
-void statementCommand(tStack **s, tToken *t)
+void statementCommand(sInteger **s, tToken *t)
 {
 	stackPush(s, NCOMMAND);
 }
 
-void statementFunction(tStack **s, tToken *t)
+void statementFunction(sInteger **s, tToken *t)
 {
 	stackPush(s, NFUNCTION);
 }
 
-void statementEnd(tStack **s, tToken *t)
+void statementEnd(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, END);
 }
 
-void expressionParen(tStack **s, tToken *t)
+void expressionParen(sInteger **s, tToken *t)
 {
 	stackPop(s);
 	stackPush(s, SEMICOLON); //zarážka pro výrazy se závorkou
@@ -325,16 +324,16 @@ void expressionParen(tStack **s, tToken *t)
 	stackPop(s);
 }
 
-void expression(tStack **s, tToken *t)
+void expression(sInteger **s, tToken *t)
 {
 	stackPop(s);
 
 	int top, operation;
-	sVariable *variable;
-	tStack *tmpStack = gmalloc(sizeof(tStack), free);
-	stackInit(tmpStack, 2);
-	tStackVar *stackVar = gmalloc(sizeof(tStackVar), free);
-	stackVarInit(stackVar, 2);
+	tVariable *variable;
+	sInteger *tmpStack = gmalloc(sizeof(sInteger), free);
+	stackInit(tmpStack, 5);
+	sVariable *stackVar = gmalloc(sizeof(sVariable), free);
+	stackVarInit(stackVar, 10);
 
 	do
 	{
@@ -353,6 +352,7 @@ void expression(tStack **s, tToken *t)
 				else if(t->name == VAR)
 				{
 					variable = BSTV_Search(actualFunction[0]->variables, t->content);
+					if(variable == NULL) variable = BSTV_Insert(&(actualFunction[0]->variables), t->content);
 
 					if(variable == NULL)
 					{
@@ -377,75 +377,16 @@ void expression(tStack **s, tToken *t)
 	} while(stackTopTerminal(s, &tmpStack, false) != SEMICOLON || t->name != SEMICOLON);
 
 	stackTopTerminal(s, &tmpStack, true);
-	gfree(tmpStack);
+	// gfree(tmpStack);
 }
 
-//TODO volat při výpisu
-char * escapeSequences(char * str)
-{
-	// int index = -1;
-	// char substr[5];
-	// char *replacements[][2] =
-	// {
-	// 	{"\\t", "\t"},
-	// 	{"\\n", "\n"},
-	// 	{"\\\\", "\\"},
-	// 	{"\\\"", "\""},
-	// 	{"\\$", "$"},
-	// };
-
-	// for(int i = 0; i < 5; ++i)
-	// {
-	// 	sprintf(substr, "%s", replacements[i][0]);
-	// 	while((index = IAL_find_string(str, substr)) > -1)
-	// 	{
-	// 		str[index] = replacements[i][1][0];
-	// 		shiftString(str, index+1, 1);
-	// 	}
-	// }
-
-	// for(int i = 0; i <= 255; ++i)
-	// {
-	// 	sprintf(substr, "\\x%.2X", i);
-	// 	// DEBUG(substr);
-	// 	while((index = IAL_find_string(str, substr)) > -1)
-	// 	{
-	// 		str[index] = i;
-	// 		shiftString(str, index+1, 3);
-	// 	}
-
-	// 	sprintf(substr, "\\x%.2x", i);
-	// 	while((index = IAL_find_string(str, substr)) > -1)
-	// 	{
-	// 		str[index] = i;
-	// 		shiftString(str, index+1, 3);
-	// 	}
-	// }
-
-	char * new = gmalloc(strlen(str)+1, free);
-	strcpy(new, str);
-
-	return new;
-}
-
-void shiftString(char * str, unsigned index, unsigned n)
-{
-	unsigned i;
-	for(i = index; i+n < strlen(str); ++i)
-	{
-		str[i] = str[i+n];
-	}
-
-	str[i] = '\0';
-}
-
-void reduce(tStack **s,tStack **tmpStack, tStackVar **stackVar)
+void reduce(sInteger **s,sInteger **tmpStack, sVariable **stackVar)
 {
 	stackPush(s, REDUCE);
 	stackPop(s);
 
 	tInstruction *instruction;
-	sVariable *var;
+	tVariable *var;
 	char* pushVarName;
 
 	while(!stackEmpty(*tmpStack)) stackPush(s, stackPop(tmpStack));
@@ -545,7 +486,7 @@ void reduce(tStack **s,tStack **tmpStack, tStackVar **stackVar)
 
 }
 
-void shift(tStack **s, tStack **tmpStack, tToken *t)
+void shift(sInteger **s, sInteger **tmpStack, tToken *t)
 {
 	// terminal = stackTopTerminal(s, tmpStack, true);
 
@@ -557,7 +498,7 @@ void shift(tStack **s, tStack **tmpStack, tToken *t)
 	getToken(f, t);
 }
 
-void equalsign(tStack **s,tStack **tmpStack, tToken *t)
+void equalsign(sInteger **s,sInteger **tmpStack, tToken *t)
 {
 	while(!stackEmpty(*tmpStack)) stackPush(s, stackPop(tmpStack));
 
@@ -565,16 +506,15 @@ void equalsign(tStack **s,tStack **tmpStack, tToken *t)
 	getToken(f, t);
 }
 
-sVariable * generateLiteral(tToken *t)
+tVariable * generateLiteral(tToken *t)
 {
 	static int literalCounter = 0;
 	char literal[intMaxChars()];
 
 	sprintf(literal, "%d", literalCounter++);
-	sVariable *argvar = BSTV_Insert(&(actualFunction[0]->variables), literal);
+	tVariable *argvar = BSTV_Insert(&(actualFunction[0]->variables), literal);
 	argvar->type = t->name;
 	argvar->defined = true;
-	// BSTV_Print(actualFunction[0]);
 	char *endptr;
 
 	switch(argvar->type)
@@ -587,7 +527,10 @@ sVariable * generateLiteral(tToken *t)
 			break;
 		case NULLV: break;
 		case BOOLEAN: argvar->value->boolv = strcmp(t->content, "true") == 0;break;
-		case STRING: argvar->value->stringv = escapeSequences(t->content);break;
+		case STRING:
+			argvar->value->stringv = gmalloc(strlen(t->content)+1, free);
+			strcpy(argvar->value->stringv, t->content);
+			break;
 	}
 
 	return argvar;
@@ -602,8 +545,8 @@ void generateParams(tToken *t)
 
 void generateArguments(tToken *t, LLFunction *LLCall)
 {
-	sFunction *topFunction = actualFunction[0];
-	sVariable *argvar;
+	tFunction *topFunction = actualFunction[0];
+	tVariable *argvar;
 	char *pushVarName;
 
 	if(LLCall == argumentVar)
@@ -621,27 +564,27 @@ void generateArguments(tToken *t, LLFunction *LLCall)
 	generateInstruction(pushSVar, pushVarName, NULL);
 }
 
-void parse(tStack *stack, tToken *t)
+void parse(sInteger *stack, tToken *t)
 {
 	bool breakParent = false;
 	bool inFunction = false;
 	instructionFunction *generatedFunction = NULL;
 	bool waitingSemicolon = false;
-	sVariable *destination = NULL;
+	tVariable *destination = NULL;
 	char * calledFunctionName = NULL;
 	int innerBraces = 0;
 	int *dstJump;
 	char* variableName = NULL;
 	LLFunction *LLCall = NULL;
 	tInstruction *instruction;
-	sFunction *topFunction;
+	tFunction *topFunction;
 
-	tStack *conditionStack = gmalloc(sizeof(tStack), free);
-	stackInit(conditionStack, 2);
-	tStackIf *ifStack = gmalloc(sizeof(tStackIf), free);
-	stackIfInit(ifStack, 2);
-	tStack *whileStack = gmalloc(sizeof(tStack), free);
-	stackInit(whileStack, 2);
+	sInteger *conditionStack = gmalloc(sizeof(sInteger), free);
+	stackInit(conditionStack, 30);
+	sIf *ifStack = gmalloc(sizeof(sIf), free);
+	stackIfInit(ifStack, 20);
+	sInteger *whileStack = gmalloc(sizeof(sInteger), free);
+	stackInit(whileStack, 10);
 
 	getToken(f, t);
 	stackPush(&stack, NPROGRAM);
@@ -802,11 +745,11 @@ int main (int argc, char *argv[])
 {
 	ginit();
 
-	stackVariables = gmalloc(sizeof(tStackVar), free);
-	stackVarInit(stackVariables, 8);
+	stackVariables = gmalloc(sizeof(sVariable), free);
+	stackVarInit(stackVariables, 50);
 
-	stackFunctions = gmalloc (sizeof(tStackFunc),free);
-	stackFuncInit (stackFunctions, 2);
+	stackFunctions = gmalloc (sizeof(sFunction),free);
+	stackFuncInit (stackFunctions, 20);
 
 	if (argc!=2) printError(PARAMSERROR,INTERPRETERROR);
 	f=fopen(argv[1],"r");
@@ -820,13 +763,13 @@ int main (int argc, char *argv[])
 
 	tToken *t = (tToken *) gmalloc(sizeof(tToken), free);
 	t->content = (char *) gmalloc(40, free);
-	tStack *stack = gmalloc(sizeof(tStack), free);
+	sInteger *stack = gmalloc(sizeof(sInteger), free);
 
-	stackInit(stack, 2);
+	stackInit(stack, 100);
 
 	BSTF_Init(&functionTree);
 	actualFunction[0] = BSTF_Insert(&functionTree, "1");
-	// BSTF_Print(functionTree);
+
 	gadd(functionTree, BSTF_Dispose);
 	BSTF_Insert(&functionTree, "boolval");
 	BSTF_Insert(&functionTree, "intval");
@@ -850,6 +793,7 @@ int main (int argc, char *argv[])
 
 	generateInstruction(iReturn, NULL, NULL);
 
+
 	interpret();
 
 	gfreeAll();
@@ -857,3 +801,11 @@ int main (int argc, char *argv[])
 
 	return 0;
 }
+
+//OPRAVIT find_string
+
+//OPRAVENO
+//znak s kodem mensim nez 31 vcetne, vypis jako chybu lexikalni - napsat na forum 
+//mezere mezerea 67 prekonvertuje na nulu vzorovy 
+//lomena \a\b\c ...nevzpise a melo by 
+//\x nevypise vubec (jinak chzba nez u teho prvniho poznatku) (v testu bylo na poslední pozici) 

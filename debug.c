@@ -63,7 +63,7 @@ char* tokenNames[256] = {
 	[NEXPRESSIONPAREN] = "NEXPRESSIONPAREN",
 };
 
-void BSTF_Print2(sFunction* TempTree, char* sufix, char fromdir)
+void BSTF_Print2(tFunction* TempTree, char* sufix, char fromdir)
 {
      if (TempTree != NULL)
      {
@@ -89,7 +89,7 @@ void BSTF_Print2(sFunction* TempTree, char* sufix, char fromdir)
     }
 }
 
-void BSTF_Print(sFunction* TempTree)
+void BSTF_Print(tFunction* TempTree)
 {
   printf("Struktura binarního stromu funkcí:\n");
   printf("\n");
@@ -101,7 +101,7 @@ void BSTF_Print(sFunction* TempTree)
   printf("=================================================\n");
 }
 
-void BSTV_Print2(sVariable* TempTree, char* sufix, char fromdir)
+void BSTV_Print2(tVariable* TempTree, char* sufix, char fromdir)
 {
      if (TempTree != NULL)
      {
@@ -127,7 +127,7 @@ void BSTV_Print2(sVariable* TempTree, char* sufix, char fromdir)
     }
 }
 
-void BSTV_Print(sFunction * TempTree)
+void BSTV_Print(tFunction * TempTree)
 {
   printf("%s: struktura binarního stromu proměnných:\n", TempTree->key);
   printf("\n");

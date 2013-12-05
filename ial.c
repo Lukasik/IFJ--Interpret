@@ -1,12 +1,12 @@
 #include "ial.h"
 
 
-void BSTF_Init(sFunction ** node) {
+void BSTF_Init(tFunction ** node) {
     *node = NULL;
 }
 
 
-sFunction * BSTF_Search(sFunction * node, char * key) {
+tFunction * BSTF_Search(tFunction * node, char * key) {
     if(node != NULL) {
         int compare = strcmp(key, node->key);
 
@@ -23,22 +23,22 @@ sFunction * BSTF_Search(sFunction * node, char * key) {
     return NULL;
 }
 
-sFunction* BSTF_Insert(sFunction ** node, char * key) {
+tFunction* BSTF_Insert(tFunction ** node, char * key) {
     if(*node == NULL) {
 
-        sFunction * tmp;
-        if((tmp = malloc(sizeof(sFunction))) != NULL) {
+        tFunction * tmp;
+        if((tmp = malloc(sizeof(tFunction))) != NULL) {
             *node = tmp;
             (*node)->key = malloc(strlen(key)+1);
             if((*node)->key == NULL) printError(ALLOCERROR, INTERPRETERROR);
             memcpy((*node)->key, key, strlen(key)+1);
             (*node)->lptr = (*node)->rptr = NULL;
-            (*node)->paramNames = gmalloc(sizeof(tStackString), free);
+            (*node)->paramNames = gmalloc(sizeof(sString), free);
             stackStringInit((*node)->paramNames, 5);
             (*node)->codePosition = 0;
             BSTV_Init(&(*node)->variables);
-            (*node)->code = gmalloc(sizeof(tStackInstruction), free);
-            stackInstructionInit((*node)->code, 5);
+            (*node)->code = gmalloc(sizeof(sInstruction), free);
+            stackInstructionInit((*node)->code, 50);
             return *node;
         }
         else {
@@ -65,7 +65,7 @@ sFunction* BSTF_Insert(sFunction ** node, char * key) {
 }
 
 void BSTF_Dispose(void * node) {
-    sFunction * treePointer = (sFunction *) node;
+    tFunction * treePointer = (tFunction *) node;
 
     if(treePointer != NULL) {
         if(treePointer->lptr != NULL) {
@@ -83,12 +83,12 @@ void BSTF_Dispose(void * node) {
 
 //##############################################################################################
 
-void BSTV_Init(sVariable ** node) {
+void BSTV_Init(tVariable ** node) {
     *node = NULL;
 }
 
 
-sVariable * BSTV_Search(sVariable * node, char * key) {
+tVariable * BSTV_Search(tVariable * node, char * key) {
     if(node != NULL) {
         int compare = strcmp(key, node->key);
 
@@ -105,42 +105,87 @@ sVariable * BSTV_Search(sVariable * node, char * key) {
     return NULL;
 }
 
-sVariable* BSTV_Insert(sVariable ** node, char * key) {
-    if(*node == NULL) {
-        sVariable * tmp;
-        if((tmp = gmalloc(sizeof(sVariable),free)) != NULL) {
-            *node = tmp;
-            (*node)->key = gmalloc(strlen(key)+1, free);
-            if((*node)->key == NULL) printError(ALLOCERROR, INTERPRETERROR);
-            memcpy((*node)->key, key, strlen(key)+1);
-            (*node)->lptr = (*node)->rptr = NULL;
-            (*node)->defined = false;
-            (*node)->value = (variableValue*) gmalloc(sizeof(variableValue), free);
-            if((*node)->value == NULL) printError(ALLOCERROR, INTERPRETERROR);
-            (*node)->value->stringv = NULL;
-            // (*node)->type = NULLV;
-        }
-        else {
-            printError(ALLOCERROR, INTERPRETERROR);
-        }
-    }
-    else {
+tVariable* BSTV_Insert(tVariable ** node, char * key) {
+    if (*node==NULL) // vklada se prvni prvek
+    {
+        tVariable* newElement= gmalloc (sizeof (tVariable), free);
+        newElement->lptr=newElement->rptr=NULL;
+        newElement->key = gmalloc(strlen(key)+1, free);
+        memcpy(newElement->key, key, strlen(key)+1);
+        newElement->defined = false;
+        newElement->value = (tVariableValue*) gmalloc(sizeof(tVariableValue), free);
+        newElement->value->stringv = NULL;
 
-        int compare = strcmp(key, (*node)->key);
-
-        if(compare > 0) {
-            return BSTV_Insert(&(*node)->rptr, key);
-        }
-        else if (compare < 0) {
-            return BSTV_Insert(&(*node)->lptr, key);
-        }
+        *node=newElement;
+        return newElement;
     }
 
-    return *node;
+
+    tVariable* tmp=*node;
+
+    // neprazdny strom, hledame jestli prvek jiz neexistuje
+    while (strcmp(tmp->key, key) != 0)
+    {
+        if (strcmp(tmp->key, key) > 0 && tmp->lptr!=NULL) tmp=tmp->lptr;
+        else if (strcmp(tmp->key, key) < 0 && tmp->rptr!=NULL) tmp=tmp->rptr;
+        else break;
+    }
+
+    // pokud neexistuje, pridame jej
+    if (strcmp(tmp->key, key) != 0)
+    {
+        tVariable* newElement= gmalloc (sizeof (tVariable), free);
+        newElement->lptr = newElement->rptr = NULL;
+        newElement->key = gmalloc(strlen(key)+1, free);
+        memcpy(newElement->key, key, strlen(key)+1);
+        newElement->defined = false;
+        newElement->value = (tVariableValue*) gmalloc(sizeof(tVariableValue), free);
+        newElement->value->stringv = NULL;
+
+        if (strcmp(tmp->key, key) > 0) tmp->lptr=newElement;
+        else tmp->rptr=newElement;
+
+        return newElement;
+    }
+
+    return tmp;
+    
+
+    // if(*node == NULL) {
+    //     tVariable * tmp;
+    //     if((tmp = gmalloc(sizeof(tVariable),free)) != NULL) {
+    //         *node = tmp;
+    //         (*node)->key = gmalloc(strlen(key)+1, free);
+    //         if((*node)->key == NULL) printError(ALLOCERROR, INTERPRETERROR);
+    //         memcpy((*node)->key, key, strlen(key)+1);
+    //         (*node)->lptr = (*node)->rptr = NULL;
+    //         (*node)->defined = false;
+    //         (*node)->value = (tVariableValue*) gmalloc(sizeof(tVariableValue), free);
+    //         if((*node)->value == NULL) printError(ALLOCERROR, INTERPRETERROR);
+    //         (*node)->value->stringv = NULL;
+    //         // (*node)->type = NULLV;
+    //     }
+    //     else {
+    //         printError(ALLOCERROR, INTERPRETERROR);
+    //     }
+    // }
+    // else {
+
+    //     int compare = strcmp(key, (*node)->key);
+
+    //     if(compare > 0) {
+    //         return BSTV_Insert(&(*node)->rptr, key);
+    //     }
+    //     else if (compare < 0) {
+    //         return BSTV_Insert(&(*node)->lptr, key);
+    //     }
+    // }
+
+    // return *node;
 }
 
 void BSTV_Dispose(void * node) {
-    sVariable * treePointer = (sVariable *) node;
+    tVariable * treePointer = (tVariable *) node;
     if(treePointer != NULL) {
         if(treePointer->lptr != NULL) {
             BSTV_Dispose(treePointer->lptr);
