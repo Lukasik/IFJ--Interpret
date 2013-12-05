@@ -39,6 +39,7 @@ typedef struct tVariable
 	tVariableValue *value;
 	struct tVariable * lptr;
 	struct tVariable * rptr;
+	bool usable;
 } tVariable;
 
 typedef void (instructionFunction) (char *, char *);

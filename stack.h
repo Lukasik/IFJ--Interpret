@@ -15,6 +15,7 @@ void prinsInteger(sInteger *s);
 void stackVarInit(sVariable *s, int size);
 tVariable * stackVarPop(sVariable **s);
 void stackVarPush(sVariable **s, tVariable * data);
+tVariable * stackVarTopUsable(sVariable **s);
 int stackVarEmpty(sVariable *s);
 void stackFuncInit(sFunction *s, int size);
 tFunction * stackFuncPop(sFunction **s);

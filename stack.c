@@ -95,6 +95,7 @@ tVariable * stackVarPop(sVariable **s)
 		printError(STACKERROR, INTERPRETERROR);
 	}
 
+	(*s)->data[(*s)->top]->usable = true;
 	return (*s)->data[(*s)->top--];
 }
 
@@ -106,6 +107,26 @@ void stackVarPush(sVariable **s, tVariable * data)
 	}
 
 	(*s)->data[++((*s)->top)] = data;
+	data->usable = false;
+	// (*s)->data[((*s)->top)]-> = data;
+}
+
+tVariable * stackVarTopUsable(sVariable **s)
+{
+	for(int i = 0; i < (*s)->top+1; ++i)
+	{
+		if((*s)->data[i]->usable) 
+		{
+			return (*s)->data[i];
+		}
+	}
+
+	// printf("\nsize %d\n", (*s)->top);
+	tVariable *tmp = gmalloc(sizeof(tVariable), free);
+	tmp->value = gmalloc(sizeof(tVariableValue), free);
+	stackVarPush(s, tmp);
+
+	return tmp;
 }
 
 int stackVarEmpty(sVariable *s)

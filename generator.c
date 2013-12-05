@@ -54,9 +54,6 @@ tVariable * duplicateTree(tVariable * root)
 		}
 	}
 
-	// gfree(stack->data);
-	// gfree(stack);
-
 	return new;
 }
 
@@ -114,8 +111,8 @@ bool doubleInt (tVariable *par1,tVariable *par2)
 // instrukce souctu +
 void add (char * param, char * function)
 {
-	tVariable *par1, *par2, * source = gmalloc(sizeof(tVariable),free);
-	source->value = gmalloc (sizeof(tVariableValue),free);
+	tVariable *par1, *par2, * source = stackVarTopUsable(&stackTmpVariables);
+	// source->value = gmalloc (sizeof(tVariableValue),free);
 
 	par2 = stackVarPop(&stackVariables);
 	par1 = stackVarPop(&stackVariables);
@@ -149,14 +146,15 @@ void add (char * param, char * function)
 		stackVarPush(&stackVariables, source);
 	}
 	else printError(INCOMPATIBLETYPE,INCOMPATIBLE);
+
 }
 
 
 // operace rozdilu -
 void sub (char * param, char * function)
 {
-	tVariable *par1, *par2, * source = gmalloc(sizeof(tVariable),free);
-	source->value = gmalloc (sizeof(tVariableValue),free);
+	tVariable *par1, *par2, * source = stackVarTopUsable(&stackTmpVariables);
+	// source->value = gmalloc (sizeof(tVariableValue),free);
 
 	par2 = stackVarPop(&stackVariables);
 	par1 = stackVarPop(&stackVariables);
@@ -190,14 +188,15 @@ void sub (char * param, char * function)
 		stackVarPush(&stackVariables, source);
 	}
 	else printError(INCOMPATIBLETYPE,INCOMPATIBLE);
+
 }
 
 
 // instrukce nasobeni
 void mul (char * param, char * function)
 {
-	tVariable *par1, *par2, * source = gmalloc(sizeof(tVariable),free);
-	source->value = gmalloc (sizeof(tVariableValue),free);
+	tVariable *par1, *par2, * source = stackVarTopUsable(&stackTmpVariables);
+	// source->value = gmalloc (sizeof(tVariableValue),free);
 
 	par2 = stackVarPop(&stackVariables);
 	par1 = stackVarPop(&stackVariables);
@@ -231,13 +230,14 @@ void mul (char * param, char * function)
 		stackVarPush(&stackVariables, source);
 	}
 	else printError(INCOMPATIBLETYPE,INCOMPATIBLE);
+
 }
 
 // instrukce deleni, osetruje deleni nulou
 void division(char * param, char * function)
 {
-	tVariable *par1, *par2, * source = gmalloc(sizeof(tVariable),free);
-	source->value = gmalloc (sizeof(tVariableValue),free);
+	tVariable *par1, *par2, * source = stackVarTopUsable(&stackTmpVariables);
+	// source->value = gmalloc (sizeof(tVariableValue),free);
 
 	par2 = stackVarPop(&stackVariables);
 	par1 = stackVarPop(&stackVariables);
@@ -272,6 +272,7 @@ void division(char * param, char * function)
 		stackVarPush(&stackVariables, source);
 	}
 	else printError(INCOMPATIBLETYPE,INCOMPATIBLE);
+
 }
 
 // pomocna pro velikost charu
@@ -292,8 +293,8 @@ int maxChars(int num)
 // konkatenace retezcu
 void concatenate (char * param, char * function)
 {
-	tVariable *par1, *par2, * source = gmalloc(sizeof(tVariable),free);
-	source->value = gmalloc (sizeof(tVariableValue),free);
+	tVariable *par1, *par2, * source = stackVarTopUsable(&stackTmpVariables);
+	// source->value = gmalloc (sizeof(tVariableValue),free);
 
 	par2 = stackVarPop(&stackVariables);
 	par1 = stackVarPop(&stackVariables);
@@ -350,14 +351,15 @@ void concatenate (char * param, char * function)
 			break;
 	}
 	stackVarPush(&stackVariables, source);
+
 }
 
 
 // operator ===
 void equal (char * param, char * function)
 {
-	tVariable *par1, *par2, * source = gmalloc(sizeof(tVariable),free);
-	source->value = gmalloc (sizeof(tVariableValue),free);
+	tVariable *par1, *par2, * source = stackVarTopUsable(&stackTmpVariables);
+	// source->value = gmalloc (sizeof(tVariableValue),free);
 
 	par2 = stackVarPop(&stackVariables);
 	par1 = stackVarPop(&stackVariables);
@@ -394,13 +396,14 @@ void equal (char * param, char * function)
 
 	}
 	stackVarPush(&stackVariables, source);
+
 }
 
 // operator !==
 void notEqual (char * param, char * function)
 {
-	tVariable *par1, *par2, * source = gmalloc(sizeof(tVariable),free);
-	source->value = gmalloc (sizeof(tVariableValue),free);
+	tVariable *par1, *par2, * source = stackVarTopUsable(&stackTmpVariables);
+	// source->value = gmalloc (sizeof(tVariableValue),free);
 
 	par2 = stackVarPop(&stackVariables);
 	par1 = stackVarPop(&stackVariables);
@@ -436,13 +439,14 @@ void notEqual (char * param, char * function)
 
 	}
 	stackVarPush(&stackVariables, source);
+
 }
 
 //operator >
 void bigger (char * param, char * function)
 {
-	tVariable *par1, *par2, * source = gmalloc(sizeof(tVariable),free);
-	source->value = gmalloc (sizeof(tVariableValue),free);
+	tVariable *par1, *par2, * source = stackVarTopUsable(&stackTmpVariables);
+	// source->value = gmalloc (sizeof(tVariableValue),free);
 
 	par2 = stackVarPop(&stackVariables);
 	par1 = stackVarPop(&stackVariables);
@@ -478,13 +482,14 @@ void bigger (char * param, char * function)
 
 	}
 	stackVarPush(&stackVariables, source);
+
 }
 
 //operator <
 void lesser (char * param, char * function)
 {
-	tVariable *par1, *par2, * source = gmalloc(sizeof(tVariable),free);
-	source->value = gmalloc (sizeof(tVariableValue),free);
+	tVariable *par1, *par2, * source = stackVarTopUsable(&stackTmpVariables);
+	// source->value = gmalloc (sizeof(tVariableValue),free);
 
 	par2 = stackVarPop(&stackVariables);
 	par1 = stackVarPop(&stackVariables);
@@ -520,17 +525,17 @@ void lesser (char * param, char * function)
 
 	}
 	stackVarPush(&stackVariables, source);
+
 }
 
 //operator <=
 void lesserEqual (char * param, char * function)
 {
-	tVariable *par1, *par2, * source = gmalloc(sizeof(tVariable),free);
-	source->value = gmalloc (sizeof(tVariableValue),free);
+	tVariable *par1, *par2, * source = stackVarTopUsable(&stackTmpVariables);
+	// source->value = gmalloc (sizeof(tVariableValue),free);
 
 	par2 = stackVarPop(&stackVariables);
 	par1 = stackVarPop(&stackVariables);
-
 
 	source->type=BOOLEAN;
 
@@ -562,17 +567,17 @@ void lesserEqual (char * param, char * function)
 
 	}
 	stackVarPush(&stackVariables, source);
+
 }
 
 // operator >=
 void biggerEqual (char * param, char * function)
 {
-	tVariable *par1, *par2, * source = gmalloc(sizeof(tVariable),free);
-	source->value = gmalloc (sizeof(tVariableValue),free);
+	tVariable *par1, *par2, * source = stackVarTopUsable(&stackTmpVariables);
+	// source->value = gmalloc (sizeof(tVariableValue),free);
 
 	par2 = stackVarPop(&stackVariables);
 	par1 = stackVarPop(&stackVariables);
-
 	source->type=BOOLEAN;
 
 	if (par1->type!=par2->type) printError(INCOMPATIBLETYPE,INCOMPATIBLE);
@@ -603,6 +608,7 @@ void biggerEqual (char * param, char * function)
 
 	}
 	stackVarPush(&stackVariables, source);
+
 }
 
 
@@ -743,8 +749,8 @@ void iReturn (char * param, char * function)
 // nahraje hodnotu z vrcholu zasobniku hodnot hodnotu pro assign do par1
 void assign (char * param, char * function)
 {
-	tVariable * source = gmalloc(sizeof(tVariable),free);
-	source->value = gmalloc (sizeof(tVariableValue),free);
+	// tVariable * source = gmalloc(sizeof(tVariable),free);
+	// source->value = gmalloc (sizeof(tVariableValue),free);
 	tVariable * top = NULL;
 	tFunction *topFunction = stackFuncTop(&stackFunctions);
 	tVariable *var = BSTV_Search(topFunction->variables, param);
@@ -781,7 +787,6 @@ void assign (char * param, char * function)
 			var->value->boolv = top->value->boolv;
 			break;
 	}
-
 }
 
 
@@ -823,8 +828,10 @@ void interpret(void)
 {
 	tFunction * topFunction;
 	tInstruction * instruction;
+	stackTmpVariables = gmalloc(sizeof(sVariable), free);
+	stackVarInit(stackTmpVariables, 4);
 
-	while(!stackFuncEmpty(stackFunctions))
+	while(stackFunctions->top != -1)
 	{
 		topFunction = stackFunctions->data[stackFunctions->top];
 		instruction = topFunction->code->data[topFunction->codePosition++];

@@ -1,8 +1,8 @@
 #include "inbuilt_functions.h"
 
 void boolval(void) {
-    tVariable * retVal = gmalloc(sizeof(tVariable),free);
-    retVal->value = gmalloc(sizeof(tVariableValue),free);
+    tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
+    // retVal->value = gmalloc(sizeof(tVariableValue),free);
 
     tVariable * term = stackVarPop(&stackVariables);
 
@@ -43,8 +43,8 @@ void boolval(void) {
 }
 
 void doubleval(void) {
-    tVariable * retVal = gmalloc(sizeof(tVariable),free);
-    retVal->value = gmalloc(sizeof(tVariableValue),free);
+    tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
+    // retVal->value = gmalloc(sizeof(tVariableValue),free);
     int index = 0;
     char* str;
 
@@ -117,8 +117,8 @@ void doubleval(void) {
 }
 
 void intval(void) {
-    tVariable * retVal = gmalloc(sizeof(tVariable),free);
-    retVal->value = gmalloc (sizeof(tVariableValue),free);
+    tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
+    // retVal->value = gmalloc (sizeof(tVariableValue),free);
     char*str;
     tVariable * term = stackVarPop(&stackVariables);
 
@@ -158,8 +158,8 @@ void intval(void) {
 }
 
 void strval(void) {
-    tVariable * retVal = gmalloc(sizeof(tVariable),free);
-    retVal->value = gmalloc (sizeof(union tVariableValue),free);
+    tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
+    // retVal->value = gmalloc (sizeof(union tVariableValue),free);
 
     tVariable * term = stackVarPop(&stackVariables);
 
@@ -203,8 +203,8 @@ void strval(void) {
 }
 
 void get_string(void) {
-    tVariable * retVal = gmalloc(sizeof(tVariable),free);
-    retVal->value = gmalloc(sizeof(tVariableValue),free);
+    tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
+    // retVal->value = gmalloc(sizeof(tVariableValue),free);
 
     int c, i = 0, size = 100;
 	retVal->type = STRING;
@@ -225,8 +225,8 @@ void get_string(void) {
 }
 
 void put_string(void) {
-	tVariable * retVal = gmalloc(sizeof(tVariable),free);
-    retVal->value = gmalloc (sizeof(tVariableValue),free);
+	tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
+    // retVal->value = gmalloc (sizeof(tVariableValue),free);
 	retVal->type = INTEGER;
     int i = 0;
     tVariable *term;
@@ -253,8 +253,8 @@ void put_string(void) {
 }
 
 void strlength(void) {
-    tVariable * retVal = gmalloc(sizeof(tVariable),free);
-    retVal->value = gmalloc (sizeof(tVariableValue),free);
+    tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
+    // retVal->value = gmalloc (sizeof(tVariableValue),free);
 
     retVal->type = INTEGER;
 
@@ -278,8 +278,8 @@ void get_substring(void) {
        || (first->value->intv >= (int) strlen(str->value->stringv)) || (last->value->intv > (int) strlen(str->value->stringv)))
         printError(OTHERSERRS, OTHERS);
 
-    tVariable * retVal = gmalloc(sizeof(tVariable),free);
-    retVal->value = gmalloc(sizeof(union tVariableValue),free);
+    tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
+    // retVal->value = gmalloc(sizeof(union tVariableValue),free);
     retVal->type = STRING;
     retVal->value->stringv = gmalloc(sizeof(char)*(last->value->intv - first->value->intv + 2),free);
 
@@ -290,8 +290,8 @@ void get_substring(void) {
 }
 
 void find_string(void){
-    tVariable * retVal = gmalloc(sizeof(tVariable),free);
-    retVal->value = gmalloc(sizeof(tVariableValue),free);
+    tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
+    // retVal->value = gmalloc(sizeof(tVariableValue),free);
 
     retVal->type = INTEGER;
 
@@ -306,8 +306,8 @@ void find_string(void){
 }
 
 void sort_string(void){
-    tVariable * retVal = gmalloc(sizeof(tVariable),free);
-    retVal->value = gmalloc (sizeof(tVariableValue),free);
+    tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
+    // retVal->value = gmalloc (sizeof(tVariableValue),free);
 
     retVal->type = STRING;
 

@@ -115,6 +115,7 @@ tVariable * generateLiteral(tToken *t);
 tFunction * actualFunction[2];
 tFunction * functionTree;
 sVariable * stackVariables;
+sVariable * stackTmpVariables;
 sFunction * stackFunctions;
 extern FILE* f;
 extern int precedenceTable[][15];
