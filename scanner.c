@@ -344,6 +344,13 @@ int isString (FILE *f, int c, char **content)
 					replaced[2] = c;
 					continue;
 				}
+				else if(c == '\\')
+				{
+					handled = 1;
+					insertChar(&index,content, replaced[0]);
+					insertChar(&index,content, replaced[1]);
+					continue;
+				}
 				else
 				{
 					handled = 0;
@@ -361,6 +368,14 @@ int isString (FILE *f, int c, char **content)
 					// printf("handled: %c\n", handled);
 					insertChar(&index, content, handled);
 					handled = 0;
+					continue;
+				}
+				else if(c == '\\')
+				{
+					handled = 1;
+					insertChar(&index,content, replaced[0]);
+					insertChar(&index,content, replaced[1]);
+					insertChar(&index,content, replaced[2]);
 					continue;
 				}
 				else

@@ -149,7 +149,7 @@ void intval(void) {
 
             while(isspace(*str)) ++str;
             
-            if(str[0] == '-') retVal->value->intv = 0;
+            if(!isdigit(*str)) retVal->value->intv = 0;
             else retVal->value->intv = (int) strtol(str, (char **)NULL, 10);
             break;
     }
