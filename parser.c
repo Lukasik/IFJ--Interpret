@@ -693,7 +693,7 @@ void parse(sInteger *stack, tToken *t)
 			else if(LLCall == function && t->name == ID)
 			{
 				actualFunction[1] = actualFunction[0];
-				actualFunction[0] = BSTF_Insert(&functionTree, t->content);
+				actualFunction[0] = BSTF_Insert(&functionTree, t->content, NULL);
 				innerBraces = 0;
 				inFunction = true;
 			}
@@ -768,19 +768,19 @@ int main (int argc, char *argv[])
 	stackInit(stack, 100);
 
 	BSTF_Init(&functionTree);
-	actualFunction[0] = BSTF_Insert(&functionTree, "1");
+	actualFunction[0] = BSTF_Insert(&functionTree, "1", NULL);
 
 	gadd(functionTree, BSTF_Dispose);
-	BSTF_Insert(&functionTree, "boolval");
-	BSTF_Insert(&functionTree, "intval");
-	BSTF_Insert(&functionTree, "strval");
-	BSTF_Insert(&functionTree, "doubleval");
-	BSTF_Insert(&functionTree, "put_string");
-	BSTF_Insert(&functionTree, "find_string");
-	BSTF_Insert(&functionTree, "sort_string");
-	BSTF_Insert(&functionTree, "get_substring");
-	BSTF_Insert(&functionTree, "get_string");
-	BSTF_Insert(&functionTree, "strlen");
+	BSTF_Insert(&functionTree, "boolval", boolval);
+	BSTF_Insert(&functionTree, "intval", intval);
+	BSTF_Insert(&functionTree, "strval", strval);
+	BSTF_Insert(&functionTree, "doubleval", doubleval);
+	BSTF_Insert(&functionTree, "put_string", put_string);
+	BSTF_Insert(&functionTree, "find_string", find_string);
+	BSTF_Insert(&functionTree, "sort_string", sort_string);
+	BSTF_Insert(&functionTree, "get_substring", get_substring);
+	BSTF_Insert(&functionTree, "get_string", get_string);
+	BSTF_Insert(&functionTree, "strlen", strlength);
 
 	stackFuncPush(&stackFunctions, actualFunction[0]);
 

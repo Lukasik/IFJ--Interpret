@@ -23,7 +23,7 @@ tFunction * BSTF_Search(tFunction * node, char * key) {
     return NULL;
 }
 
-tFunction* BSTF_Insert(tFunction ** node, char * key) {
+tFunction* BSTF_Insert(tFunction ** node, char * key, inbuiltFunction * function) {
     if(*node == NULL) {
 
         tFunction * tmp;
@@ -33,12 +33,18 @@ tFunction* BSTF_Insert(tFunction ** node, char * key) {
             if((*node)->key == NULL) printError(ALLOCERROR, INTERPRETERROR);
             memcpy((*node)->key, key, strlen(key)+1);
             (*node)->lptr = (*node)->rptr = NULL;
-            (*node)->paramNames = gmalloc(sizeof(sString), free);
-            stackStringInit((*node)->paramNames, 5);
             (*node)->codePosition = 0;
-            BSTV_Init(&(*node)->variables);
-            (*node)->code = gmalloc(sizeof(sInstruction), free);
-            stackInstructionInit((*node)->code, 50);
+            (*node)->function = function;
+
+            if(function == NULL)
+            {
+                (*node)->paramNames = gmalloc(sizeof(sString), free);
+                stackStringInit((*node)->paramNames, 5);
+                BSTV_Init(&(*node)->variables);
+                (*node)->code = gmalloc(sizeof(sInstruction), free);
+                stackInstructionInit((*node)->code, 50);
+            }
+            
             return *node;
         }
         else {
@@ -51,10 +57,10 @@ tFunction* BSTF_Insert(tFunction ** node, char * key) {
         int compare = strcmp(key, (*node)->key);
 
         if(compare > 0) {
-            return BSTF_Insert(&(*node)->rptr, key);
+            return BSTF_Insert(&(*node)->rptr, key, function);
         }
         else if (compare < 0) {
-            return BSTF_Insert(&(*node)->lptr, key);
+            return BSTF_Insert(&(*node)->lptr, key, function);
         }
         else
         {
@@ -74,7 +80,8 @@ void BSTF_Dispose(void * node) {
         if(treePointer->rptr != NULL) {
             BSTF_Dispose((void *) treePointer->rptr);
         }
-        BSTV_Dispose(treePointer->variables);
+
+        if(treePointer->function == NULL) BSTV_Dispose(treePointer->variables);
         free(treePointer->key);
         free(treePointer);
         treePointer = NULL;

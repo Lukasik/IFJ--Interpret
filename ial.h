@@ -14,7 +14,7 @@
 /* Prototypy funkcí */
 void BSTF_Init(tFunction ** node);
 tFunction* BSTF_Search(tFunction * node, char * key);
-tFunction* BSTF_Insert(tFunction ** node, char * key);
+tFunction* BSTF_Insert(tFunction ** node, char * key, inbuiltFunction * function);
 void BSTF_Dispose(void * node);
 
 void BSTV_Init(tVariable ** node);

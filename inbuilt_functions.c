@@ -1,6 +1,9 @@
 #include "inbuilt_functions.h"
 
 void boolval(void) {
+    if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+    stackVariables->top=0;
+
     tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
     // retVal->value = gmalloc(sizeof(tVariableValue),free);
 
@@ -43,6 +46,9 @@ void boolval(void) {
 }
 
 void doubleval(void) {
+    if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+    stackVariables->top=0;
+
     tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
     // retVal->value = gmalloc(sizeof(tVariableValue),free);
     int index = 0;
@@ -117,6 +123,9 @@ void doubleval(void) {
 }
 
 void intval(void) {
+    if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+    stackVariables->top=0;
+
     tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
     // retVal->value = gmalloc (sizeof(tVariableValue),free);
     char*str;
@@ -158,6 +167,9 @@ void intval(void) {
 }
 
 void strval(void) {
+    if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+    stackVariables->top=0;
+
     tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
     // retVal->value = gmalloc (sizeof(union tVariableValue),free);
 
@@ -203,6 +215,8 @@ void strval(void) {
 }
 
 void get_string(void) {
+    stackVariables->top= -1;
+
     tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
     // retVal->value = gmalloc(sizeof(tVariableValue),free);
 
@@ -253,6 +267,9 @@ void put_string(void) {
 }
 
 void strlength(void) {
+    if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+    stackVariables->top=0;
+
     tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
     // retVal->value = gmalloc (sizeof(tVariableValue),free);
 
@@ -267,6 +284,9 @@ void strlength(void) {
 }
 
 void get_substring(void) {
+    if (stackVariables->top < 2) printError(FEWPARAMETERS,PARAMMISSING);
+        stackVariables->top = 2;
+
 	if(stackVariables->data[stackVariables->top]->type != INTEGER) intval();
     tVariable * last = stackVarPop(&stackVariables);
 	if(stackVariables->data[stackVariables->top]->type != INTEGER) intval();
@@ -290,6 +310,9 @@ void get_substring(void) {
 }
 
 void find_string(void){
+    if (stackVariables->top < 1) printError(FEWPARAMETERS,PARAMMISSING);
+    stackVariables->top = 1;
+
     tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
     // retVal->value = gmalloc(sizeof(tVariableValue),free);
 
@@ -306,6 +329,9 @@ void find_string(void){
 }
 
 void sort_string(void){
+    if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+    stackVariables->top = 0;
+
     tVariable * retVal = stackVarTopUsable(&stackTmpVariables);
     // retVal->value = gmalloc (sizeof(tVariableValue),free);
 

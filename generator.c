@@ -588,63 +588,68 @@ void iFunctionCall (char * param, char * function)
 	tFunction *topFunction, * func = BSTF_Search(functionTree, function);
 	if (func == NULL) printError(UNDECLAREDFUNCTION,FUNCTIONDEFINITIONERROR);
 
-	if (strcmp(func->key,"boolval") == 0)
+	if(func->function != NULL)
 	{
-		if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
-		stackVariables->top=0;
-		boolval();
+		func->function();
 	}
-	else if (strcmp(func->key,"doubleval") == 0)
-	{
-		if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
-		stackVariables->top=0;
-		doubleval();
-	}
-	else if (strcmp(func->key,"intval") == 0)
-	{
-		if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
-		stackVariables->top=0;
-		intval();
-	}
-	else if (strcmp(func->key,"strval") == 0)
-	{
-		if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
-		stackVariables->top=0;
-		strval();
-	}
-	else if (strcmp(func->key,"strlen") == 0)
-	{
-		if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
-		stackVariables->top=0;
-		strlength();
-	}
-	else if (strcmp(func->key,"get_string") == 0)
-	{
-		stackVariables->top= -1;
-		get_string();
-	}
-	else if (strcmp(func->key,"put_string") == 0)
-	{
-		put_string();
-	}
-	else if (strcmp(func->key,"sort_string") == 0)
-	{
-		if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
-		stackVariables->top = 0;
-		sort_string();
-	}
-	else if (strcmp(func->key,"find_string") == 0)
-	{
-		if (stackVariables->top < 1) printError(FEWPARAMETERS,PARAMMISSING);
-		stackVariables->top = 1;
-		find_string();
-	}
-	else if (strcmp(func->key,"get_substring") == 0)
-	{
-		if (stackVariables->top < 2) printError(FEWPARAMETERS,PARAMMISSING);
-		stackVariables->top = 2;
-		get_substring();
-	}
+
+	// if (strcmp(func->key,"boolval") == 0)
+	// {
+	// 	if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+	// 	stackVariables->top=0;
+	// 	boolval();
+	// }
+	// else if (strcmp(func->key,"doubleval") == 0)
+	// {
+	// 	if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+	// 	stackVariables->top=0;
+	// 	doubleval();
+	// }
+	// else if (strcmp(func->key,"intval") == 0)
+	// {
+	// 	if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+	// 	stackVariables->top=0;
+	// 	intval();
+	// }
+	// else if (strcmp(func->key,"strval") == 0)
+	// {
+	// 	if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+	// 	stackVariables->top=0;
+	// 	strval();
+	// }
+	// else if (strcmp(func->key,"strlen") == 0)
+	// {
+	// 	if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+	// 	stackVariables->top=0;
+	// 	strlength();
+	// }
+	// else if (strcmp(func->key,"get_string") == 0)
+	// {
+	// 	stackVariables->top= -1;
+	// 	get_string();
+	// }
+	// else if (strcmp(func->key,"put_string") == 0)
+	// {
+	// 	put_string();
+	// }
+	// else if (strcmp(func->key,"sort_string") == 0)
+	// {
+	// 	if (stackVarEmpty(stackVariables)) printError(FEWPARAMETERS,PARAMMISSING);
+	// 	stackVariables->top = 0;
+	// 	sort_string();
+	// }
+	// else if (strcmp(func->key,"find_string") == 0)
+	// {
+	// 	if (stackVariables->top < 1) printError(FEWPARAMETERS,PARAMMISSING);
+	// 	stackVariables->top = 1;
+	// 	find_string();
+	// }
+	// else if (strcmp(func->key,"get_substring") == 0)
+	// {
+	// 	if (stackVariables->top < 2) printError(FEWPARAMETERS,PARAMMISSING);
+	// 	stackVariables->top = 2;
+	// 	get_substring();
+	// }
 	else
 	{
 		duplicateFunction(func);

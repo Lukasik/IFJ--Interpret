@@ -66,6 +66,8 @@ typedef struct sString
 	char **data;
 } sString;
 
+typedef void (inbuiltFunction)(void);
+
 typedef struct tFunction
 {
 	struct tVariable * variables;
@@ -74,6 +76,7 @@ typedef struct tFunction
 	unsigned codePosition;
 	char *key;
 	sString *paramNames;
+	inbuiltFunction * function;
 	struct tFunction * lptr;
 	struct tFunction * rptr;
 } tFunction;
