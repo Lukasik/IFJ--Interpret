@@ -403,7 +403,9 @@ void equal (char * param, char * function)
 void notEqual (char * param, char * function)
 {
 	equal(param, function);
-	stackVariables->data[stackVariables->top] = !stackVariables->data[stackVariables->top];
+	tVariable * var = stackVariables->data[stackVariables->top];
+	var->value->boolv = !var->value->boolv;
+	// stackVariables->data[stackVariables->top]->value->boolv = !stackVariables->data[stackVariables->top]->value->boolv;
 }
 
 //operator >
