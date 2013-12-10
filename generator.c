@@ -402,44 +402,8 @@ void equal (char * param, char * function)
 // operator !==
 void notEqual (char * param, char * function)
 {
-	tVariable *par1, *par2, * source = stackVarTopUsable(&stackTmpVariables);
-	// source->value = gmalloc (sizeof(tVariableValue),free);
-
-	par2 = stackVarPop(&stackVariables);
-	par1 = stackVarPop(&stackVariables);
-
-
-	source->type=BOOLEAN;
-
-	if (par1->type!=par2->type) source->value->boolv=true;
-	else
-	{
-		switch (par1->type)
-		{
-			case STRING:
-				source->value->boolv = strcmp(par1->value->stringv,par2->value->stringv);
-				break;
-
-			case BOOLEAN:
-				source->value->boolv=par1->value->boolv != par2->value->boolv;
-				break;
-
-			case INTEGER:
-				source->value->boolv=par1->value->intv != par2->value->intv;
-				break;
-
-			case DOUBLE:
-				source->value->boolv=par1->value->doublev != par2->value->doublev;
-				break;
-
-			case NULLV:
-				source->value->boolv=false;
-				break;
-		}
-
-	}
-	stackVarPush(&stackVariables, source);
-
+	equal(param, function);
+	stackVariables->data[stackVariables->top] = !stackVariables->data[stackVariables->top];
 }
 
 //operator >
