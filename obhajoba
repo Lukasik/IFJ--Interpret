@@ -1,0 +1,49 @@
+lex 0.5
+	není moc o čem mluvit
+	standartní implementace pomocí konenčného automatu
+	předávání obashu jako string odkazem
+
+2 syntaktické analýzy	3
+	rekurzivní sestup
+		intuitivní
+		křivka
+
+	proč jsme si vybrali tabulku
+
+	tabulka
+		matice funkcí
+
+	generování kódu
+
+
+interpret	0.5
+	počet instrukcí
+	cyklické provedení vygenerovanách instrukcí
+
+
+garbage collector 1
+	tři funkce
+	ukazatel na funkce pro smazání paměti
+
+optimalizace	2
+	průběžné uvolňování paměti sekvenčním vyhledáváním
+	zbytečné proměnné pro každý výsledek
+	hloupost v kódu - zbyteččná alokace
+
+lucka	1
+	sliby
+	špatná flashka
+	stará verze
+	bolavý zuby
+
+schůzky	1
+	před ifj
+	co sme řešili
+	týmové programování
+	kazišuci
+
+použité nástroje	1
+	bitbucket, git
+	doodle
+	fb
+
