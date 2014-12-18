@@ -13,3 +13,5 @@ Celkem bez rozsireni: 93% (1853/1983)
 #### Bodový zisk
 
 23/20 (?)
+
+Projekt byl vytvořen ve čtyřčlenném týmu
